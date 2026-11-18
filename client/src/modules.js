@@ -69,7 +69,7 @@ const MODULE_LIST = [
 // Menu and dashboard list the modules A to Z inside each group.
 export const MODULES = [...MODULE_LIST].sort((a, b) => a.name.localeCompare(b.name))
 
-export const DASHBOARD = { name: 'Dashboard', path: '/', icon: LayoutDashboard }
+export const DASHBOARD = { name: import.meta.env.VITE_DEMO === '1' ? 'Dashboard demo' : 'Dashboard', path: '/', icon: LayoutDashboard }
 export const GROUPS = ['Operations', 'Finance', 'Supply chain', 'Pre-construction', 'Other']
 export const moduleByCode = Object.fromEntries(MODULES.map((m) => [m.code, m]))
 export const moduleForPath = (p) => MODULES.find((m) => p === m.path || p.startsWith(m.path + '/'))

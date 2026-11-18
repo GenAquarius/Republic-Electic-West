@@ -761,25 +761,46 @@ p.small, .muted.small { font-size: 12px; margin-top: 8px; }
 .mg-emp-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 4px 12px; max-height: 220px; overflow-y: auto; margin-top: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
 tr.mg-budget td { background: var(--blue-soft, #eef4ff); font-weight: 600; }
 
-/* Alarm monitoring — printouts and reports (Access AmAccountInfo / AmAccountInfoTech / switchboard reports) */
-.am-sheet .am-sec { margin-top: 18px; }
-.am-sheet .am-sec h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 20px; }
-.am-grid.one { grid-template-columns: 1fr; }
-.am-f { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .am-f b { font-weight: 600; overflow-wrap: anywhere; }
+/* Alarm monitoring — account print sheets (Access AmAccountInfo / AmAccountInfoTech).
+   Scoped to .am-sheet; AmReports.jsx's .am-report / .am-report-head are unrelated and untouched. */
+.am-sheet { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 28px 32px; max-width: 900px; }
+.am-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding-bottom: 16px; margin-bottom: 18px; border-bottom: 2px solid var(--text); }
+.am-head-brand { display: flex; align-items: center; gap: 10px; }
+.am-head-co { font-weight: 700; font-size: 13.5px; }
+.am-head-div { font-size: 11.5px; color: var(--muted); }
+.am-head h2 { font-size: 16px; margin: 12px 0 0; }
+.am-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-top: 6px; background: var(--green-soft); color: var(--green); }
+.am-badge.slate { background: var(--slate-soft); color: var(--slate); }
+.am-head-right { text-align: right; flex-shrink: 0; }
+.am-acct-no { font-size: 19px; font-weight: 700; color: var(--primary); }
+.am-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; margin-bottom: 18px; }
+.am-sec-h { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--primary); margin: 0 0 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border-strong); }
+.am-sec-full { margin-bottom: 18px; }
+.am-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 18px; }
+.am-f { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .am-f.wide { grid-column: span 2; }
-.am-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.am-f-l { font-size: 11.5px; color: var(--muted); }
+.am-f-v { font-weight: 600; overflow-wrap: anywhere; }
+.am-f-v.empty { color: var(--faint); font-weight: 400; }
+.am-table { width: 100%; border-collapse: collapse; }
+.am-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); padding: 6px 8px; border-bottom: 2px solid var(--text); }
+.am-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.am-table tr:last-child td { border-bottom: 0; }
 .am-notes { white-space: pre-wrap; margin: 0; }
 .report-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .am-report { padding: 18px 20px; }
 .am-report-head { margin-bottom: 12px; } .am-report-head h2 { font-size: 18px; margin: 0 0 2px; }
 .grid tr.group-row td { background: var(--surface-2); padding-top: 10px; }
 .grid tr.subtotal td { border-top: 1px solid var(--border); font-size: 12.5px; color: var(--text-2); }
-@media (max-width: 640px) { .am-two { grid-template-columns: 1fr; } .am-f.wide { grid-column: auto; } }
+/* .am-sheet has its own 900px cap, so it gets cramped well before the sidebar+page shrink the
+   window this far — stack the two-column sections to one column earlier than usual. */
+@media (max-width: 960px) { .am-cols { grid-template-columns: 1fr; } .am-f.wide { grid-column: auto; } }
 @media print {
-  .am-sheet { font-size: 11.5px; } .am-sheet .grid td, .am-sheet .grid th { padding: 4px 6px; }
+  .am-sheet { border: 0; padding: 0; max-width: none; font-size: 11.5px; }
+  .print-doc .page-actions { display: none !important; }
+  .am-table td, .am-table th { padding: 4px 6px; }
   .am-report { box-shadow: none; border: 0; padding: 0; }
-  .am-sec, .grid tr { break-inside: avoid; }
+  .am-cols, .am-sec-full, .am-table tr { break-inside: avoid; }
 }
 
 /* ==========================================================================

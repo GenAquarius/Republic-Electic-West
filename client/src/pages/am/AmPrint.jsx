@@ -2,10 +2,11 @@
 // and AmAccountInfoTech (technician sheet: service address, panel type, premises phone).
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, Mail, Printer } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Mail, Printer, XCircle } from 'lucide-react'
 import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
+import Logo from '../../components/Logo'
 
 function useAccount(id) {
   const [d, setD] = useState(null)
@@ -20,11 +21,14 @@ function useAccount(id) {
 
 const printedAt = () => new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })
 
+// Label-over-value field. Blank values read "Not recorded" (lighter weight) instead of a bare dash,
+// which reads better once the page is printed or exported to PDF.
 function Field({ label, value, wide }) {
+  const empty = value == null || value === ''
   return (
     <div className={wide ? 'am-f wide' : 'am-f'}>
-      <span className="muted small">{label}</span>
-      <b>{value === true ? 'Yes' : value === false ? 'No' : value || '—'}</b>
+      <span className="am-f-l">{label}</span>
+      <span className={empty ? 'am-f-v empty' : 'am-f-v'}>{value === true ? 'Yes' : value === false ? 'No' : empty ? 'Not recorded' : value}</span>
     </div>
   )
 }
@@ -39,9 +43,36 @@ function Shell({ id, title, d, error, children, email }) {
           <button className="btn primary" disabled={!d} onClick={() => window.print()}><Printer size={15} /> Print</button>
         </>} />
       {error && <ErrorState message={error} />}
-      {!d && !error ? <SkeletonRows rows={8} cols={3} /> : d && <article className="po-sheet am-sheet">{children}</article>}
+      {!d && !error ? <SkeletonRows rows={8} cols={3} /> : d && <article className="am-sheet">{children}</article>}
     </div>
   )
+}
+
+// Shared letterhead for both documents: logo, division line, the document's own title/badge on the
+// left and the account number pulled out in the brand color on the right.
+function AmHead({ title, badge, badgeTone = 'green', accountNumber }) {
+  const BadgeIcon = badgeTone === 'green' ? CheckCircle2 : XCircle
+  return (
+    <header className="am-head">
+      <div>
+        <div className="am-head-brand">
+          <Logo size={38} />
+          <div><div className="am-head-co">Republic Electric West</div><div className="am-head-div">REI Security · Alarm monitoring</div></div>
+        </div>
+        <h2>{title}</h2>
+        {badge && <span className={`am-badge ${badgeTone}`}><BadgeIcon size={11} /> {badge}</span>}
+      </div>
+      <div className="am-head-right">
+        <div className="muted xs">Account</div>
+        <div className="am-acct-no">{accountNumber}</div>
+        <div className="muted xs" style={{ marginTop: 4 }}>Printed {printedAt()}</div>
+      </div>
+    </header>
+  )
+}
+
+function SectionTitle({ children }) {
+  return <h3 className="am-sec-h">{children}</h3>
 }
 
 export function AmAccountPrint() {
@@ -49,66 +80,74 @@ export function AmAccountPrint() {
   const { d, error } = useAccount(id)
   const a = d?.account
   const name = (list, v) => list.find((x) => String(x.id) === String(v))?.name
+  const active = a && !a.DisconnectionDate
   return (
     <Shell id={id} title="Account information" d={d} error={error}>
       {a && <>
-        <header className="po-head">
-          <div><h2>Alarm monitoring account information</h2><div className="muted small">Republic Electric West · REI Security</div></div>
-          <div className="po-title"><b>Account {a.AccountNumber}</b><span className="small muted">Printed {printedAt()}</span></div>
-        </header>
+        <AmHead title="Alarm monitoring account information" badge={active ? 'Active' : 'Disconnected'} badgeTone={active ? 'green' : 'slate'} accountNumber={a.AccountNumber} />
 
-        <section className="am-sec">
-          <h3>Account</h3>
-          <div className="am-grid">
-            <Field label="Account number" value={a.AccountNumber} />
-            <Field label="Customer name" value={a.CustomerName} wide />
-            <Field label="Phone" value={a.PhoneNumber} />
-            <Field label="Email" value={a.Email} wide />
-            <Field label="Contract terms" value={a.ContractTerms || name(d.lookups.contractTerms, a.ContractTermsId)} />
-            <Field label="Contract value / month" value={a.MonthlyContractValue} />
-            <Field label="Sales person" value={a.SalesPerson} />
+        <section className="am-cols">
+          <div>
+            <SectionTitle>Account</SectionTitle>
+            <div className="am-grid">
+              <Field label="Customer name" value={a.CustomerName} />
+              <Field label="Phone" value={a.PhoneNumber} />
+              <Field label="Email" value={a.Email} />
+              <Field label="Contract terms" value={a.ContractTerms || name(d.lookups.contractTerms, a.ContractTermsId)} />
+              <Field label="Contract value / month" value={a.MonthlyContractValue} />
+              <Field label="Sales person" value={a.SalesPerson} />
+            </div>
+          </div>
+          <div>
+            <SectionTitle>Panel and monitoring</SectionTitle>
+            <div className="am-grid">
+              <Field label="Panel info" value={a.PanelInfo} />
+              <Field label="Panel type" value={a.PanelType} />
+              <Field label="Monitoring type" value={name(d.lookups.monitoringTypes, a.MonitoringTypeId)} />
+              <Field label="Permit #" value={a.PermitNumber} />
+              <Field label="Activation date" value={fmtDate(a.ActivationDate)} />
+              <Field label="Renewal date" value={fmtDate(a.RenewalDate)} />
+              <Field label="Disconnection date" value={fmtDate(a.DisconnectionDate)} />
+            </div>
           </div>
         </section>
 
-        <div className="am-two">
-          <section className="am-sec">
-            <h3>Monitoring service address</h3>
-            <div className="am-grid one">
+        <section className="am-cols">
+          <div>
+            <SectionTitle>Monitoring service address</SectionTitle>
+            <div className="am-grid">
               <Field label="Street" value={a.ServiceStreet} />
-              <Field label="City / State / Zip" value={[a.ServiceCity, a.ServiceState, a.ServiceZip].filter(Boolean).join(', ')} />
+              <Field label="City / state / zip" value={[a.ServiceCity, a.ServiceState, a.ServiceZip].filter(Boolean).join(', ')} />
               <Field label="Country" value={a.ServiceCountry} />
             </div>
-          </section>
-          <section className="am-sec">
-            <h3>Mailing address {a.MailingSameService && <span className="muted small">(same as service)</span>}</h3>
-            <div className="am-grid one">
+          </div>
+          <div>
+            <SectionTitle>Mailing address {a.MailingSameService && <span className="muted xs">(same as service)</span>}</SectionTitle>
+            <div className="am-grid">
               <Field label="Street" value={a.MailStreet} />
-              <Field label="City / State / Zip" value={[a.MailCity, a.MailState, a.MailZip].filter(Boolean).join(', ')} />
+              <Field label="City / state / zip" value={[a.MailCity, a.MailState, a.MailZip].filter(Boolean).join(', ')} />
               <Field label="Country" value={a.MailCountry} />
             </div>
-          </section>
-        </div>
-
-        <section className="am-sec">
-          <h3>Panel and monitoring</h3>
-          <div className="am-grid">
-            <Field label="Panel info" value={a.PanelInfo} />
-            <Field label="Panel type" value={a.PanelType} />
-            <Field label="Monitoring type" value={name(d.lookups.monitoringTypes, a.MonitoringTypeId)} />
-            <Field label="Permit #" value={a.PermitNumber} />
-            <Field label="Activation date" value={fmtDate(a.ActivationDate)} />
-            <Field label="Renewal date" value={fmtDate(a.RenewalDate)} />
-            <Field label="Disconnection date" value={fmtDate(a.DisconnectionDate)} />
-            <Field label="Cancellation reason" value={a.CancellationReason} />
           </div>
         </section>
 
-        {a.AccountNotes && <section className="am-sec"><h3>Account notes</h3><p className="am-notes">{a.AccountNotes}</p></section>}
+        {a.AccountNotes && (
+          <section className="am-sec-full">
+            <SectionTitle>Account notes</SectionTitle>
+            <p className="am-notes">{a.AccountNotes}</p>
+          </section>
+        )}
+        {a.CancellationReason && (
+          <section className="am-sec-full">
+            <SectionTitle>Cancellation reason</SectionTitle>
+            <p className="am-notes">{a.CancellationReason}</p>
+          </section>
+        )}
 
-        <section className="am-sec">
-          <h3>Zones</h3>
-          <table className="grid">
-            <thead><tr><th>Zone</th><th>Zone description</th></tr></thead>
+        <section className="am-sec-full">
+          <SectionTitle>Zones</SectionTitle>
+          <table className="am-table">
+            <thead><tr><th style={{ width: 90 }}>Zone</th><th>Description</th></tr></thead>
             <tbody>
               {d.zones.map((z) => <tr key={z.ZoneID}><td>{z.Zone}</td><td>{z.ZoneDescription}</td></tr>)}
               {!d.zones.length && <tr><td colSpan={2} className="muted">No zones</td></tr>}
@@ -116,12 +155,12 @@ export function AmAccountPrint() {
           </table>
         </section>
 
-        <section className="am-sec">
-          <h3>Call list</h3>
-          <table className="grid">
+        <section className="am-sec-full" style={{ marginBottom: 0 }}>
+          <SectionTitle>Call list</SectionTitle>
+          <table className="am-table">
             <thead><tr><th>Contact name</th><th>Pass code</th><th>Phone</th><th>Type</th></tr></thead>
             <tbody>
-              {d.contacts.map((c) => <tr key={c.ContactID}><td>{c.ContactName}</td><td>{c.PassCode}</td><td>{c.PhoneNumber}</td><td>{c.PhoneType}</td></tr>)}
+              {d.contacts.map((c) => <tr key={c.ContactID}><td>{c.ContactName}</td><td className={c.PassCode ? '' : 'muted'}>{c.PassCode || '—'}</td><td>{c.PhoneNumber}</td><td>{c.PhoneType}</td></tr>)}
               {!d.contacts.length && <tr><td colSpan={4} className="muted">No contacts</td></tr>}
             </tbody>
           </table>
@@ -142,24 +181,30 @@ export function AmAccountTechPrint() {
   return (
     <Shell id={id} title="Account info – tech" d={d} error={error} email={email}>
       {a && <>
-        <header className="po-head">
-          <div><h2>Account info – technician</h2><div className="muted small">Republic Electric West · REI Security</div></div>
-          <div className="po-title"><b>Account {a.AccountNumber}</b><span className="small muted">Printed {printedAt()}</span></div>
-        </header>
-        <section className="am-sec">
+        <AmHead title="Account info – technician" accountNumber={a.AccountNumber} />
+
+        <section className="am-sec-full" style={{ marginBottom: 18 }}>
+          <SectionTitle>Customer</SectionTitle>
           <div className="am-grid">
-            <Field label="Customer name" value={a.CustomerName} wide />
+            <Field label="Customer name" value={a.CustomerName} />
             <Field label="Panel type" value={a.PanelType} />
-            <Field label="Service street" value={a.ServiceStreet} wide />
-            <Field label="City / State / Zip" value={[a.ServiceCity, a.ServiceState, a.ServiceZip].filter(Boolean).join(', ')} />
-            <Field label="Country" value={a.ServiceCountry} />
-            <Field label="Premises phone" value={premises.map((c) => c.PhoneNumber).join(' · ')} wide />
+            <Field label="Premises phone" value={premises.map((c) => c.PhoneNumber).join(' · ') || null} />
           </div>
         </section>
-        <section className="am-sec">
-          <h3>Zones</h3>
-          <table className="grid">
-            <thead><tr><th>Zone</th><th>Zone description</th></tr></thead>
+
+        <section className="am-sec-full" style={{ marginBottom: 16 }}>
+          <SectionTitle>Service address</SectionTitle>
+          <div className="am-grid">
+            <Field label="Street" value={a.ServiceStreet} wide />
+            <Field label="City / state / zip" value={[a.ServiceCity, a.ServiceState, a.ServiceZip].filter(Boolean).join(', ')} />
+            <Field label="Country" value={a.ServiceCountry} />
+          </div>
+        </section>
+
+        <section className="am-sec-full" style={{ marginBottom: 0 }}>
+          <SectionTitle>Zones</SectionTitle>
+          <table className="am-table">
+            <thead><tr><th style={{ width: 90 }}>Zone</th><th>Description</th></tr></thead>
             <tbody>
               {d.zones.map((z) => <tr key={z.ZoneID}><td>{z.Zone}</td><td>{z.ZoneDescription}</td></tr>)}
               {!d.zones.length && <tr><td colSpan={2} className="muted">No zones</td></tr>}

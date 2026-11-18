@@ -53,6 +53,12 @@ export default function AmReports() {
       expiring: [['FutureExpirationDate', 'Expires'], ['AccountNumber', 'Account #'], ['CustomerName', 'Customer'], ['PhoneNumber', 'Phone'], ['Email', 'Email'], ['ServiceStreet', 'Street'], ['ServiceCity', 'City'], ['ServiceState', 'State'], ['ContractTerms', 'Terms'], ['MonthlyContractValue', 'Monthly'], ['ActivationDate', 'Activated'], ['RenewalDate', 'Renewal']],
     }
     cols['expiring-monthly'] = cols.expiring.slice(1)
+    // Created / created per year / cancelled: export one line per account (the details behind the counts).
+    if (d.accounts) {
+      const period = rep.key === 'created-year' ? 'Year' : rep.key === 'cancelled' ? 'Period cancelled' : 'Period active'
+      download(d.accounts, [['Period', period], ...ACCOUNT_COLS.map(([k, label]) => [k, label])], `am-${rep.key}-accounts.csv`)
+      return
+    }
     download(d.rows, cols[rep.key], `am-${rep.key}.csv`)
   }
 
@@ -103,6 +109,7 @@ export default function AmReports() {
         {loading && <SkeletonRows rows={6} cols={4} />}
         {d && !d.rows.length && <EmptyState icon={rep.icon} title="Nothing to report">No accounts match these filters.</EmptyState>}
         {d && d.rows.length > 0 && <ReportBody rep={rep.key} d={d} />}
+        {d && d.accounts?.length > 0 && <AccountDetails accounts={d.accounts} cancelled={rep.key === 'cancelled'} />}
       </article>}
     </div>
   )
@@ -149,6 +156,38 @@ function AccountChooser({ kind, label, text }) {
       )}
       {rows && <p className="muted small" style={{ marginTop: 8 }}>Showing up to 12 matches — type to narrow the list.</p>}
     </article>
+  )
+}
+
+const ACCOUNT_COLS = [
+  ['AccountNumber', 'Account #'], ['CustomerName', 'Customer'], ['MonitoringType', 'Monitoring type'], ['PhoneNumber', 'Phone'], ['Email', 'Email'],
+  ['ServiceStreet', 'Street'], ['ServiceCity', 'City'], ['ServiceState', 'State'], ['ContractTerms', 'Terms'], ['MonthlyContractValue', 'Monthly'],
+  ['ActivationDate', 'Activated'], ['DisconnectionDate', 'Disconnected'], ['CancellationReason', 'Cancellation reason'],
+]
+
+// The accounts behind the counts above; the account number opens the account.
+function AccountDetails({ accounts, cancelled }) {
+  return (
+    <>
+      <h3 style={{ marginTop: 20 }}>Account details ({accounts.length})</h3>
+      <div className="table-wrap"><table className="grid">
+        <thead><tr><th>Period</th><th>Acct #</th><th>Customer</th><th>Type</th><th>Phone</th><th>Service address</th><th>Terms</th><th className="num">Monthly</th><th>Activated</th>{cancelled && <th>Disconnected</th>}{cancelled && <th>Reason</th>}</tr></thead>
+        <tbody>
+          {accounts.map((r) => (
+            <tr key={r.AccountID}>
+              <td>{r.Period}</td>
+              <td><Link to={`/am/accounts/${r.AccountID}`}>{r.AccountNumber}</Link></td>
+              <td>{r.CustomerName}</td><td>{r.MonitoringType}</td><td>{r.PhoneNumber}</td>
+              <td className="wrap">{[r.ServiceStreet, r.ServiceCity, r.ServiceState].filter(Boolean).join(', ')}</td>
+              <td>{r.ContractTerms}</td><td className="num">{r.MonthlyContractValue}</td>
+              <td>{fmtDate(r.ActivationDate)}</td>
+              {cancelled && <td>{fmtDate(r.DisconnectionDate)}</td>}
+              {cancelled && <td>{r.CancellationReason || '—'}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table></div>
+    </>
   )
 }
 

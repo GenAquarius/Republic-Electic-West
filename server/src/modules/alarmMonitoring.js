@@ -232,6 +232,16 @@ function range(q) {
 // Monitoring type filter: blank / 0 = all accounts (Access cboMonitoringTypeId = 0).
 const typeParam = (v) => { const n = parseInt(v, 10); return Number.isFinite(n) && n > 0 ? n : null };
 
+const ACCT_COLS = `a.AccountID, a.AccountNumber, a.CustomerName, a.PhoneNumber, a.Email, a.ServiceStreet, a.ServiceCity, a.ServiceState,
+  mt.MonitoringType, a.ContractTerms, a.MonthlyContractValue, a.ActivationDate, a.DisconnectionDate, a.CancellationReason`;
+
+// Account rows behind a report's counts (same filters), so the screen can link to each account and the CSV can list them.
+const reportAccounts = (periodSql, whereSql, p) => query(
+  `SELECT ${ACCT_COLS}, ${periodSql} AS Period
+     FROM AmAccount a JOIN LsAmMonitoringType mt ON mt.MonitoringTypeID = a.MonitoringTypeId
+    WHERE ${whereSql} AND (@mt IS NULL OR a.MonitoringTypeId = @mt)
+    ORDER BY Period, mt.MonitoringType, a.AccountNumber`, p);
+
 // AmAccountsCreated (rptAmAccounts01New): new accounts by monitoring type and month, with % of total.
 router.get('/reports/created', h(async (req, res) => {
   const p = { ...range(req.query), mt: typeParam(req.query.monitoringTypeId) };
@@ -241,7 +251,8 @@ router.get('/reports/created', h(async (req, res) => {
       WHERE CAST(${START} AS date) BETWEEN @from AND @to AND (@mt IS NULL OR a.MonitoringTypeId = @mt)
       GROUP BY mt.MonitoringType, FORMAT(${START}, 'yyyy-MM')
       ORDER BY mt.MonitoringType, PeriodActive`, p);
-  res.json({ ...p, rows, total: rows.reduce((s, r) => s + r.NewAccounts, 0) });
+  const accounts = await reportAccounts(`FORMAT(${START}, 'yyyy-MM')`, `CAST(${START} AS date) BETWEEN @from AND @to`, p);
+  res.json({ ...p, rows, accounts, total: rows.reduce((s, r) => s + r.NewAccounts, 0) });
 }));
 
 // AmAccountsCreatedYear (rptAmAccounts01NewYear): new accounts per year.
@@ -254,7 +265,8 @@ router.get('/reports/created-year', h(async (req, res) => {
       WHERE CAST(${START} AS date) BETWEEN @from AND @to AND (@mt IS NULL OR a.MonitoringTypeId = @mt)
       GROUP BY FORMAT(${START}, 'yyyy')
       ORDER BY PeriodActive`, p);
-  res.json({ ...p, rows, total: rows.reduce((s, r) => s + r.NewAccounts, 0) });
+  const accounts = await reportAccounts(`FORMAT(${START}, 'yyyy')`, `CAST(${START} AS date) BETWEEN @from AND @to`, p);
+  res.json({ ...p, rows, accounts, total: rows.reduce((s, r) => s + r.NewAccounts, 0) });
 }));
 
 // AmAccountsCancelled (rptAmAccounts02Cancel): cancelled accounts by type, month and reason.
@@ -266,7 +278,8 @@ router.get('/reports/cancelled', h(async (req, res) => {
       WHERE a.DisconnectionDate IS NOT NULL AND CAST(a.DisconnectionDate AS date) BETWEEN @from AND @to AND (@mt IS NULL OR a.MonitoringTypeId = @mt)
       GROUP BY mt.MonitoringType, a.CancellationReason, FORMAT(a.DisconnectionDate, 'yyyy-MM')
       ORDER BY mt.MonitoringType, PeriodCancelled, a.CancellationReason`, p);
-  res.json({ ...p, rows, total: rows.reduce((s, r) => s + r.CancelledAccounts, 0) });
+  const accounts = await reportAccounts(`FORMAT(a.DisconnectionDate, 'yyyy-MM')`, `a.DisconnectionDate IS NOT NULL AND CAST(a.DisconnectionDate AS date) BETWEEN @from AND @to`, p);
+  res.json({ ...p, rows, accounts, total: rows.reduce((s, r) => s + r.CancelledAccounts, 0) });
 }));
 
 const EXPIRY_COLS = `a.AccountID, a.AccountNumber, a.CustomerName, a.PhoneNumber, a.Email, a.ServiceStreet, a.ServiceCity, a.ServiceState,

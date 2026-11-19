@@ -11,6 +11,7 @@ const LIVE_PREFIXES = ['/auth/', '/am/'];
 export const isLive = (path) => !DEMO && (LIVE_ALL || LIVE_PREFIXES.some((p) => path.startsWith(p)));
 const BASE = import.meta.env.BASE_URL;
 let demoData = null;
+let demoLoading = null;
 const demoKey = (path, params) => {
   const qs = new URLSearchParams(Object.entries(params || {}).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => [k, String(v)]));
   const [p, q = ''] = path.split('?');
@@ -20,7 +21,16 @@ const demoKey = (path, params) => {
   return s ? `${p}?${s}` : p;
 };
 async function demoGet(path, params) {
-  if (!demoData) demoData = await (await fetch(`${BASE}demo-data.json`)).json();
+  if (!demoData) {
+    // Demo build (GitHub Pages): a static file. Normal build: served by the API to logged-in users only.
+    // One shared download for all the requests a screen makes at once; a failed download is retried next time.
+    demoLoading ||= (async () => {
+      const res = DEMO ? await fetch(`${BASE}demo-data.json`) : await fetch('/api/sample-data', { headers: CLIENT_HEADERS, credentials: 'same-origin' });
+      if (!res.ok) throw Object.assign(new Error(res.status === 401 ? 'Your session has ended. Please log in again.' : 'Sample data is not available on this server.'), { status: res.status });
+      return res.json();
+    })();
+    try { demoData = await demoLoading } catch (e) { demoLoading = null; throw e }
+  }
   const key = demoKey(path, params);
   if (key in demoData) return demoData[key];
   const bare = key.split('?')[0];

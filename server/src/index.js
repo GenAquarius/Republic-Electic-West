@@ -18,6 +18,16 @@ app.get('/api/health', (req, res) => res.json({ ok: true, env: process.env.APP_E
 
 app.use('/api/auth', authRouter);
 
+// Sample data for the prototype modules (everything except Alarm Monitoring): logged-in users only, never a public file.
+// Deployed: server/sample-data.json (copied in by the deploy workflow). Local dev: client/public/demo-data.json.
+const fs = require('fs');
+const SAMPLE_DATA = [path.join(__dirname, '..', 'sample-data.json'), path.join(__dirname, '..', '..', 'client', 'public', 'demo-data.json')]
+  .find((p) => fs.existsSync(p));
+app.get('/api/sample-data', requireAuth, (req, res) => {
+  if (!SAMPLE_DATA) return res.status(404).json({ error: 'Sample data is not installed on this server' });
+  res.type('application/json').sendFile(SAMPLE_DATA);
+});
+
 // Shared (any logged-in user)
 app.use('/api/common', requireAuth, require('./modules/common'));
 app.use('/api/dashboard', requireAuth, require('./modules/dashboard'));

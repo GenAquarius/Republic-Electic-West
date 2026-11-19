@@ -50,6 +50,8 @@ jobs:
         run: |
           mkdir -p package/server package/client
           cp -r server/src server/package.json server/package-lock.json package/server/
+          # sample data for the prototype modules: served by the API to logged-in users, not as a public file
+          cp client/public/demo-data.json package/server/sample-data.json
           cp -r client/dist package/client/dist
           cd package/server
           # the hosted database driver is pure JavaScript; the Windows-only driver is optional and skipped

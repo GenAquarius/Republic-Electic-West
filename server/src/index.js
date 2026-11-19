@@ -24,6 +24,7 @@ app.use('/api/dashboard', requireAuth, require('./modules/dashboard'));
 
 // Modules — each one is added here as it is built.
 app.use('/api/js', requireAuth, requireModule('JS'), require('./modules/jobSetup'));
+app.use('/api/am/ai', requireAuth, requireModule('AM'), require('./modules/amAi')); // AI insights (Claude)
 app.use('/api/am', requireAuth, requireModule('AM'), require('./modules/alarmMonitoring'));
 app.use('/api/pr', requireAuth, requireModule('PR'), require('./modules/payroll'));
 app.use('/api/sc', requireAuth, requireModule('SC'), require('./modules/scheduling'));

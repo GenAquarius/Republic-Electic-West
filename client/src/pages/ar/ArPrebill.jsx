@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ArTabs, ConfirmDialog, SnapshotsInUse, money, pct, today, useArLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ArPrebill() {
   const lk = useArLookups()
@@ -64,8 +65,8 @@ export default function ArPrebill() {
           {!ready && d.groups.length > 0 && (
             <section className="panel" style={{ marginBottom: 16 }}>
               <div className="panel-head"><h2>Waiting to post</h2></div>
-              <table className="grid compact"><thead><tr><th>Builder</th><th>Division</th><th className="num">Lots</th><th>Invoice date</th></tr></thead>
-                <tbody>{d.groups.map((g) => <tr key={`${g.CustId}-${g.DivisionId}`} className="link-row" onClick={() => set({ customerId: g.CustId, division: g.DivisionId })}><td><a>{g.Customer}</a></td><td>{g.DivisionId}</td><td className="num">{g.Lots}</td><td>{fmtDate(g.InvDate)}</td></tr>)}</tbody></table>
+              <Grid className="grid compact"><thead><tr><th>Builder</th><th>Division</th><th className="num">Lots</th><th>Invoice date</th></tr></thead>
+                <tbody>{d.groups.map((g) => <tr key={`${g.CustId}-${g.DivisionId}`} className="link-row" onClick={() => set({ customerId: g.CustId, division: g.DivisionId })}><td><a>{g.Customer}</a></td><td>{g.DivisionId}</td><td className="num">{g.Lots}</td><td>{fmtDate(g.InvDate)}</td></tr>)}</tbody></Grid>
             </section>
           )}
           {!d.lots.length ? <EmptyState title="Nothing submitted">Use <Link to="/ar/billing">Process billing</Link> to choose what to bill on each lot.</EmptyState> : (
@@ -82,7 +83,7 @@ export default function ArPrebill() {
                       <button className="btn small" aria-label={`Remove lot ${l.LotBlock}`} onClick={() => delLot(l.PreBillLotID)}><Trash2 size={13} /></button>
                     </span>
                   </div>
-                  <div className="table-wrap"><table className="grid compact">
+                  <div className="table-wrap"><Grid className="grid compact">
                     <thead><tr><th>Pack</th><th>Stage</th><th>Work</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Bill %</th><th className="num">Amount set</th><th>Notes</th><th className="num">To bill</th><th /></tr></thead>
                     <tbody>{d.lines.filter((x) => x.PreBillLotId === l.PreBillLotID).map((x) => (
                       <tr key={x.PreBillPackID}><td className="wrap">{x.PackName}</td><td>{x.ScheduleStage}</td><td>{x.WorkType}</td><td className="num">{Number(x.Quantity)}</td><td className="num">{money(x.ValueEa)}</td>
@@ -90,7 +91,7 @@ export default function ArPrebill() {
                         <td><button className="btn small icon" aria-label="Remove line" onClick={() => delLine(x.PreBillPackID)}><Trash2 size={13} /></button></td></tr>
                     ))}</tbody>
                     <tfoot><tr><td colSpan={8}><b>Invoice total</b></td><td className="num"><b>{money(l.Amount)}</b></td><td /></tr></tfoot>
-                  </table></div>
+                  </Grid></div>
                 </section>
               ))}
             </>

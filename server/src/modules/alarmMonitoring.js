@@ -286,13 +286,16 @@ const EXPIRY_COLS = `a.AccountID, a.AccountNumber, a.CustomerName, a.PhoneNumber
   t.ContractTerms, a.MonthlyContractValue, a.ActivationDate, a.RenewalDate`;
 
 // AmAccountsExpiring: contracts longer than one month whose term ends between From and To.
+// The renewal date on an account IS the end of its current term (it equals activation + whole contract terms on
+// 84 of 86 accounts), so the term ends on the renewal date; only accounts without one fall back to activation + term.
+// (The Access query added another full term to the renewal date, which pushed every expiry one term too late.)
 router.get('/reports/expiring', h(async (req, res) => {
   const p = range(req.query);
   const rows = await query(
-    `SELECT ${EXPIRY_COLS}, DATEADD(month, t.LengthMonths, ISNULL(a.RenewalDate, a.ActivationDate)) AS FutureExpirationDate
+    `SELECT ${EXPIRY_COLS}, ISNULL(a.RenewalDate, DATEADD(month, t.LengthMonths, a.ActivationDate)) AS FutureExpirationDate
        FROM AmAccount a JOIN LsAmContractTerms t ON t.ContractTermsID = a.ContractTermsId
       WHERE t.LengthMonths > 1 AND a.DisconnectionDate IS NULL
-        AND CAST(DATEADD(month, t.LengthMonths, ISNULL(a.RenewalDate, a.ActivationDate)) AS date) BETWEEN @from AND @to
+        AND CAST(ISNULL(a.RenewalDate, DATEADD(month, t.LengthMonths, a.ActivationDate)) AS date) BETWEEN @from AND @to
       ORDER BY FutureExpirationDate, a.AccountNumber`, p);
   res.json({ ...p, rows });
 }));

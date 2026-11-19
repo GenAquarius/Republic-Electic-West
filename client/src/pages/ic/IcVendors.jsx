@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { IcTabs, money, useIcLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function IcVendors() {
   const nav = useNavigate()
@@ -34,13 +35,13 @@ export function IcVendors() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Vendor</th><th>Category</th><th>City</th><th>Phone</th><th>Terms</th><th className="num">Items</th><th className="num">POs</th></tr></thead>
             <tbody>
               {data.rows.map((r) => <tr key={r.VendorID} onClick={() => nav(`/ic/vendors/${r.VendorID}`)} tabIndex={0} className={r.StatusId !== 1 ? 'dim' : ''}><td><b>{r.Vendor}</b></td><td>{r.Category}</td><td>{r.City}{r.State ? `, ${r.State}` : ''}</td><td>{r.Phone}</td><td>{r.PayTerms}</td><td className="num">{r.Items}</td><td className="num">{r.Pos}</td></tr>)}
               {!data.rows.length && <tr><td colSpan={7}><EmptyState icon={Users} title="No vendors match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -122,7 +123,7 @@ export function IcVendorDetail() {
           <section className="panel span-2">
             <div className="panel-head"><h2>Contacts ({d.contacts.length})</h2></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Name</th><th>Title</th><th>Office</th><th>Cell</th><th>Email</th><th>Main</th><th /></tr></thead>
                 <tbody>
                   {d.contacts.map((c) => editC?.VendorContID === c.VendorContID ? (
@@ -141,18 +142,18 @@ export function IcVendorDetail() {
                     <td className="actions"><button className="btn small primary" disabled={!nc.Name.trim()} onClick={addC}><Plus size={13} /> Add</button></td>
                   </tr>
                 </tbody>
-              </table>
+              </Grid>
             </div>
           </section>
           <section className="panel">
             <div className="panel-head"><h2>Recent POs</h2></div>
-            {!d.recentPos.length ? <p className="muted small">No purchase orders.</p> : <table className="grid compact"><thead><tr><th>PO #</th><th>Date</th><th>Closed</th></tr></thead><tbody>{d.recentPos.map((r) => <tr key={r.PoNum}><td>{r.PoNum}</td><td>{fmtDate(r.PoDate)}</td><td>{fmtDate(r.DateClosed)}</td></tr>)}</tbody></table>}
+            {!d.recentPos.length ? <p className="muted small">No purchase orders.</p> : <Grid className="grid compact"><thead><tr><th>PO #</th><th>Date</th><th>Closed</th></tr></thead><tbody>{d.recentPos.map((r) => <tr key={r.PoNum}><td>{r.PoNum}</td><td>{fmtDate(r.PoDate)}</td><td>{fmtDate(r.DateClosed)}</td></tr>)}</tbody></Grid>}
           </section>
           <section className="panel span-2" style={{ gridColumn: '1 / -1' }}>
             <div className="panel-head"><h2>Items quoted ({d.items.length})</h2></div>
             {!d.items.length ? <p className="muted small">No item prices for this vendor.</p> : (
-              <table className="grid compact"><thead><tr><th>Item</th><th>Description</th><th>Part #</th><th className="num">Default</th><th className="num">Last</th><th>Quoted</th></tr></thead>
-                <tbody>{d.items.map((i) => <tr key={i.VendItemID}><td><Link to={`/ic/items/${i.InvItemId}`}>{i.InvItem}</Link></td><td className="wrap">{i.Description}</td><td>{i.PartNum}</td><td className="num">{money(i.DefaultPrice)}</td><td className="num">{money(i.LastPrice)}</td><td>{fmtDate(i.DateQuote)}</td></tr>)}</tbody></table>
+              <Grid className="grid compact"><thead><tr><th>Item</th><th>Description</th><th>Part #</th><th className="num">Default</th><th className="num">Last</th><th>Quoted</th></tr></thead>
+                <tbody>{d.items.map((i) => <tr key={i.VendItemID}><td><Link to={`/ic/items/${i.InvItemId}`}>{i.InvItem}</Link></td><td className="wrap">{i.Description}</td><td>{i.PartNum}</td><td className="num">{money(i.DefaultPrice)}</td><td className="num">{money(i.LastPrice)}</td><td>{fmtDate(i.DateQuote)}</td></tr>)}</tbody></Grid>
             )}
           </section>
         </div>

@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { money } from '../shared'
 import { Frame, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 // Shared body of "Total billing by lot" (ArLotBilling) and its T&M variant (ArLotBillingTM#, extra "T & M #" column).
 export default function LotBilling({ routeKey, params, tm, csvName }) {
@@ -12,7 +13,7 @@ export default function LotBilling({ routeKey, params, tm, csvName }) {
     <Frame state={st} filters={[['Customer', d?.header?.customer]]} csv={{ cols, name: csvName }} empty="This lot has no packs">
       {d?.header?.lotNotes && <p className="ar-sub">Lot notes: {d.header.lotNotes}</p>}
       <div className="table-wrap">
-        <table className="grid compact">
+        <Grid className="grid compact">
           <thead><tr><th>Pack</th>{tm && <th>T &amp; M #</th>}<th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Rev cont ea</th><th className="num">Ext value</th><th>Invoice</th><th className="num">Qty</th><th className="num">Value</th><th className="num">Percent</th><th className="num">Item total</th></tr></thead>
           <tbody>
             {d?.rows?.map((r) => (
@@ -25,7 +26,7 @@ export default function LotBilling({ routeKey, params, tm, csvName }) {
             <tr className="ar-sum"><td colSpan={lead - 1}>Total contract value</td><td className="num">{money(d?.totals?.contract)}</td><td colSpan={4}>Total invoiced value</td><td className="num">{money(d?.totals?.invoiced)}</td></tr>
             <tr className="ar-grand"><td colSpan={lead - 1}>Balance</td><td className="num">{money(d?.totals?.balance)}</td><td colSpan={5} /></tr>
           </tbody>
-        </table>
+        </Grid>
       </div>
     </Frame>
   )

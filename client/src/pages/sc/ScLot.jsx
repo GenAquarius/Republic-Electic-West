@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ScTabs, lotName, useScLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ScLot() {
   const { id } = useParams()
@@ -122,8 +123,8 @@ export default function ScLot() {
             <section className="panel">
               <div className="panel-head"><h2><History size={16} /> Open / close history</h2></div>
               {!d.endDateHistory.length ? <p className="muted small">The lot has never been closed or reopened.</p> : (
-                <table className="grid compact"><thead><tr><th>When</th><th>Action</th><th>End date</th><th>By</th></tr></thead>
-                  <tbody>{d.endDateHistory.map((h) => <tr key={h.LotCloseChangeID}><td>{fmtDate(h.ChangeDate)}</td><td>{h.Action}</td><td>{fmtDate(h.EndDateNew) || '—'}</td><td className="muted small">{h.ChangeUser}</td></tr>)}</tbody></table>
+                <Grid className="grid compact"><thead><tr><th>When</th><th>Action</th><th>End date</th><th>By</th></tr></thead>
+                  <tbody>{d.endDateHistory.map((h) => <tr key={h.LotCloseChangeID}><td>{fmtDate(h.ChangeDate)}</td><td>{h.Action}</td><td>{fmtDate(h.EndDateNew) || '—'}</td><td className="muted small">{h.ChangeUser}</td></tr>)}</tbody></Grid>
               )}
             </section>
           </div>
@@ -132,7 +133,7 @@ export default function ScLot() {
           <section className="panel" style={{ margin: '16px 0' }}>
             <div className="panel-head"><h2><CalendarPlus size={16} /> Scheduled stages ({d.stages.length})</h2></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Stage</th><th>Work type</th><th>Delivery date</th><th>Notes</th><th>Status</th><th /></tr></thead>
                 <tbody>
                   {d.stages.map((s) => editStage?.id === s.StageAutoID ? (
@@ -161,7 +162,7 @@ export default function ScLot() {
                     <td className="actions"><button className="btn small primary" onClick={addStage}><Plus size={13} /> Add</button></td>
                   </tr>
                 </tbody>
-              </table>
+              </Grid>
             </div>
           </section>
 
@@ -169,7 +170,7 @@ export default function ScLot() {
           <section className="panel">
             <div className="panel-head"><h2>Scheduled packs ({d.packs.length})</h2><span className="muted small">{d.availablePacks.length} packs available from the plan and universal plan</span></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Pack</th><th>Code</th><th>Type</th><th className="num">Qty</th><th className="num">Posted</th><th className="num">Contract ea</th><th /></tr></thead>
                 <tbody>
                   {d.packs.map((p) => editPack?.id === p.PackID ? (
@@ -206,7 +207,7 @@ export default function ScLot() {
                     <td colSpan={2} /><td className="actions"><button className="btn small primary" disabled={!newPack.PmPackId} onClick={addPack}><Plus size={13} /> Add</button></td>
                   </tr>
                 </tbody>
-              </table>
+              </Grid>
               {!d.packs.length && <EmptyState title="No packs scheduled">Add the standard packs for this lot's plan, then any options.</EmptyState>}
             </div>
           </section>

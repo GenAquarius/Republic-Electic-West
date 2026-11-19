@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { money } from '../shared'
 import { Frame, fd, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 const COLS = [['CustName', 'Customer'], ['JobName', 'Job'], ['Phase', 'Phase'], ['BidNum', 'Bid'], ['LotBlock', 'Lot/block'], ['PackName', 'Pack name'], ['PackType', 'Pack type'], ['PackQty', 'Qty'], ['ContractEa', 'Contract ea'], ['RevContractEa', 'Rev cont ea'], ['ExtVal', 'Ext value'], ['FirstDate', 'First date']]
 
@@ -13,7 +14,7 @@ export default function RptLotPackTypeToBill({ params }) {
       {d?.groups?.map((g) => (
         <div key={g.customer} className="table-wrap">
           <div className="ar-block">{g.customer} - {params.division}</div>
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th>Lot/block</th><th>Pack name</th><th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Rev cont ea</th><th className="num">Ext value</th><th>First date</th><th>Phase</th><th>Bid</th></tr></thead>
             <tbody>
               {g.jobs.map((j) => (
@@ -26,7 +27,7 @@ export default function RptLotPackTypeToBill({ params }) {
               ))}
               <tr className="ar-sum"><td colSpan={5}>Total {g.customer} {type}</td><td className="num">{money(g.extVal)}</td><td colSpan={3} /></tr>
             </tbody>
-          </table>
+          </Grid>
         </div>
       ))}
       {d && <p className="ar-block">Total {params.division} {type}: {money(d.totals.extVal)}</p>}

@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ArTabs, ConfirmDialog, int, money, useArLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const OTHER = 'other'
 
@@ -53,7 +54,7 @@ export default function ArFixCode() {
                 <h2>Preview</h2>
                 <span className="muted">{int(pv.unfixedLines)} billing line(s) of {pv.division} have no stage/work; {int(pv.contractValues)} contract value(s) to match against</span>
               </div>
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Step</th><th>Rule</th><th className="num">Would fix</th><th className="num">Ambiguous (left for manual)</th><th /></tr></thead>
                 <tbody>
                   {pv.steps.map((s, i) => (
@@ -61,7 +62,7 @@ export default function ArFixCode() {
                   ))}
                 </tbody>
                 <tfoot><tr><td colSpan={2}><b>Total</b></td><td className="num"><b>{int(pv.total)}</b></td><td /><td /></tr></tfoot>
-              </table></div>
+              </Grid></div>
               <div className="row form-actions" style={{ padding: '0 14px 14px' }}>
                 <button className="btn primary" disabled={!pv.total || busy} onClick={() => setAsk(true)}><Wrench size={15} /> Fix billing code</button>
                 {!pv.total && <span className="muted">Nothing to fix automatically for this division.</span>}
@@ -90,13 +91,13 @@ function FragmentRows({ s, n, open, toggle }) {
       </tr>
       {open && (
         <tr><td colSpan={5}>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Invoice</th><th>Job</th><th>Lot</th><th>Pack</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Total</th><th>New stage / work</th></tr></thead>
             <tbody>{s.sample.map((r) => (
               <tr key={r.BillItemID}><td>{r.BillID}</td><td className="wrap">{r.JobName}</td><td>{r.LotBlock}</td><td className="wrap">{r.PackName}</td><td className="num">{int(r.Quantity)}</td><td className="num">{r.ValueEa}</td><td className="num">{r.ItemTotal}</td>
                 <td>{r.n > 1 ? <Badge tone="amber">ambiguous</Badge> : `${r.NewStageId} / ${r.NewWorkId}`}</td></tr>
             ))}</tbody>
-          </table></div>
+          </Grid></div>
           {s.candidates > s.sample.length && <p className="muted">Showing {s.sample.length} of {s.candidates} lines.</p>}
         </td></tr>
       )}
@@ -156,7 +157,7 @@ function ManualFix({ division, onFixed }) {
       {invoiceId && !d && !error && <SkeletonRows rows={4} cols={6} />}
       {d && (!d.items.length ? <EmptyState title="Every option line of this invoice has a stage and work" /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Pack</th><th>Code</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Total</th><th>Contract values of this pack (stage / work, ea)</th><th>Billing stage / work</th></tr></thead>
             <tbody>{d.items.map((it) => {
               const v = pick[it.BillItemID] || ''
@@ -181,7 +182,7 @@ function ManualFix({ division, onFixed }) {
                 </tr>
               )
             })}</tbody>
-          </table></div>
+          </Grid></div>
           <div className="row form-actions" style={{ padding: '0 14px 14px' }}>
             <button className="btn primary" disabled={!fixes.length || busy} onClick={save}>{busy ? 'Saving…' : `Save ${fixes.length} fix(es)`}</button>
           </div>

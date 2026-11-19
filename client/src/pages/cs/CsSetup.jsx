@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, int, money, num, pct, resetCsLookups, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const TABS = [['technicians', 'Technicians'], ['assemblies', 'Assemblies'], ['lists', 'Master lists'], ['items', 'Inventory items']]
 
@@ -58,7 +59,7 @@ function Technicians() {
         {rows && <span className="muted">{rows.length} technician(s)</span>}
       </div>
       {!rows ? <SkeletonRows rows={8} cols={4} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>ID</th><th>Technician</th><th>Div</th><th>Type</th><th>Active</th><th className="num">Visits</th><th>Last visit</th><th>Entered</th><th /></tr></thead>
           <tbody>
             {rows.map((t) => (
@@ -72,7 +73,7 @@ function Technicians() {
             ))}
             {!rows.length && <tr><td colSpan={9}><EmptyState title="No technicians" /></td></tr>}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )
@@ -98,7 +99,7 @@ function Assemblies() {
         <button className="btn primary" disabled={!name.trim()}><Plus size={14} /> New assembly</button>
       </form>
       {!rows ? <SkeletonRows rows={4} cols={5} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Assembly</th><th className="num">Items</th><th className="num">Sale price</th><th className="num">Est cost</th><th className="num">Est profit</th><th className="num">Actual cost</th><th className="num">Actual profit %</th><th>Prices updated</th></tr></thead>
           <tbody>
             {rows.map((a) => (
@@ -109,7 +110,7 @@ function Assemblies() {
             ))}
             {!rows.length && <tr><td colSpan={8}><EmptyState title="No assemblies" /></td></tr>}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )
@@ -160,7 +161,7 @@ export function CsAssembly() {
           </div>
           <section className="panel">
             <div className="panel-head"><h2>Items ({d.items.length})</h2></div>
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Item</th><th>Class</th><th className="num">Qty</th><th className="num">Cost ea</th><th className="num">Ext cost</th><th className="num">Estimating price</th><th>Entered</th><th /></tr></thead>
               <tbody>
                 {d.items.map((it) => (
@@ -174,7 +175,7 @@ export function CsAssembly() {
                 ))}
                 {!d.items.length && <tr><td colSpan={8} className="muted">No items yet</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
             <form className="cs-inline" style={{ marginTop: 10 }} onSubmit={addItem}>
               <label style={{ flexBasis: 240 }}>Item<SearchSelect endpoint="/cs/items/search" value={add.InvItemId} label={add.label} placeholder="Search item…" onSelect={(r) => setAdd({ ...add, InvItemId: r?.id ?? null, label: r?.name ?? '', CostEa: r?.EstimatingPrice != null ? String(Number(r.EstimatingPrice)) : '' })} /></label>
               <label style={{ flexBasis: 70 }}>Qty<input inputMode="decimal" value={add.Quantity} onChange={(e) => setAdd({ ...add, Quantity: e.target.value })} /></label>
@@ -227,7 +228,7 @@ function Lists() {
       </div>
       {error && <ErrorState message={error} />}
       {needsParent ? <p className="muted">Choose the {name === 'errorDetails' ? 'error and category' : 'error'} first.</p> : !d ? <SkeletonRows rows={6} cols={3} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>ID</th>{fields.map((fd) => <th key={fd.col}>{fd.label}{fd.required ? ' *' : ''}</th>)}<th className="num">In use</th><th /></tr></thead>
           <tbody>
             {d.rows.map((r) => edit?.id === r.id ? (
@@ -249,7 +250,7 @@ function Lists() {
               <td><button className="btn small" onClick={create}><Plus size={13} /> Add</button></td>
             </tr>
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )
@@ -272,7 +273,7 @@ function Items() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={8} cols={5} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Item</th><th>Description</th><th>Class</th><th>UOM</th><th>CC</th><th className="num">Job cost</th><th className="num">Estimating</th><th className="num">Labor cost</th></tr></thead>
             <tbody>
               {d.rows.map((i) => (
@@ -282,7 +283,7 @@ function Items() {
               ))}
               {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No items match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={setPage} />
         </>
       )}
@@ -324,19 +325,19 @@ export function CsItem() {
           <div className="cs-grid2" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Divisions</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <thead><tr><th>Division</th><th className="num">On hand</th><th className="num">Re order</th><th className="num">On order</th><th>Notes</th></tr></thead>
                 <tbody>{d.divisions.map((x) => <tr key={x.InvDivisionID}><td>{x.DivisionId}</td><td className="num">{num(x.QtyOnHand)}</td><td className="num">{num(x.QtyReOrder)}</td><td className="num">{num(x.QtyOnOrder)}</td><td className="wrap">{x.Notes}</td></tr>)}
                   {!d.divisions.length && <tr><td colSpan={5} className="muted">None</td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
             <section className="panel">
               <div className="panel-head"><h2>Vendors</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <thead><tr><th>Vendor</th><th>Part #</th><th className="num">Default price</th><th className="num">Last price</th></tr></thead>
                 <tbody>{d.vendors.map((x) => <tr key={x.VendItemID}><td>{x.Vendor}</td><td>{x.PartNum}</td><td className="num">{money(x.DefaultPrice)}</td><td className="num">{money(x.LastPrice)}</td></tr>)}
                   {!d.vendors.length && <tr><td colSpan={4} className="muted">None</td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
           </div>
         </>

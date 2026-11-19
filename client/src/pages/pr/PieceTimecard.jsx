@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PayrollDatePicker, PrTabs, money, num, usePayrollDate } from './shared'
+import Grid from '../../components/Grid'
 
 export default function PieceTimecard() {
   const [date, setDate] = usePayrollDate()
@@ -142,7 +143,7 @@ export default function PieceTimecard() {
             <EmptyState title="No labor lines">This lot has no labor lines{workId ? ' for this work type' : ''}. Labor lines are created when the stage is posted in Scheduling.</EmptyState>
           ) : (
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr>
                   <th>Pack</th><th>Stage</th><th>Item</th><th className="num">Qty</th><th className="num">Price</th><th className="num">Labor $</th>
                   <th className="num">Paid / pending</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Pay</th>
@@ -176,7 +177,7 @@ export default function PieceTimecard() {
                   <td colSpan={5}>{lines.length} lines · {totals.selected} selected</td>
                   <td className="num">{money(totals.labor)}</td><td colSpan={4} /><td className="num"><b>{money(totals.pay)}</b></td>
                 </tr></tfoot>
-              </table>
+              </Grid>
             </div>
           )}
           <div className="row form-actions" style={{ justifyContent: 'flex-end' }}>
@@ -194,7 +195,7 @@ export default function PieceTimecard() {
           </div>
           {!timecard.length ? <EmptyState title="Timecard is empty">Submitted lines for this payroll date appear here.</EmptyState> : (
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Job</th><th>Lot</th><th>Pack</th><th>Item</th><th className="num">Qty</th><th className="num">Price</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Pay</th><th /></tr></thead>
                 <tbody>{timecard.map((r) => (
                   <tr key={r.TempLaborID} className={r.PackMissing ? 'row-error' : ''}>
@@ -204,7 +205,7 @@ export default function PieceTimecard() {
                     <td className="actions"><button className="btn small ghost danger" onClick={() => removeLine(r.TempLaborID)} aria-label="Remove line"><Trash2 size={13} /></button></td>
                   </tr>
                 ))}</tbody>
-              </table>
+              </Grid>
             </div>
           )}
         </section>

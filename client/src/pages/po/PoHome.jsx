@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PoTabs, int } from './shared'
+import Grid from '../../components/Grid'
 
 export default function PoHome() {
   const nav = useNavigate()
@@ -25,12 +26,12 @@ export default function PoHome() {
       <section className="panel">
         <div className="panel-head"><h2>Latest purchase orders</h2><Link className="panel-link" to="/po/orders">All orders <ArrowRight size={13} /></Link></div>
         {!d ? <SkeletonRows rows={4} cols={3} /> : (
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th>PO #</th><th>Date</th><th>Vendor</th><th>Status</th></tr></thead>
             <tbody>{d.recent.map((r) => (
               <tr key={r.PoNum} className="link-row" onClick={() => nav(`/po/orders/${r.PoNum}`)}><td><a>{r.PoNum}</a></td><td>{fmtDate(r.PoDate)}</td><td>{r.Vendor}</td><td>{r.DateClosed ? <Badge>Closed {fmtDate(r.DateClosed)}</Badge> : <Badge tone="amber">Open</Badge>}</td></tr>
             ))}</tbody>
-          </table>
+          </Grid>
         )}
       </section>
     </div>

@@ -8,6 +8,7 @@ import { api } from '../../api'
 import { SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { AssemblySelector, EsTabs, FormCard, Fields, int, money, money4, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const MAT_FIELDS = [['Quantity', 'Quantity *', 'num'], ['EstimatingPrice', 'Estimating price $ (blank = from item)', 'num'], ['StageId', 'Stage *', 'select', { list: 'stages' }],
   ['WorkId', 'Work *', 'select', { list: 'works' }], ['StatusId', 'Status', 'select', { list: 'statuses' }], ['NoChange', 'No change', 'check'], ['Notes', 'Notes (quoted as)', 'text', { span: 3, max: 255 }]]
@@ -63,7 +64,7 @@ export default function EsPack() {
               <Fields fields={MAT_FIELDS} value={mat} onChange={setMat} lk={lk} />
             </FormCard>
           )}
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Item</th><th>Description</th><th>Code</th><th className="num">Qty</th><th className="num">Est price</th><th className="num">Ext price</th><th>Stage</th><th>Work</th><th>No change</th><th>Status</th><th /></tr></thead>
             <tbody>{d.material.map((m) => (
               <tr key={m.EsBidItemID}>
@@ -77,7 +78,7 @@ export default function EsPack() {
               </tr>
             ))}{!d.material.length && <tr><td colSpan={11}><EmptyState title="No material in this pack" /></td></tr>}</tbody>
             {d.material.length > 0 && <tfoot><tr><td colSpan={5}><b>Material {money(d.totals.material)} · Labor {money(d.totals.labor)}</b></td><td className="num"><b>{money(d.totals.total)}</b></td><td colSpan={5} className="muted small">per pack (× pack qty {k.Quantity ?? 1} in the bid calculation)</td></tr></tfoot>}
-          </table></div>
+          </Grid></div>
         </section>
       )}
     </div>

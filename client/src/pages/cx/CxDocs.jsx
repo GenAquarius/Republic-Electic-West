@@ -4,6 +4,7 @@ import { fmtDate } from '../../format'
 import { EmptyState } from '../../components/ui'
 import { Link } from 'react-router-dom'
 import { groupBy, money, qty } from './shared'
+import Grid from '../../components/Grid'
 
 const CO = { name: 'Republic Electric, Inc.', street: '4225 W. Post Road', city: 'Las Vegas, NV 89118', phone: '(702) 643-2688', fax: '(702) 835-0122', email: 'jorge@nvrepublic.com' }
 const COX_NOTE = "*Please use the project name listed on the Assessor's page. Please fax completed form to (702) 545-2606 or email to construction.fax@cox.com. For faster processing please write legibly or type your information. This request will be filled within 7 business days upon receipt. Incomplete forms will result in delayed processing. Please contact the Cox Construction Front Desk at (702) 545-1606 for any questions."
@@ -31,12 +32,12 @@ function ReqHead({ title, r }) {
 function ReqFoot() {
   return (
     <>
-      <table className="grid compact" style={{ marginTop: 12 }}><tbody>
+      <Grid className="grid compact" style={{ marginTop: 12 }}><tbody>
         <tr><td>Project planner signature</td><td style={{ width: '30%' }} /><td>Date issued</td><td style={{ width: '20%' }} /></tr>
         <tr><td>Project planner # and phone</td><td /><td>Material req. #</td><td /></tr>
         <tr><td>Admin specialist and phone</td><td /><td>Material P.O. #</td><td /></tr>
         <tr><td>Admin specialist email</td><td /><td>Oracle project #</td><td /></tr>
-      </tbody></table>
+      </tbody></Grid>
       <p className="muted small">Please note: items in red are required to be completed to process your request.</p>
       <p className="muted small">{COX_NOTE}</p>
       <p className="small"><b>Please call the Cox warehouse to schedule material pick up: (702) 545-1174</b></p>
@@ -49,11 +50,11 @@ export function SingleRequest({ rows, start = 0 }) {
   return groupBy(rows.map(norm), (r) => `${r.AssessorName}|${r.job}`).map(([k, g], i) => (
     <div key={k} style={brk(i + start)}>
       <ReqHead title="Pre-wire R1 request" r={g[0]} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th className="num">#</th><th>Lot</th><th>Complete address (number and name)</th><th>Permit #</th><th className="num"># of outlets</th></tr></thead>
         <tbody>{g.map((r, n) => <tr key={n}><td className="num">{n + 1}</td><td>{r.lot}</td><td>{r.Address}</td><td>{r.Permit}</td><td className="num">{qty(r.OutletPrewire)}</td></tr>)}</tbody>
         <tfoot><tr><td colSpan={2}><b>Total lots per order: {g.length}</b></td><td colSpan={2} className="num"><b>Total outlets per order</b></td><td className="num"><b>{qty(sum(g, 'OutletPrewire'))}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
       <ReqFoot />
     </div>
   ))
@@ -64,10 +65,10 @@ export function MultiRequest({ rows, start = 0 }) {
   return groupBy(rows.map(norm), (r) => `${r.AssessorName}|${r.job}`).map(([k, g], i) => (
     <div key={k} style={brk(i + start)}>
       <ReqHead title="Pre-wire MDU request" r={g[0]} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Lot/Bldg #</th><th>Address</th><th>Plan #</th><th className="num"># of bed rooms</th><th>Permit</th><th className="num"># of home runs</th><th className="num"># of lock boxes</th><th className="num"># of outlets</th><th className="num"># of risers</th></tr></thead>
         <tbody>{g.map((r, n) => <tr key={n}><td>{r.lot}</td><td>{r.Address}</td><td>{r.PlanNum}</td><td className="num">{r.Bedrooms}</td><td>{r.Permit}</td><td className="num">{qty(r.HomeRuns)}</td><td className="num">{qty(r.LockboxPrewire)}</td><td className="num">{qty(r.OutletPrewire)}</td><td className="num">{qty(r.RiserPrewire)}</td></tr>)}</tbody>
-      </table></div>
+      </Grid></div>
       <div className="fm-head" style={{ marginTop: 12 }}><dl>
         <div><dt>Total units per order</dt><dd>{g.length}</dd></div>
         <div><dt>Total home runs per order</dt><dd>{qty(sum(g, 'HomeRuns'))}</dd></div>
@@ -87,11 +88,11 @@ export function RequestSummary({ rows, date, breakBefore }) {
     <div style={breakBefore ? brk(1) : undefined}>
       <div className="fm-head"><div><h2>Cox material requested summary</h2><div className="muted">Date requested: <b>{fmtDate(date || rows[0]?.DateCoxMatReq)}</b></div></div></div>
       {!rows.length ? <EmptyState title="Nothing requested on this date" /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th className="num">Lots</th><th>Item</th><th className="num">Quantity</th><th className="num">Amount ea</th><th className="num">Estimated billing</th></tr></thead>
           <tbody>{rows.map((r) => <tr key={r.Item + r.BillPrice}><td className="num">{r.Lots}</td><td>{r.Item}</td><td className="num">{qty(r.Quantity)}</td><td className="num">{money(r.BillPrice)}</td><td className="num">{money(r.ExtCost)}</td></tr>)}</tbody>
           <tfoot><tr><td colSpan={2}><b>Total</b></td><td className="num"><b>{qty(sum(rows, 'Quantity'))}</b></td><td /><td className="num"><b>{money(sum(rows, 'ExtCost'))}</b></td></tr></tfoot>
-        </table></div>
+        </Grid></div>
       )}
     </div>
   )
@@ -103,10 +104,10 @@ export function RequestCheck({ rows }) {
     <div>
       <div className="fm-head"><div><h2>Active jobs without Cox job data</h2><div className="muted">{fmtDate(new Date().toISOString())} · total unmatched jobs {rows.length}</div></div></div>
       <div className="banner warn">Material request has been stopped! Add the Cox plan data (and job assessor names) to the jobs listed here before running the material request again.</div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Customer</th><th>Job – scheduling module</th><th>Sample address</th></tr></thead>
         <tbody>{rows.map((r) => <tr key={r.CustName + r.JobName}><td>{r.CustName}</td><td>{r.JobId ? <Link to={`/cx/jobs/${r.JobId}`}>{r.JobName}</Link> : r.JobName}</td><td>{r.SampleAddress}</td></tr>)}</tbody>
-      </table></div>
+      </Grid></div>
     </div>
   )
 }
@@ -159,11 +160,11 @@ export function Invoices({ rows }) {
 
 function InvoiceLines({ rows }) {
   return (
-    <div className="table-wrap"><table className="grid compact">
+    <div className="table-wrap"><Grid className="grid compact">
       <thead><tr><th>Lot</th><th>Address</th><th>Item</th><th className="num">Qty</th><th className="num">Price ea</th><th className="num">Ext price</th></tr></thead>
       <tbody>{rows.map((r, n) => <tr key={n}><td>{r.LotBlock}</td><td>{r.Address}</td><td>{r.Item}</td><td className="num">{qty(r.Quantity)}</td><td className="num">{money(r.PriceEa)}</td><td className="num">{money(r.ExtPrice)}</td></tr>)}</tbody>
       <tfoot><tr><td colSpan={5}><b>Invoice total</b></td><td className="num"><b>{money(sum(rows, 'ExtPrice'))}</b></td></tr></tfoot>
-    </table></div>
+    </Grid></div>
   )
 }
 

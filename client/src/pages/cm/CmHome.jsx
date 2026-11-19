@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { CmTabs, int, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export default function CmHome() {
   const nav = useNavigate()
@@ -42,7 +43,7 @@ export default function CmHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Latest contracts</h2><Link className="panel-link" to="/cm/jobs">All jobs <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={5} cols={4} /> : !d.recent.length ? <EmptyState title="No contracts entered yet" /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Customer</th><th>Job</th><th>Div</th><th>Type</th><th>Contract</th><th>Addendum</th><th>Effective</th><th /></tr></thead>
               <tbody>{d.recent.map((r) => (
                 <tr key={r.CmContractID} className="link-row" onClick={() => nav(`/cm/jobs/${r.PmJobId}?contract=${r.CmContractID}`)}>
@@ -50,20 +51,20 @@ export default function CmHome() {
                   <td>{yes(r.Executed) ? <Badge tone="green">Executed</Badge> : <Badge tone="amber">Not executed</Badge>}</td>
                 </tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-2">
           <div className="panel-head"><h2>Diary – to do</h2><Link className="panel-link" to="/cm/reports?report=to-do-diary">To-do report <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={4} cols={4} /> : !d.due.length ? <EmptyState title="Nothing due" /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Due</th><th>Job</th><th>Contract</th><th>Contact</th><th>Notes</th></tr></thead>
               <tbody>{d.due.map((r) => (
                 <tr key={r.CmDiaryID} className="link-row" onClick={() => nav(`/cm/jobs/${r.PmJobId}?contract=${r.CmContractID}`)}>
                   <td>{fmtDate(r.DueDate)}</td><td className="wrap">{r.Job}</td><td>{[r.ContractNumber, r.AddendumNumber].filter(Boolean).join(' / ')}</td><td>{r.Contact}</td><td className="wrap">{r.Notes}</td>
                 </tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-2">

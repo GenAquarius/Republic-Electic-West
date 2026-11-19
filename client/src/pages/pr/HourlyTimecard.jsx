@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader } from '../../components/ui'
 import { PayrollDatePicker, PrTabs, money, num, usePayrollDate, usePrLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const BLANK = { lotId: '', packId: '', scheduleStageId: '', workId: '', hourTypeId: '1', payTypeId: '', hours: '', hourlyRate: '', dateWorked: '', notes: '' }
 
@@ -160,7 +161,7 @@ export default function HourlyTimecard() {
           </div>
           {!list.rows.length ? <EmptyState icon={Clock3} title="No hourly entries">Entries you add for this payroll date appear here.</EmptyState> : (
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Employee</th><th>Worked</th><th>Job</th><th>Lot</th><th>Pack</th><th>Work</th><th>Type</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Amount</th><th /></tr></thead>
                 <tbody>{list.rows.map((r) => (
                   <tr key={r.TempLaborHourlyID}>
@@ -170,19 +171,19 @@ export default function HourlyTimecard() {
                     <td className="actions"><button className="btn small ghost danger" onClick={() => remove(r.TempLaborHourlyID)} aria-label="Delete entry"><Trash2 size={13} /></button></td>
                   </tr>
                 ))}</tbody>
-              </table>
+              </Grid>
             </div>
           )}
         </section>
         <section className="panel">
           <div className="panel-head"><h2><Users size={16} /> Hours by employee</h2></div>
           {!list.byEmployee.length ? <p className="muted small">None yet.</p> : (
-            <table className="grid compact"><thead><tr><th>Employee</th><th className="num">Hours</th><th className="num">Amount</th></tr></thead>
+            <Grid className="grid compact"><thead><tr><th>Employee</th><th className="num">Hours</th><th className="num">Amount</th></tr></thead>
               <tbody>{list.byEmployee.map((r) => (
                 <tr key={r.EmployeeId} className="link-row" onClick={() => { setEmp({ id: r.EmployeeId, name: r.EmpName }); setShowAll(false) }}>
                   <td><a>{r.EmpName}</a></td><td className="num">{num(r.hours)}</td><td className="num">{money(r.amount)}</td>
                 </tr>
-              ))}</tbody></table>
+              ))}</tbody></Grid>
           )}
         </section>
       </div>

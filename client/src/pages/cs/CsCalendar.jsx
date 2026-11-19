@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, addDays, int, today, useCsLookups, weekday } from './shared'
+import Grid from '../../components/Grid'
 
 function NoteBox({ date, division, note, onSaved }) {
   const [text, setText] = useState(note?.CalendarNotes || '')
@@ -70,7 +71,7 @@ export default function CsCalendar() {
           <div className="panel-head"><h2>{weekday(from)} {fmtDate(from)}</h2></div>
           {d.notes.filter((n) => n.CalendarDate.slice(0, 10) === from && (!division || n.DivisionId === division)).map((n) => !division && <div key={n.DivisionId} className="cs-note" style={{ marginBottom: 6 }}>{n.DivisionId}: {n.CalendarNotes}</div>)}
           <NoteBox date={from} division={division} note={d.notes.find((n) => n.CalendarDate.slice(0, 10) === from && n.DivisionId === division)} onSaved={load} />
-          <div className="table-wrap flat" style={{ marginTop: 8 }}><table className="grid compact">
+          <div className="table-wrap flat" style={{ marginTop: 8 }}><Grid className="grid compact">
             <thead><tr><th>Ticket</th><th>Time</th><th>Type</th><th>Job type</th><th>Property</th><th>Customer</th><th>Rep</th><th className="num">Est hrs</th><th>Status</th><th>Community</th><th>Resolution</th><th className="num">Techs</th></tr></thead>
             <tbody>
               {d.appointments.map((a) => (
@@ -81,7 +82,7 @@ export default function CsCalendar() {
               ))}
               {!d.appointments.length && <tr><td colSpan={12} className="muted">No appointments</td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
         </section>
       ) : (
         <div className="cs-week">
@@ -110,25 +111,25 @@ export default function CsCalendar() {
         <section className="panel">
           <div className="panel-head"><h2>Upcoming by city and time</h2></div>
           {!up ? <SkeletonRows rows={3} cols={3} /> : (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Date</th><th>City</th><th>Time</th><th>Ticket type</th><th>Job type</th><th className="num">Qty</th></tr></thead>
               <tbody>
                 {up.byCity.map((r, i) => <tr key={i} className="link-row" onClick={() => set({ from: r.ApptDate.slice(0, 10), days: '1' })}><td>{fmtDate(r.ApptDate)}</td><td>{r.City}</td><td>{r.ApptTime}</td><td>{r.TicketType}</td><td>{r.CsJobType}</td><td className="num">{r.Appointments}</td></tr>)}
                 {!up.byCity.length && <tr><td colSpan={6} className="muted">Nothing scheduled from today on</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel">
           <div className="panel-head"><h2>Upcoming by technician</h2></div>
           {!up ? <SkeletonRows rows={3} cols={3} /> : (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Date</th><th>Technician</th><th>Time</th><th>City</th><th className="num">Qty</th></tr></thead>
               <tbody>
                 {up.byTech.map((r, i) => <tr key={i}><td>{fmtDate(r.ApptDate)}</td><td>{r.TechName}</td><td>{r.ApptTime}</td><td>{r.City}</td><td className="num">{r.Appointments}</td></tr>)}
                 {!up.byTech.length && <tr><td colSpan={5} className="muted">No technicians booked from today on</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
       </div>

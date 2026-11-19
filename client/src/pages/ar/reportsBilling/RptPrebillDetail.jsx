@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import { money } from '../shared'
 import { Frame, fd, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 const COLS = [['PreInvoiceNum', 'Pre-invoice'], ['Customer', 'Customer'], ['InvDate', 'Date'], ['JobName', 'Job'], ['Phase', 'Phase'], ['LotBlock', 'Lot/block'], ['PlanNum', 'Plan'], ['BillType', 'Bill type'], ['Terms', 'Terms'], ['ItemCode', 'Item code'], ['PackName', 'Pack name'], ['Quantity', 'Qty'], ['ValueEa', 'Value Ea'], ['BillPercent', 'Bill %'], ['BillValue', 'Bill value'], ['TotalBill', 'Subtotal'], ['Notes', 'Notes']]
 
@@ -14,7 +15,7 @@ export default function RptPrebillDetail({ params }) {
           <div className="ar-block">{g.customer} - {g.division}</div>
           {g.lots.map((l) => (
             <div key={l.PreInvoiceNum} className="table-wrap">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead>
                   <tr className="ar-grp"><td colSpan={4}>{l.JobName} {l.JobNum ? `(${l.JobNum})` : ''} - lot {l.LotBlock} - plan {l.PlanNum}</td><td colSpan={5}>Pre-invoice {l.PreInvoiceNum} | {fd(l.InvDate)} | {l.BillType} | {l.Terms} | {l.Phase}</td></tr>
                   <tr><th>Item code</th><th>Pack name</th><th>Stage</th><th>Work</th><th className="num">Qty</th><th className="num">Value Ea</th><th className="num">Bill %</th><th className="num">Bill value</th><th className="num">Subtotal</th></tr>
@@ -28,7 +29,7 @@ export default function RptPrebillDetail({ params }) {
                   ))}
                   <tr className="ar-sum"><td colSpan={8}>Invoice total</td><td className="num">{money(l.total)}</td></tr>
                 </tbody>
-              </table>
+              </Grid>
             </div>
           ))}
           <p className="ar-block">Total billing for {g.customer} - {g.division}: {money(g.total)}</p>

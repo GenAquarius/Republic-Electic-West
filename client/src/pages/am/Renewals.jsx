@@ -5,6 +5,7 @@ import { fmtDate } from '../../format'
 import { CalendarCheck, Printer } from 'lucide-react'
 import { EmptyState, ErrorState, PageHeader } from '../../components/ui'
 import AmTabs from './AmTabs'
+import Grid from '../../components/Grid'
 
 export default function Renewals() {
   const [days, setDays] = useState(60)
@@ -28,7 +29,7 @@ export default function Renewals() {
         </div>} />
       <AmTabs />
       {error && <ErrorState message={error} />}
-      <div className="table-wrap"><table className="grid">
+      <div className="table-wrap"><Grid className="grid">
         <thead><tr><th>Renewal</th><th>Acct #</th><th>Customer</th><th>Phone</th><th>Terms</th><th>Monthly</th></tr></thead>
         <tbody>
           {rows.map((r) => (
@@ -40,7 +41,7 @@ export default function Renewals() {
           ))}
           {!rows.length && <tr><td colSpan={6}><EmptyState icon={CalendarCheck} title="No renewals due">No active accounts renew in the next {days} days.</EmptyState></td></tr>}
         </tbody>
-      </table></div>
+      </Grid></div>
     </div>
   )
 }

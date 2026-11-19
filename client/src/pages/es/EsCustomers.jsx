@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { BID_TABS, BID_FIELDS, EsTabs, FormCard, JOB_FIELDS, TabbedFields, Fields, int, toForm, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export function EsCustomers() {
   const nav = useNavigate()
@@ -40,11 +41,11 @@ export function EsCustomers() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={3} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Customer</th><th>Status</th><th className="num">Jobs</th><th className="num">Estimating bids</th><th>Notes</th></tr></thead>
             <tbody>{d.rows.map((r) => <tr key={r.PmCustID} className="link-row" onClick={() => nav(`/es/customers/${r.PmCustID}`)}><td><a><b>{r.Customer}</b></a></td><td><Badge tone={r.StatusId === 1 ? 'green' : 'neutral'}>{r.Status || '—'}</Badge></td><td className="num">{r.Jobs}</td><td className="num">{r.Bids || ''}</td><td className="wrap">{r.Notes}</td></tr>)}
               {!d.rows.length && <tr><td colSpan={5}><EmptyState title="No customers match" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -101,7 +102,7 @@ export function EsCustomer() {
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Jobs</h2><button className="btn small primary" onClick={() => setJob(blankJob())}><Plus size={13} /> New job</button></div>
             {job && <FormCard legend={job.id ? 'Edit job' : 'New job'} onSubmit={saveJob} onCancel={() => setJob(null)} saveLabel="Save job"><Fields fields={JOB_FIELDS} value={job} onChange={setJob} lk={lk} /></FormCard>}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Job</th><th>Div</th><th>Type</th><th>Number</th><th>City</th><th>Est start</th><th className="num">Units</th><th>Status</th><th className="num">Bids</th><th /></tr></thead>
               <tbody>{d.jobs.map((j) => (
                 <tr key={j.PmJobID} className={`link-row${selJob === j.PmJobID ? ' selected' : ''}`} onClick={() => setSelJob(j.PmJobID)}>
@@ -112,14 +113,14 @@ export function EsCustomer() {
                   </td>
                 </tr>
               ))}{!d.jobs.length && <tr><td colSpan={10}><EmptyState title="No jobs yet" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
 
           {sj && (
             <section className="panel" style={{ marginTop: 16 }}>
               <div className="panel-head"><h2>Estimating bids of {sj.Job}</h2><button className="btn small primary" onClick={() => setBid({ ...blankBid(bids.reduce((m, b) => Math.max(m, b.BidNum || 0), 0) + 1), jobId: sj.PmJobID })}><Plus size={13} /> New bid</button></div>
               {bid && <FormCard legend={bid.id ? 'Edit bid' : 'New bid'} onSubmit={saveBid} onCancel={() => setBid(null)} saveLabel="Save bid"><TabbedFields tabs={BID_TABS} value={bid} onChange={setBid} lk={lk} /></FormCard>}
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Bid</th><th>Date</th><th>Effective release</th><th>Recipient</th><th>Estimator</th><th className="num">Tax %</th><th className="num">O/H %</th><th className="num">Profit %</th><th className="num">Plans</th><th>PM bid</th><th>Status</th><th /></tr></thead>
                 <tbody>{bids.map((b) => (
                   <tr key={b.EsBidID} className="link-row" onClick={() => nav(`/es/bids/${b.EsBidID}`)}>
@@ -131,7 +132,7 @@ export function EsCustomer() {
                     </td>
                   </tr>
                 ))}{!bids.length && <tr><td colSpan={12}><EmptyState title="No estimating bids for this job" /></td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
           )}
         </>

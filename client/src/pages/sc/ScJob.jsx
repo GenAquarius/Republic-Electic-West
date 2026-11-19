@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ScTabs } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ScJob() {
   const { id } = useParams()
@@ -23,7 +24,7 @@ export default function ScJob() {
       {job?.Notes && <div className="banner">Job notes: {job.Notes}</div>}
       <div className="table-wrap">
         {!d ? <div style={{ padding: 16 }}><SkeletonRows rows={6} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid className="grid clickable">
             <thead><tr><th>Phase</th><th>Type</th><th>Superintendents</th><th>Start</th><th>End</th><th className="num">Lots</th><th className="num">Open lots</th><th className="num">Open stages</th></tr></thead>
             <tbody>
               {d.phases.map((p) => (
@@ -35,7 +36,7 @@ export default function ScJob() {
               ))}
               {!d.phases.length && <tr><td colSpan={8}><EmptyState icon={Layers} title="No phases on this job">Add phases in Job setup first.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>

@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, StatusBadge, int, useCsLookups, withConfirm } from './shared'
+import Grid from '../../components/Grid'
 
 export function CsCustomers() {
   const nav = useNavigate()
@@ -33,7 +34,7 @@ export function CsCustomers() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={5} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Homeowner</th><th>Phone</th><th>Email</th><th className="num">Properties</th><th className="num">Tickets</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -43,7 +44,7 @@ export function CsCustomers() {
               ))}
               {!d.rows.length && <tr><td colSpan={5}><EmptyState title="No homeowners match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -138,7 +139,7 @@ export function CsCustomerDetail() {
           <div className="cs-grid2" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Phone numbers ({d.phones.length})</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <tbody>
                   {d.phones.map((ph) => (
                     <tr key={ph.CustPhoneID}>
@@ -149,7 +150,7 @@ export function CsCustomerDetail() {
                   ))}
                   {!d.phones.length && <tr><td className="muted">No phone numbers</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
               <form className="cs-inline" style={{ marginTop: 10 }} onSubmit={addPhone}>
                 <label>Phone<input inputMode="tel" placeholder="(916) 555-0100" value={newPhone.PhoneNum} onChange={(e) => setNewPhone({ ...newPhone, PhoneNum: e.target.value })} /></label>
                 <label>Type<select value={newPhone.PhoneTypeId} onChange={(e) => setNewPhone({ ...newPhone, PhoneTypeId: e.target.value })}><Options list={lk.phoneTypes} /></select></label>
@@ -158,7 +159,7 @@ export function CsCustomerDetail() {
             </section>
             <section className="panel">
               <div className="panel-head"><h2>Properties ({d.properties.length})</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <tbody>
                   {d.properties.map((pr) => (
                     <tr key={pr.PropertyId}>
@@ -169,7 +170,7 @@ export function CsCustomerDetail() {
                   ))}
                   {!d.properties.length && <tr><td className="muted">No properties linked</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
               <form className="cs-inline" style={{ marginTop: 10 }} onSubmit={addLink}>
                 <label>Property<SearchSelect endpoint="/cs/properties/search" value={link.PropertyId} label={link.label} placeholder="Search address…" onSelect={(r) => setLink({ ...link, PropertyId: r?.id ?? null, label: r?.name ?? '' })} /></label>
                 <label>Customer type<select value={link.CustomerTypeId} onChange={(e) => setLink({ ...link, CustomerTypeId: e.target.value })}><Options list={lk.customerTypes} /></select></label>
@@ -179,7 +180,7 @@ export function CsCustomerDetail() {
           </div>
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Ticket history ({d.history.length})</h2></div>
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Ticket</th><th>Date</th><th>Time</th><th>Property</th><th>Type</th><th>Job type</th><th>Status</th><th>Resolution</th></tr></thead>
               <tbody>
                 {d.history.map((h) => (
@@ -189,7 +190,7 @@ export function CsCustomerDetail() {
                 ))}
                 {!d.history.length && <tr><td colSpan={8} className="muted">No tickets yet</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
           </section>
         </>
       )}

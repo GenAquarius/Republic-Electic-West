@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtMoney } from '../../format'
 import { ErrorState, PageHeader, StatCard, SkeletonRows } from '../../components/ui'
 import AmTabs from './AmTabs'
+import Grid from '../../components/Grid'
 
 export default function AmDashboard() {
   const [s, setS] = useState(null)
@@ -38,7 +39,7 @@ export default function AmDashboard() {
           <Link to="/am/accounts" className="btn small ghost">View all</Link>
         </div>
         {!s ? <SkeletonRows rows={3} cols={2} /> : (
-          <table className="grid">
+          <Grid className="grid">
             <thead><tr><th>Monitoring type</th><th className="num">Accounts</th><th style={{ width: '40%' }} /></tr></thead>
             <tbody>
               {s.byType.map((t) => (
@@ -49,7 +50,7 @@ export default function AmDashboard() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Grid>
         )}
       </section>
     </div>

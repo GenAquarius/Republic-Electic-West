@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PoTabs, int, money, money0, usePoLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function PoOrders() {
   const nav = useNavigate()
@@ -39,7 +40,7 @@ export default function PoOrders() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>PO #</th><th>Date</th><th>Vendor</th><th>Ship to</th><th>Terms</th><th className="num">Lines</th><th>Received</th><th className="num">Items</th><th className="num">Tax</th><th className="num">Total</th><th>Status</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -51,7 +52,7 @@ export default function PoOrders() {
               ))}
               {!data.rows.length && <tr><td colSpan={11}><EmptyState title="No purchase orders match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}

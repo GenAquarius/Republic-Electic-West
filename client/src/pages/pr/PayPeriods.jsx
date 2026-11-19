@@ -4,6 +4,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PrTabs } from './shared'
+import Grid from '../../components/Grid'
 
 export default function PayPeriods() {
   const [rows, setRows] = useState(null)
@@ -46,7 +47,7 @@ export default function PayPeriods() {
       </form>
       <div className="table-wrap">
         {!rows ? <div style={{ padding: 16 }}><SkeletonRows rows={6} cols={3} /></div> : (
-          <table className="grid">
+          <Grid className="grid">
             <thead><tr><th>Payroll date</th><th>Period from</th><th>Period to</th><th>Entered</th><th /></tr></thead>
             <tbody>
               {rows.map((r) => (
@@ -56,7 +57,7 @@ export default function PayPeriods() {
               ))}
               {!rows.length && <tr><td colSpan={5}><EmptyState icon={CalendarRange} title="No pay periods" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>

@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CmTabs, useCmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const blankContract = { TypeId: '', ContractNumber: '', WorkAgreeNum: '', AddendumNumber: '', Description: '', EffectivePhase: '', EffectiveDate: '', Executed: false, LatestPrint: false, Notes: '' }
 const JOB_FIELDS = ['JobNumber', 'Address', 'City', 'State', 'Zip', 'EstStartDate', 'EstEndDate', 'UnitQty', 'JobTypeId', 'JurisdictionId', 'DivisionId', 'StatusId']
@@ -90,7 +91,7 @@ export default function CmJob() {
                 <label className="span3">Notes<input maxLength={255} {...cf('Notes')} /></label>
               </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save</button><button type="button" className="btn" onClick={() => setForm(null)}><X size={15} /> Cancel</button></div></form>
             )}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Type</th><th>Contract</th><th>Work agreement</th><th>Addendum</th><th>Description</th><th>Effective</th><th>Executed</th><th className="num">Diary</th><th className="num">Bids</th><th /></tr></thead>
               <tbody>{d.contracts.map((c) => (
                 <tr key={c.CmContractID} className={`link-row${sel === c.CmContractID ? ' row-selected' : ''}`} onClick={() => setSp({ contract: c.CmContractID })}>
@@ -103,7 +104,7 @@ export default function CmJob() {
                   </td>
                 </tr>
               ))}{!d.contracts.length && <tr><td colSpan={10}><EmptyState title="No contracts for this job yet" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
           {sel && d.contracts.some((c) => c.CmContractID === sel) && <ContractDetail key={sel} id={sel} bids={d.bids} onChanged={load} />}
         </>
@@ -150,7 +151,7 @@ function ContractDetail({ id, bids, onChanged }) {
             <label className="span3">File (path or link)<input maxLength={255} {...nf('LinkFile')} /></label>
           </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save note</button><button type="button" className="btn" onClick={() => setNote(null)}><X size={15} /> Cancel</button></div></form>
         )}
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Date</th><th>Contact</th><th>Notes</th><th>Due</th><th>File</th><th /></tr></thead>
           <tbody>{d.diary.map((n) => (
             <tr key={n.CmDiaryID}><td>{fmtDate(n.Date)}</td><td>{n.Contact}</td><td className="wrap">{n.Notes}</td><td>{fmtDate(n.DueDate)}</td><td className="wrap">{n.LinkFile}</td>
@@ -159,11 +160,11 @@ function ContractDetail({ id, bids, onChanged }) {
                 <button className="btn small icon" aria-label={`Delete note ${n.CmDiaryID}`} onClick={() => delNote(n.CmDiaryID)}><Trash2 size={13} /></button>
               </td></tr>
           ))}{!d.diary.length && <tr><td colSpan={6}><EmptyState title="No diary notes" /></td></tr>}</tbody>
-        </table></div>
+        </Grid></div>
       </section>
       <section className="panel span-2">
         <div className="panel-head"><h2><Link2 size={15} /> Link to estimating bids</h2></div>
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Bid</th><th>Release</th><th>Bid date</th><th /></tr></thead>
           <tbody>{d.links.map((l) => (
             <tr key={l.CmLinkPmID}>
@@ -177,7 +178,7 @@ function ContractDetail({ id, bids, onChanged }) {
               {bids.filter((b) => !d.links.some((l) => l.PmContractId === b.id)).map((b) => <option key={b.id} value={b.id}>{b.name}{b.BidRelease ? ` (${b.BidRelease})` : ''}</option>)}</select></td>
               <td><button className="btn small" disabled={!link} onClick={addLink}><Plus size={13} /> Link</button></td></tr>
           </tbody>
-        </table></div>
+        </Grid></div>
       </section>
     </div>
   )

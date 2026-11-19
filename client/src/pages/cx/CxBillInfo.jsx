@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CxTabs, isoDay, useCxLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function CxBillInfo() {
   const lk = useCxLookups()
@@ -50,7 +51,7 @@ export default function CxBillInfo() {
       {!jobId ? null : !d ? <SkeletonRows rows={8} cols={6} /> : (
         <section className="panel">
           <div className="panel-head"><h2>{j.JobName}</h2><span className="muted">Job assessor: <b>{j.FirstOfAssessorName}</b> · {d.lots.length} lot(s)</span></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Lot</th><th>Address</th><th>Cox job</th><th>Job assessor</th><th>Date material</th><th>Requisition #</th><th>PO #</th><th>Oracle proj #</th><th>Admin</th><th>Planner</th><th>Invoice</th><th /></tr></thead>
             <tbody>
               {d.lots.map((l) => edit?.id === l.LotID ? (
@@ -79,7 +80,7 @@ export default function CxBillInfo() {
               ))}
               {!d.lots.length && <tr><td colSpan={12}><EmptyState title="No lots match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
         </section>
       )}
     </div>

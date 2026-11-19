@@ -5,6 +5,7 @@ import { AlertTriangle, CalendarClock, CheckCircle2, DollarSign, FileX, Send, Up
 import { api } from '../../api'
 import { ErrorState, PageHeader } from '../../components/ui'
 import { DmFilters, DmTabs, int, money, useDmParams } from './shared'
+import Grid from '../../components/Grid'
 
 export default function DmHome() {
   const [p, set] = useDmParams()
@@ -102,17 +103,17 @@ export default function DmHome() {
             <textarea aria-label="Price rows" rows={6} style={{ width: '100%', fontFamily: 'monospace' }} value={paste} onChange={(e) => setPaste(e.target.value)} placeholder={'1234\tBX-MT-1G\tABC-1\tAcme\t3.25'} />
           </label>
           <div className="row" style={{ gap: 8, alignItems: 'center' }}>{btn('vendor', 'Load vendor prices', Upload, actions.vendor, !p.vendorId || !p.fromDate || !paste.trim())}<span className="muted small">{parsePaste(paste).length} row(s) read</span></div>
-          {mism && <div className="table-wrap" style={{ marginTop: 10 }}><table className="grid compact"><thead><tr><th>Item id</th><th>Item #</th></tr></thead>
-            <tbody>{mism.map((m, i) => <tr key={i}><td>{m.ItemID}</td><td>{m.ItemNum}</td></tr>)}</tbody></table></div>}
+          {mism && <div className="table-wrap" style={{ marginTop: 10 }}><Grid className="grid compact"><thead><tr><th>Item id</th><th>Item #</th></tr></thead>
+            <tbody>{mism.map((m, i) => <tr key={i}><td>{m.ItemID}</td><td>{m.ItemNum}</td></tr>)}</tbody></Grid></div>}
         </section>
       </div>
       {low && (
         <section className="panel" style={{ marginTop: 16 }}>
           <div className="panel-head"><h2>Low estimating prices</h2><span className="muted small">{low.length} active item(s) whose estimating price is below last, average or labor cost</span></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Class</th><th>Item</th><th>Code</th><th className="num">Last cost</th><th className="num">Average cost</th><th className="num">Labor cost</th><th className="num">Estimating price</th><th className="num">Mark-up %</th></tr></thead>
             <tbody>{low.slice(0, 500).map((r) => <tr key={r.InvItemID}><td>{r.InvClass}</td><td>{r.InvItem}</td><td>{r.CostCodeId}</td><td className="num">{money(r.LastCost)}</td><td className="num">{money(r.AverageCost)}</td><td className="num">{money(r.LaborCost)}</td><td className="num"><b>{money(r.EstimatingPrice)}</b></td><td className="num">{int(r.EstimatingPriceMkUp)}</td></tr>)}</tbody>
-          </table></div>
+          </Grid></div>
         </section>
       )}
     </div>

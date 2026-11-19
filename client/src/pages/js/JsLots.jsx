@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, download, nextParams, useDebounced, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function JsLots() {
   const nav = useNavigate()
@@ -48,7 +49,7 @@ export function JsLots() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Lot/Block</th><th>Address</th><th>Builder</th><th>Job</th><th>Phase</th><th>Plan</th><th>Permit</th><th>Start</th><th>Status</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -60,7 +61,7 @@ export function JsLots() {
               ))}
               {!data.rows.length && <tr><td colSpan={9}><EmptyState icon={HomeIcon} title="No lots match">Try a different search or filter.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -124,10 +125,10 @@ export function JsLotDetail() {
             <div className="panel-head"><h2>Packs / options ({d.packs.length})</h2></div>
             {!d.packs.length ? <EmptyState title="No packs scheduled on this lot" /> : (
               <div className="table-wrap flat">
-                <table className="grid compact">
+                <Grid className="grid compact">
                   <thead><tr><th>Pack/option name</th><th>Builder option code</th><th className="num">Pack qty</th></tr></thead>
                   <tbody>{d.packs.map((p) => <tr key={p.PackID}><td>{p.PackName}</td><td>{p.BuilderCode}</td><td className="num">{p.PackQty}</td></tr>)}</tbody>
-                </table>
+                </Grid>
               </div>
             )}
           </section>

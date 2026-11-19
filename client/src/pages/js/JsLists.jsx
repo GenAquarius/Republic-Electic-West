@@ -5,6 +5,7 @@ import { ListChecks, Plus, Save, Search, Trash2 } from 'lucide-react'
 import { api } from '../../api'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, changed, nextParams, resetJsLookups, useConfirm, useDebounced, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 // field: [key, label, type, extra]
 const LISTS = {
@@ -87,7 +88,7 @@ export default function JsLists() {
       {msg && <div className="success-state" role="status" style={{ marginBottom: 12 }}>{msg}</div>}
       <div className="table-wrap">
         {!ready ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th className="num">ID</th>{cfg.fields.map(([k, l]) => <th key={k}>{l}</th>)}<th className="num">In use</th><th /></tr></thead>
             <tbody>
               <tr className="new-row">
@@ -116,7 +117,7 @@ export default function JsLists() {
               ))}
               {!data.rows.length && <tr><td colSpan={cfg.fields.length + 3}><EmptyState icon={ListChecks} title="No entries">Add the first one in the row above.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>

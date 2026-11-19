@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PuTabs } from './shared'
 import { LotSheet } from './PuReports'
+import Grid from '../../components/Grid'
 
 export default function PuHome() {
   const [sp, setSp] = useSearchParams()
@@ -45,14 +46,14 @@ export default function PuHome() {
         <section className="panel no-print" style={{ marginBottom: 16 }}>
           <div className="panel-head"><h2>Addresses</h2><span className="muted small">{hits.length === 100 ? 'First 100 matches – type more to narrow' : `${hits.length} match(es)`}</span></div>
           {!hits.length ? <EmptyState icon={Search} title="No lot has that address" /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Address</th><th>City</th><th>State</th><th>Job</th><th>Lot/block</th></tr></thead>
               <tbody>{hits.map((h) => (
                 <tr key={h.id} className={`link-row${String(h.id) === lotId ? ' selected' : ''}`} onClick={() => pick(h.id)}>
                   <td><a><b>{h.Address}</b></a></td><td>{h.City}</td><td>{h.State}</td><td className="wrap">{h.JobName}</td><td>{h.LotBlock}</td>
                 </tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
       )}

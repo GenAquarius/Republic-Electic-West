@@ -8,6 +8,7 @@ import { JobLotPicker, Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import Logo from '../../components/Logo'
 import { ArTabs, LIENS, download, int, money, pct, today, typeTone, useArLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function ArInvoices() {
   const lk = useArLookups()
@@ -45,7 +46,7 @@ export function ArInvoices() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={6} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Invoice</th><th>Date</th><th>Type</th><th>Builder</th><th>Div</th><th>Job</th><th>Lot</th><th>Terms</th><th className="num">Total</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -56,7 +57,7 @@ export function ArInvoices() {
               ))}
               {!d.rows.length && <tr><td colSpan={9}><EmptyState title="No invoices match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -151,7 +152,7 @@ export function ArInvoice() {
           </form>
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Lines ({d.items.length})</h2></div>
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Pack / description</th><th>Stage</th><th>Work</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Bill %</th><th className="num">Total</th><th>Notes</th><th /></tr></thead>
               <tbody>
                 {d.items.map((it) => edit?.id === it.BillItemID ? (
@@ -183,7 +184,7 @@ export function ArInvoice() {
                 </tr>
               </tbody>
               <tfoot><tr><td colSpan={6}><b>Invoice total</b></td><td className="num"><b>{money(v.Total)}</b></td><td colSpan={2} /></tr></tfoot>
-            </table></div>
+            </Grid></div>
           </section>
         </>
       )}
@@ -211,11 +212,11 @@ export function ArInvoicePrint() {
           <div><div className="muted">Bill to</div><b>{v.CustName}</b>{v.CustContact && <div>Attn: {v.CustContact}</div>}<div>{v.BillAddress}</div><div>{[v.BillCity, v.BillState, v.BillZip].filter(Boolean).join(' ')}</div></div>
           <div><div className="muted">Job</div><b>{v.JobName}</b>{v.JobNum && <div>Job # {v.JobNum}</div>}<div>Lot {v.LotBlock}</div>{d.lot && <div>{[d.lot.Address, d.lot.City, d.lot.State].filter(Boolean).join(', ')}</div>}</div>
         </div>
-        <table className="grid compact" style={{ marginTop: 20 }}>
+        <Grid className="grid compact" style={{ marginTop: 20 }}>
           <thead><tr><th>Description</th><th>Stage</th><th className="num">Qty</th><th className="num">Value</th><th className="num">%</th><th className="num">Amount</th></tr></thead>
           <tbody>{d.items.map((it) => <tr key={it.BillItemID}><td>{it.PackName}{it.WorkType && it.WorkType !== 'Default' ? ` · ${it.WorkType}` : ''}{it.Notes ? <div className="muted">{it.Notes}</div> : null}</td><td>{it.ScheduleStage}</td><td className="num">{int(it.Quantity)}</td><td className="num">{money(it.ValueNum)}</td><td className="num">{pct(it.BillPercent)}</td><td className="num">{money(it.TotalNum)}</td></tr>)}</tbody>
           <tfoot><tr><td colSpan={5}><b>Total due</b></td><td className="num"><b>{money(v.Total)}</b></td></tr></tfoot>
-        </table>
+        </Grid>
         {v.Lien && <p className="muted" style={{ marginTop: 16 }}>{v.Lien} lien release.</p>}
         {v.Notes && <p>{v.Notes}</p>}
       </div>

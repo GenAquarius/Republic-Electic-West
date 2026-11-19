@@ -10,6 +10,7 @@ import AccountDetail from './pages/am/AccountDetail'
 import Renewals from './pages/am/Renewals'
 import AmReports from './pages/am/AmReports'
 import AmAudit from './pages/am/AmAudit'
+import AmInsights from './pages/am/AmInsights'
 import { AmAccountPrint, AmAccountTechPrint } from './pages/am/AmPrint'
 import {
   AttentionDetail, Billing, BillingDetail, InventoryValue, LotDetail, OpenLots, PayrollDate, PayrollPending,
@@ -102,6 +103,7 @@ export default function App() {
         <Route path="am/renewals" element={am(<Renewals />)} />
         <Route path="am/reports" element={am(<AmReports />)} />
         <Route path="am/audit" element={am(<AmAudit />)} />
+        <Route path="am/insights" element={am(<AmInsights />)} />
         <Route path="am/accounts/:id/print" element={am(<AmAccountPrint />)} />
         <Route path="am/accounts/:id/print-tech" element={am(<AmAccountTechPrint />)} />
 

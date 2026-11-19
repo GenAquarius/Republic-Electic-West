@@ -4,6 +4,7 @@ import { EmptyState } from '../../../components/ui'
 import { money } from '../shared'
 import { Plain, Sec, WipTable } from './common'
 import { WIP_COLS } from './wipCols'
+import Grid from '../../../components/Grid'
 
 const pctNum = (v) => (v == null ? '' : `${Number(v)}%`)
 const mon = (v) => (v == null ? '' : money(v))
@@ -33,7 +34,7 @@ export default function LotView({ data, tm }) {
 
       <Sec title="Billing detail">
         {!data.billing.length ? <p className="muted">No packs.</p> : (
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Pack name</th>{!tm && <th>TM #</th>}<th className="num">Qty</th><th className="num">PM contract value ea</th><th className="num">Lot contract value ea</th><th className="num">Ext contract value</th>
               <th>Invoice #</th><th>Invoice date</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Bill %</th><th className="num">Amount billed</th></tr></thead>
             <tbody>
@@ -46,7 +47,7 @@ export default function LotView({ data, tm }) {
               )))}
               <tr className="subtotal"><td colSpan={tm ? 3 : 4}><b>Total contract value</b></td><td /><td className="num"><b>{money(t.contract)}</b></td><td colSpan={4} className="num"><b>Total billed value</b></td><td /><td className="num"><b>{money(t.billed)}</b></td></tr>
             </tbody>
-          </table></div>
+          </Grid></div>
         )}
       </Sec>
 

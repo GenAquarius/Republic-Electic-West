@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PayrollDatePicker, PrTabs, money, num, usePayrollDate } from './shared'
+import Grid from '../../components/Grid'
 
 export default function Timecards() {
   const [date, setDate] = usePayrollDate()
@@ -64,7 +65,7 @@ export default function Timecards() {
         <section key={g.name} className="panel" style={{ marginBottom: 14 }}>
           <div className="panel-head"><h2>{g.name}</h2><span className="muted small">{g.rows.length} lines · {num(g.hours)} h · <b>{money(g.pay)}</b></span></div>
           <div className="table-wrap flat">
-            <table className="grid compact">
+            <Grid className="grid compact">
               <thead><tr><th>Job</th><th>Lot</th><th>Pack</th><th>Item</th><th>Work</th><th className="num">Qty</th><th className="num">Price</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Pay</th><th>Entered</th><th /></tr></thead>
               <tbody>{g.rows.map((r) => edit?.id === r.TempLaborID ? (
                 <tr key={r.TempLaborID} className="row-selected">
@@ -91,7 +92,7 @@ export default function Timecards() {
                   </td>
                 </tr>
               ))}</tbody>
-            </table>
+            </Grid>
           </div>
         </section>
       ))}

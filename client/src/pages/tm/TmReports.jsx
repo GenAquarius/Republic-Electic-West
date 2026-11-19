@@ -8,6 +8,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { TmTabs, lotLabel, money, useTmLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const GROUPS = [['user', 'User'], ['customer', 'Customer'], ['job', 'Job'], ['work', 'Work type'], ['division', 'Division'], ['super', 'Superintendent'], ['month', 'Month']]
 const LISTS = [['unpaid', 'Unpaid'], ['quotes', 'Quotes'], ['no-customer-po', 'No customer PO'], ['all', 'All T&M']]
@@ -72,26 +73,26 @@ export default function TmReports() {
             <StatCard label="Paid" value={money(data.totals.Paid)} foot="Has a paid date" />
           </div>
           <div className="table-wrap">
-            <table className="grid">
+            <Grid className="grid">
               <thead><tr><th>{GROUPS.find(([k]) => k === p.groupBy)[1]}</th><th className="num">T&Ms</th><th className="num">Subtotal</th><th className="num">Discount</th><th className="num">Sales tax</th><th className="num">Total</th><th className="num">Unpaid</th><th className="num">Paid</th></tr></thead>
               <tbody>
                 {data.rows.map((r) => <tr key={String(r.GroupKey)}><td><b>{r.GroupLabel}</b></td><td className="num">{r.Tms}</td><td className="num">{money(r.Subtotal)}</td><td className="num">{money(r.DiscountAmt)}</td><td className="num">{money(r.SalesTax)}</td><td className="num"><b>{money(r.Total)}</b></td><td className="num">{money(r.Unpaid)}</td><td className="num">{money(r.Paid)}</td></tr>)}
                 {!data.rows.length && <tr><td colSpan={8}><EmptyState title="Nothing in this range" /></td></tr>}
               </tbody>
-            </table>
+            </Grid>
           </div>
         </>
       ) : (
         <>
           <div className="kpis"><StatCard label={LISTS.find(([k]) => k === p.kind)[1]} value={data.total} tone="blue" foot="orders" /><StatCard label="Value" value={money(data.amount)} tone="green" foot="Including sales tax" /></div>
           <div className="table-wrap">
-            <table className="grid clickable">
+            <Grid serverPaged className="grid clickable">
               <thead><tr><th>T&M #</th><th>Date</th><th>Name</th><th>PO #</th><th>Builder</th><th>Job / lot</th><th>Super</th><th>By</th><th className="num">Subtotal</th><th className="num">Tax</th><th className="num">Total</th></tr></thead>
               <tbody>
                 {data.rows.map((r) => <tr key={r.TmID} onClick={() => nav(`/tm/${r.TmID}`)} tabIndex={0}><td><b>{r.TmID}</b></td><td>{fmtDate(r.TmDate)}</td><td className="wrap">{r.TmName}</td><td>{r.TmCustomerNum}</td><td>{r.CustName}</td><td className="wrap">{r.JobName} · {lotLabel(r)}</td><td>{r.SuperName}</td><td>{r.PreparedBy}</td><td className="num">{money(r.Subtotal)}</td><td className="num">{money(r.SalesTax)}</td><td className="num"><b>{money(r.Total)}</b></td></tr>)}
                 {!data.rows.length && <tr><td colSpan={11}><EmptyState title="Nothing to list" /></td></tr>}
               </tbody>
-            </table>
+            </Grid>
           </div>
           <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => set({ page: pg })} />
         </>

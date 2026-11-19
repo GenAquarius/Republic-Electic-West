@@ -7,6 +7,7 @@ import { fmtDate, fmtMoney } from '../../format'
 import DrillTable, { fmtCell } from '../../components/DrillTable'
 import { Badge, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { moduleByCode } from '../../modules'
+import Grid from '../../components/Grid'
 
 const back = <Link to="/">Dashboard</Link>
 const BackBtn = () => <Link className="btn" to="/"><ArrowLeft size={15} /> Dashboard</Link>
@@ -77,18 +78,18 @@ export function LotDetail() {
           </div>
           <section className="panel" style={{ marginBottom: 16 }}>
             <div className="panel-head"><h2>Packs ({d.packs.length})</h2></div>
-            <table className="grid"><thead><tr><th>Pack</th><th>Type</th><th className="num">Qty</th><th className="num">Posted</th><th className="num">Labor posted</th><th className="num">Contract ea</th><th className="num">Revised ea</th></tr></thead>
-              <tbody>{d.packs.map((p) => <tr key={p.PackID}><td>{p.PackName}</td><td>{p.PackType}</td><td className="num">{p.PackQty}</td><td className="num">{p.PostedQty}</td><td className="num">{p.PostedLaborQty}</td><td className="num">{p.ContractEa}</td><td className="num">{p.RevContractEa}</td></tr>)}</tbody></table>
+            <Grid className="grid"><thead><tr><th>Pack</th><th>Type</th><th className="num">Qty</th><th className="num">Posted</th><th className="num">Labor posted</th><th className="num">Contract ea</th><th className="num">Revised ea</th></tr></thead>
+              <tbody>{d.packs.map((p) => <tr key={p.PackID}><td>{p.PackName}</td><td>{p.PackType}</td><td className="num">{p.PackQty}</td><td className="num">{p.PostedQty}</td><td className="num">{p.PostedLaborQty}</td><td className="num">{p.ContractEa}</td><td className="num">{p.RevContractEa}</td></tr>)}</tbody></Grid>
           </section>
           <section className="panel">
             <div className="panel-head"><h2>Schedule ({d.stages.length})</h2></div>
-            <table className="grid"><thead><tr><th>Stage</th><th>Work type</th><th>Delivery</th><th>Status</th><th>Posted by</th></tr></thead>
+            <Grid className="grid"><thead><tr><th>Stage</th><th>Work type</th><th>Delivery</th><th>Status</th><th>Posted by</th></tr></thead>
               <tbody>{d.stages.map((s) => {
                 const overdue = !s.DatePosted && s.DeliveryDate && new Date(s.DeliveryDate) < new Date()
                 return <tr key={s.StageAutoID}><td>{s.ScheduleStage}</td><td>{s.WorkType}</td><td>{fmtDate(s.DeliveryDate)}</td>
                   <td>{s.DatePosted ? <Badge tone="green">Posted {fmtDate(s.DatePosted)}</Badge> : overdue ? <Badge tone="red">Overdue</Badge> : <Badge tone="amber">Scheduled</Badge>}</td>
                   <td>{s.UserPosted || '—'}</td></tr>
-              })}</tbody></table>
+              })}</tbody></Grid>
           </section>
         </>
       )}
@@ -155,7 +156,12 @@ export function PayrollPending() {
 export function Billing() {
   const [sp] = useSearchParams()
   const month = sp.get('month')
-  const label = month ? new Date(month + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : 'All months'
+  const monthName = (v) => new Date(v.slice(0, 7) + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' })
+  const rangeFrom = sp.get('from'), rangeTo = sp.get('to')
+  // ?to= is exclusive (first day of the month after the range), so the label shows the month before it
+  const lastMonth = rangeTo ? new Date(Date.UTC(+rangeTo.slice(0, 4), +rangeTo.slice(5, 7) - 2, 1)).toISOString() : null
+  const label = month ? new Date(month + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
+    : rangeFrom && lastMonth ? `${monthName(rangeFrom)} – ${monthName(lastMonth)}` : 'All months'
   return (
     <div className="page">
       <PageHeader crumb={back} title={`Invoices · ${label}`} subtitle="A/R billing by lot. Open an invoice to see its pack and stage lines." actions={<BackBtn />} />
@@ -202,11 +208,11 @@ export function BillingDetail() {
           </div>
           <section className="panel">
             <div className="panel-head"><h2>Invoice lines ({d.items.length})</h2></div>
-            <table className="grid"><thead><tr><th>Pack</th><th>Stage</th><th>Work type</th><th>Item</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Bill %</th><th className="num">Line total</th></tr></thead>
+            <Grid className="grid"><thead><tr><th>Pack</th><th>Stage</th><th>Work type</th><th>Item</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Bill %</th><th className="num">Line total</th></tr></thead>
               <tbody>{d.items.map((i) => <tr key={i.BillItemID}><td>{i.PackName}</td><td>{i.ScheduleStage}</td><td>{i.WorkType}</td><td>{i.ItemCode}</td>
                 <td className="num">{fmtCell(i.Quantity, 'num')}</td><td className="num">{fmtCell(i.ValueEa, 'text')}</td><td className="num">{fmtCell(i.BillPercent, 'text')}</td><td className="num">{fmtCell(i.ItemTotal, 'text')}</td></tr>)}
                 {!d.items.length && <tr><td colSpan={8} className="muted">No line items recorded for this invoice.</td></tr>}
-              </tbody></table>
+              </tbody></Grid>
           </section>
         </>
       )}

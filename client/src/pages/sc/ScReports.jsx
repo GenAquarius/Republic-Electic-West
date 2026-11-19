@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { ScTabs, lotName, useScLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const iso = (d) => d.toISOString().slice(0, 10)
 const addDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return iso(d) }
@@ -67,7 +68,7 @@ export function ScSchedule({ overdue = false }) {
             {data.summary.slice(0, 3).map((s) => <StatCard key={s.ScheduleStage + s.WorkType} label={`${s.ScheduleStage} · ${s.WorkType}`} value={s.n} foot="stages in range" />)}
           </div>
           <div className="table-wrap">
-            <table className="grid clickable">
+            <Grid serverPaged className="grid clickable">
               <thead><tr><th>Delivery</th><th>Job</th><th>Lot</th><th>Plan</th><th>Stage</th><th>Work type</th><th>Builder</th><th>Div</th><th>Status</th></tr></thead>
               <tbody>
                 {data.rows.map((r) => (
@@ -78,7 +79,7 @@ export function ScSchedule({ overdue = false }) {
                 ))}
                 {!data.rows.length && <tr><td colSpan={9}><EmptyState title={overdue ? 'Nothing overdue' : 'No stages in this range'} /></td></tr>}
               </tbody>
-            </table>
+            </Grid>
           </div>
           <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...Object.fromEntries(sp.entries()), page: pg })} />
         </>
@@ -117,7 +118,7 @@ export function ScBacklog() {
             <StatCard label="Not scheduled" tone={data.summary.notScheduled ? 'amber' : 'green'} value={data.summary.notScheduled} foot="No date for this stage yet" />
           </div>
           <div className="table-wrap">
-            <table className="grid clickable">
+            <Grid className="grid clickable">
               <thead><tr><th>Phase</th><th>Lot</th><th>Plan</th><th>Address</th><th>Work type</th><th>Delivery</th><th>Status</th></tr></thead>
               <tbody>{data.rows.map((r, i) => (
                 <tr key={`${r.LotID}-${i}`} onClick={() => nav(`/sc/lots/${r.LotID}`)} tabIndex={0}>
@@ -125,7 +126,7 @@ export function ScBacklog() {
                   <td>{r.Status === 'Not scheduled' ? <Badge tone="amber">Not scheduled</Badge> : r.Status === 'Posted' ? <Badge tone="green">Posted</Badge> : <Badge tone="blue">Scheduled</Badge>}</td>
                 </tr>
               ))}</tbody>
-            </table>
+            </Grid>
           </div>
         </>
       )}
@@ -154,14 +155,14 @@ export function ScPackSearch() {
       </div>
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
-        <table className="grid">
+        <Grid className="grid">
           <thead><tr><th>Pack</th><th>Type</th><th className="num">Open lots</th><th className="num">Total qty</th><th className="num">Not yet posted</th></tr></thead>
           <tbody>
             {(rows || []).map((r) => <tr key={r.PackName}><td className="wrap">{r.PackName}</td><td>{r.PackType}</td><td className="num">{r.Lots}</td><td className="num">{r.Qty}</td><td className="num">{r.Unposted || <span className="faint">0</span>}</td></tr>)}
             {rows && !rows.length && <tr><td colSpan={5}><EmptyState icon={PackageSearch} title="No packs scheduled with those words" /></td></tr>}
             {!rows && <tr><td colSpan={5}><EmptyState icon={PackageSearch} title="Type at least two letters">All words must appear in the pack name.</EmptyState></td></tr>}
           </tbody>
-        </table>
+        </Grid>
       </div>
       <p className="muted small" style={{ marginTop: 10 }}>Open the lot from <Link to="/sc">Scheduling</Link> to change quantities.</p>
     </div>

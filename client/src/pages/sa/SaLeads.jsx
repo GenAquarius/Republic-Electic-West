@@ -8,6 +8,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { Options, SaTabs, int, useSaLookups, withConfirm } from './shared'
+import Grid from '../../components/Grid'
 
 const SORTS = [['address', 'Address'], ['city', 'City'], ['priority', 'Sale priority'], ['entered', 'Newest first'], ['escrow', 'Escrow date']]
 const prioTone = (s) => (!s ? 'neutral' : s.startsWith('1') ? 'amber' : s.startsWith('4') ? 'red' : s.startsWith('2') ? 'blue' : 'neutral')
@@ -44,7 +45,7 @@ export function SaLeads() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={6} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Address</th><th>City</th><th>Job / lot</th><th>Builder</th><th>Priority</th><th>Homeowner</th><th>Escrow</th><th className="num">Packs</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -59,7 +60,7 @@ export function SaLeads() {
               ))}
               {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No leads match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -151,13 +152,13 @@ export function SaLead() {
             <section className="panel" style={{ marginTop: 16 }}>
               <div className="panel-head"><h2>Packs on the production lot</h2>{v.LotId ? <span className="muted">{v.JobName} · lot {v.LotBlock} · {v.DivisionId} · start {fmtDate(v.LotStartDate) || '—'} · end {fmtDate(v.LotEndDate) || 'open'}</span> : null}</div>
               {!v.LotId ? <p className="muted">This lead is not linked to a production lot.</p> : (
-                <div className="table-wrap flat"><table className="grid compact">
+                <div className="table-wrap flat"><Grid className="grid compact">
                   <thead><tr><th>Pack type</th><th>Pack name</th><th className="num">Pack qty</th><th className="num">Posted qty</th><th>Date entered</th></tr></thead>
                   <tbody>
                     {d.packs.map((k) => <tr key={k.PackID}><td>{k.PackType}</td><td className="wrap">{k.PackName}</td><td className="num">{int(k.PackQty)}</td><td className="num">{int(k.PostedQty)}</td><td>{fmtDate(k.DateEntered)}</td></tr>)}
                     {!d.packs.length && <tr><td colSpan={5} className="muted">No packs scheduled on the lot</td></tr>}
                   </tbody>
-                </table></div>
+                </Grid></div>
               )}
             </section>
           )}
@@ -229,7 +230,7 @@ function Homeowner({ propertyId, ho, lk, run }) {
           <button type="button" className="btn small danger" onClick={unlink}><X size={14} /> Remove from lead</button>
         </div>
       </form>
-      <div className="table-wrap flat" style={{ marginTop: 12 }}><table className="grid compact">
+      <div className="table-wrap flat" style={{ marginTop: 12 }}><Grid className="grid compact">
         <thead><tr><th>Phone number</th><th>Type</th><th /></tr></thead>
         <tbody>
           {ho.phones.map((p) => <PhoneRow key={p.CustPhoneID} p={p} lk={lk} run={run} />)}
@@ -239,7 +240,7 @@ function Homeowner({ propertyId, ho, lk, run }) {
             <td><button className="btn small" disabled={!ph.PhoneNum.trim()} onClick={addPhone}><Plus size={13} /> Add</button></td>
           </tr>
         </tbody>
-      </table></div>
+      </Grid></div>
     </section>
   )
 }

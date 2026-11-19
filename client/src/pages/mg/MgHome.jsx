@@ -5,6 +5,7 @@ import { ArrowRight, CalendarClock, CheckSquare, Home as HomeIcon, Search } from
 import { api } from '../../api'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { MgTabs, int, today, yearAgo } from './shared'
+import Grid from '../../components/Grid'
 
 export default function MgHome() {
   const nav = useNavigate()
@@ -27,12 +28,12 @@ export default function MgHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Open lots by start month</h2></div>
           {!d ? <SkeletonRows rows={6} cols={4} /> : !d.openByPeriod.length ? <EmptyState title="No open lots" /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Started</th>{d.divisions.map((x) => <th key={x} className="num">{x}</th>)}<th className="num">Total</th></tr></thead>
               <tbody>{d.openByPeriod.map((r) => (
                 <tr key={r.Period}><td><b>{r.Period}</b></td>{d.divisions.map((x) => <td key={x} className="num">{r[x] ? <Link to={`/mg/reports?report=open-lots&division=${x}&from=${r.Period}-01&to=${r.Period}-31`}>{r[x]}</Link> : ''}</td>)}<td className="num"><b>{r.total}</b></td></tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-2">

@@ -8,6 +8,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PrTabs, money, num, usePrLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const GROUPS = [
   ['employee', 'Employee'], ['job', 'Job'], ['lot', 'Lot'], ['division', 'Division'], ['builder', 'Builder'], ['work', 'Work type'], ['payroll', 'Payroll date'],
@@ -119,7 +120,7 @@ export default function Reports() {
               <StatCard label="Hourly" value={`${num(data.totals.Hours)} h`} foot={`${money(data.totals.HourlyPay)} hourly pay`} />
             </div>
             <div className="table-wrap">
-              <table className="grid clickable">
+              <Grid className="grid clickable">
                 <thead><tr>
                   <th>{GROUPS.find(([k]) => k === p.groupBy)?.[1]}</th>
                   {p.groupBy === 'job' && <th>Builder</th>}{p.groupBy === 'lot' && <th>Plan</th>}
@@ -136,7 +137,7 @@ export default function Reports() {
                   ))}
                   {!data.rows.length && <tr><td colSpan={9}><EmptyState title="No labor paid in this range" /></td></tr>}
                 </tbody>
-              </table>
+              </Grid>
             </div>
           </>
         )
@@ -144,7 +145,7 @@ export default function Reports() {
         !detail ? <SkeletonRows rows={8} cols={4} /> : (
           <>
             <div className="table-wrap">
-              <table className="grid compact">
+              <Grid serverPaged className="grid compact">
                 <thead><tr><th>Payroll</th><th>Employee</th><th>Job</th><th>Lot</th><th>Pack</th><th>Item</th><th>Work</th><th className="num">Qty</th><th className="num">Price</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Pay</th></tr></thead>
                 <tbody>
                   {detail.rows.map((r) => (
@@ -156,7 +157,7 @@ export default function Reports() {
                   ))}
                   {!detail.rows.length && <tr><td colSpan={13}><EmptyState title="No labor lines match" /></td></tr>}
                 </tbody>
-              </table>
+              </Grid>
             </div>
             <Pager page={detail.page} pageSize={detail.pageSize} total={detail.total} onPage={(pg) => setSp({ ...q, page: pg })} />
           </>

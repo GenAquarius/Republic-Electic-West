@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, download, nextParams, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { id: 'jobs-alphabetical', label: 'Jobs alphabetical', needs: [] },
@@ -85,13 +86,13 @@ export default function JsReports() {
         <>
           <h2 className="js-report-title">{data.title} <span className="muted small">· {data.total} row(s){data.truncated ? ' (first 20,000 shown)' : ''}</span></h2>
           <div className="table-wrap">
-            <table className="grid compact">
+            <Grid className="grid compact">
               <thead><tr><th className="num">#</th>{data.columns.map((c) => <th key={c.key}>{c.label}</th>)}</tr></thead>
               <tbody>
                 {data.rows.map((r, i) => <tr key={i}><td className="num muted">{i + 1}</td>{data.columns.map((c) => <td key={c.key}>{cell(c.key, r[c.key])}</td>)}</tr>)}
                 {!data.rows.length && <tr><td colSpan={data.columns.length + 1}><EmptyState icon={ClipboardList} title="Nothing to report">No rows match these filters.</EmptyState></td></tr>}
               </tbody>
-            </table>
+            </Grid>
           </div>
         </>
       )}

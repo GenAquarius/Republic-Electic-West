@@ -4,6 +4,7 @@ import { CheckCircle2, Pencil, Plus, Save, Trash2, X } from 'lucide-react'
 import { api } from '../../api'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CxTabs, money, useCxLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const blank = { Item: '', Description: '', CxJobTypeId: '', BillPrice: '' }
 
@@ -34,7 +35,7 @@ export default function CxItems() {
       {error && <ErrorState message={error} />}
       {msg && <div className="success-state" style={{ marginBottom: 12 }}><CheckCircle2 size={16} /> {msg}</div>}
       {!rows ? <SkeletonRows rows={6} cols={4} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Item</th><th>Description</th><th>Job type</th><th className="num">Bill price</th><th className="num">Used on plans</th><th /></tr></thead>
           <tbody>
             {rows.map((r) => edit?.id === r.CxItemID ? (
@@ -64,7 +65,7 @@ export default function CxItems() {
               <td><button className="btn small primary" disabled={!add.Item.trim() || !add.CxJobTypeId} onClick={create}><Plus size={13} /> Add</button></td>
             </tr>
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
       {rows && !rows.length && <EmptyState title="No Cox items yet – add the first one above" />}
     </div>

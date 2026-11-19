@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader } from '../../components/ui'
 import { PmCascade, PmTabs, money4, usePmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const KINDS = [['pack', 'Duplicate pack'], ['plan', 'Duplicate plan'], ['bid', 'Duplicate bid'], ['sweep', 'Sweeping material change']]
 
@@ -97,10 +98,10 @@ function Sweep() {
             <label>Unit cost<input inputMode="decimal" value={ch.UnitCost} placeholder={ch.item ? 'from item' : '(keep)'} onChange={(e) => setCh({ ...ch, UnitCost: e.target.value })} /></label>
             <label>Estimating price<input inputMode="decimal" value={ch.EstimatingPrice} placeholder={ch.item ? 'from item' : '(keep)'} onChange={(e) => setCh({ ...ch, EstimatingPrice: e.target.value })} /></label>
           </fieldset><div className="row form-actions"><button className="btn primary" disabled={!sel.size} onClick={() => apply()}><Wand2 size={15} /> Apply to {sel.size} line(s)</button></div></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th><input type="checkbox" aria-label="Select all" checked={sel.size === rows.length} onChange={(e) => setSel(e.target.checked ? new Set(rows.map((r) => r.PmMatID)) : new Set())} /></th><th>Div</th><th>Job</th><th>Bid</th><th>Plan</th><th>Pack</th><th>Item</th><th className="num">Qty</th><th>Stage</th><th>Work</th><th className="num">Cost</th><th className="num">Est.</th></tr></thead>
             <tbody>{rows.map((r) => <tr key={r.PmMatID}><td><input type="checkbox" aria-label={`Select line ${r.PmMatID}`} checked={sel.has(r.PmMatID)} onChange={() => toggle(r.PmMatID)} /></td><td>{r.DivisionId}</td><td className="wrap">{r.Job}</td><td>{r.BidNum}{yes(r.Lock) ? ' 🔒' : ''}</td><td>{r.PlanNum}</td><td className="wrap">{r.PackName}{yes(r.TruedUp) ? ' (trued up)' : ''}</td><td><b>{r.InvItem}</b></td><td className="num">{r.Quantity}</td><td>{r.Stage}</td><td>{r.WorkType}</td><td className="num">{money4(r.UnitCost)}</td><td className="num">{money4(r.EstimatingPrice)}</td></tr>)}</tbody>
-          </table></div>
+          </Grid></div>
         </>
       )}
     </>

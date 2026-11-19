@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Grid from './Grid'
 
 /**
  * Single-series column chart (SVG). data = [{ key, label, value, tip: [ [k,v], ... ] }].
@@ -37,12 +38,12 @@ export default function BarChart({ data, format = (v) => v, height = 200, ariaLa
 
   if (showTable) {
     return (
-      <table className="grid compact">
+      <Grid className="grid compact">
         <thead><tr><th>Period</th><th className="num">Value</th>{data[0]?.tip?.map(([k]) => <th key={k} className="num">{k}</th>)}</tr></thead>
         <tbody>{data.map((d) => (
           <tr key={d.key} className={onBarClick ? 'link-row' : ''} onClick={onBarClick ? () => onBarClick(d) : undefined}><td>{onBarClick ? <a href="#" onClick={(e) => e.preventDefault()}>{d.label}</a> : d.label}</td><td className="num">{format(d.value)}</td>{d.tip?.map(([k, v]) => <td key={k} className="num">{v}</td>)}</tr>
         ))}</tbody>
-      </table>
+      </Grid>
     )
   }
 

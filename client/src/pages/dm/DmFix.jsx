@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { DmFilters, DmTabs, int, useDmParams } from './shared'
+import Grid from '../../components/Grid'
 
 const FIELDS = { lot: ['customer', 'job', 'lot'], 'emp-date': ['employee', 'from'], 'emp-range': ['employee', 'from', 'to'] }
 const LABELS = { 'emp-date': { from: 'Payroll date' }, 'emp-range': { from: 'Date entered from', to: 'Date entered to' } }
@@ -78,7 +79,7 @@ function Sheet({ d, edit, setEdit, save, remove }) {
   return (
     <section className="panel">
       <div className="panel-head"><h2>{d.label}</h2><span className="muted small">{d.rows.length === 2000 ? 'First 2,000 rows' : `${d.rows.length} row(s)`} · {d.query}{d.note ? ` · ${d.note}` : ''}</span></div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>{d.id}</th>{d.columns.map((c) => <th key={c.name} className={c.edit ? '' : 'faint'}>{c.name}</th>)}<th /></tr></thead>
         <tbody>{d.rows.map((r) => {
           const on = edit?.id === r._id
@@ -93,7 +94,7 @@ function Sheet({ d, edit, setEdit, save, remove }) {
             </tr>
           )
         })}</tbody>
-      </table></div>
+      </Grid></div>
     </section>
   )
 }
@@ -105,7 +106,7 @@ function PostedPacks({ rows, edit, setEdit, save }) {
   return (
     <section className="panel">
       <div className="panel-head"><h2>Edit posted packs</h2><span className="muted small">{r0.JobName} · {r0.Phase} · Lot {r0.Lot}/{r0.Block} · Plan {r0.LotPlan}</span></div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Pack</th><th>Builder code</th><th>Type</th><th className="num">Pack qty</th><th className="num">Material posted</th><th className="num">Labor posted</th><th>Contract ea</th><th>Rev. contract ea</th><th /></tr></thead>
         <tbody>{rows.map((r) => {
           const on = edit?.id === r.PackID
@@ -120,7 +121,7 @@ function PostedPacks({ rows, edit, setEdit, save }) {
             </tr>
           )
         })}</tbody>
-      </table></div>
+      </Grid></div>
       <p className="muted small">Only the posted material and labor quantities can change here (as in Access).</p>
     </section>
   )

@@ -4,11 +4,12 @@ import {
   Bell, ChevronDown, ChevronsLeft, ChevronsRight, LogOut, Menu, Search, Building2, Check, X,
 } from 'lucide-react'
 import Logo from './Logo'
-import { api, session, DEMO } from '../api'
+import { api, session, DEMO, isLive } from '../api'
 import { DASHBOARD, GROUPS, MODULES, moduleByCode } from '../modules'
 import { usePref } from '../prefs'
 import { useLookups } from './Pickers'
 import CommandPalette from './CommandPalette'
+import { Toaster } from './Toast'
 
 function useOutside(ref, onOut) {
   useEffect(() => {
@@ -85,6 +86,9 @@ function Topbar({ openSearch, openMobile }) {
   const nav = useNavigate()
   const user = session.user
   const [env, setEnv] = useState('')
+  const loc = useLocation()
+  // Only Alarm Monitoring screens use the live database; everything else is a sample-data prototype
+  const liveScreen = /^\/am(\/|$)/.test(loc.pathname) && isLive('/am/')
   const [division, setDivision] = usePref('sw_division', '')
   const { divisions } = useLookups('divisions')
   const [alerts, setAlerts] = useState(null)
@@ -108,6 +112,9 @@ function Topbar({ openSearch, openMobile }) {
       </button>
 
       <div className="topbar-right">
+        {liveScreen
+          ? <span className="data-badge live" title="Alarm monitoring reads and saves to the database">Live data</span>
+          : <span className="data-badge sample" title="Prototype screen: sample data, changes are not saved to the database">Sample data</span>}
         {env && <span className={`env-badge ${env === 'LIVE' ? 'live' : 'demo'}`} title={env === 'LIVE' ? 'Production data' : 'Sample / test database'}>{env}</span>}
 
         <Dropdown trigger={({ toggle, open }) => (
@@ -202,6 +209,7 @@ export default function Layout() {
         </main>
       </div>
       {searchOpen && <CommandPalette onClose={() => setSearchOpen(false)} />}
+      <Toaster />
     </div>
   )
 }

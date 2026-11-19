@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ScTabs, lotName, useScLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ScPhase() {
   const { id } = useParams()
@@ -136,7 +137,7 @@ export default function ScPhase() {
       </div>
       <div className="table-wrap">
         {!d ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid className="grid clickable">
             <thead><tr>
               <th style={{ width: 36 }}><input type="checkbox" checked={allSel} onChange={() => setSel(allSel ? new Set() : new Set(lots.map((l) => l.LotID)))} aria-label="Select all lots" /></th>
               <th>Lot</th><th>Plan</th><th>Address</th><th>Status</th><th>Substitution</th><th className="num">Packs</th><th className="num">Open stages</th><th>Next delivery</th><th>End</th>
@@ -154,7 +155,7 @@ export default function ScPhase() {
               ))}
               {!lots.length && <tr><td colSpan={10}><EmptyState icon={PackagePlus} title="No lots">Use “Add lots” to create the first lots in this phase.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>

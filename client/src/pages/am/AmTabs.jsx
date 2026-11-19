@@ -8,6 +8,7 @@ export default function AmTabs() {
       { to: '/am/renewals', label: 'Renewals' },
       { to: '/am/reports', label: 'Reports' },
       { to: '/am/audit', label: 'Audit' },
+      { to: '/am/insights', label: 'AI insights' },
     ]} />
   )
 }

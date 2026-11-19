@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PoTabs, int, money, usePoLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const today = () => new Date().toISOString().slice(0, 10)
 
@@ -147,7 +148,7 @@ export function PoOrder() {
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Lines ({d.lines.length})</h2></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Item</th><th>Description</th><th className="num">Qty</th><th className="num">Cost</th><th className="num">Vendor price</th><th className="num">Ext cost</th><th className="num">Received</th><th>Receive</th><th className="num">Billed</th><th>Bill</th><th /></tr></thead>
                 <tbody>
                   {d.lines.map((l) => edit?.id === l.PoItemID ? (
@@ -183,7 +184,7 @@ export function PoOrder() {
                     </tr>
                   )}
                 </tbody>
-              </table>
+              </Grid>
             </div>
             {!d.lines.length && <EmptyState icon={AlertTriangle} title="No items yet">Search for an item above. Cost defaults to the vendor's price, then last cost.</EmptyState>}
           </section>
@@ -192,14 +193,14 @@ export function PoOrder() {
             <div className="dash-grid" style={{ marginTop: 16 }}>
               <section className="panel span-2" style={{ gridColumn: 'span 1' }}>
                 <div className="panel-head"><h2>Receipts ({d.receipts.length})</h2></div>
-                <table className="grid compact"><thead><tr><th>Date</th><th>Item</th><th className="num">Qty</th><th>Inventory</th><th /></tr></thead>
+                <Grid className="grid compact"><thead><tr><th>Date</th><th>Item</th><th className="num">Qty</th><th>Inventory</th><th /></tr></thead>
                   <tbody>{d.receipts.map((r) => <tr key={r.PoItemRecID}><td>{fmtDate(r.ReceivedDate)}</td><td>{r.InvItem}</td><td className="num">{int(r.ReceivedQty)}</td><td>{r.IcTransacPostedDate ? <Badge tone="green">Posted</Badge> : <Badge tone="amber">Waiting</Badge>}</td>
-                    <td className="actions">{!r.IcTransacPostedDate && <button className="btn small ghost danger" onClick={() => delRec(r.PoItemRecID)} aria-label="Delete receipt"><Trash2 size={13} /></button>}</td></tr>)}</tbody></table>
+                    <td className="actions">{!r.IcTransacPostedDate && <button className="btn small ghost danger" onClick={() => delRec(r.PoItemRecID)} aria-label="Delete receipt"><Trash2 size={13} /></button>}</td></tr>)}</tbody></Grid>
               </section>
               <section className="panel span-2" style={{ gridColumn: 'span 1' }}>
                 <div className="panel-head"><h2>Billing ({d.bills.length})</h2></div>
-                <table className="grid compact"><thead><tr><th>Date</th><th>Item</th><th className="num">Qty</th><th /></tr></thead>
-                  <tbody>{d.bills.map((b) => <tr key={b.PoItemBillID}><td>{fmtDate(b.BilledDate)}</td><td>{b.InvItem}</td><td className="num">{int(b.BilledQty)}</td><td className="actions"><button className="btn small ghost danger" onClick={() => delBill(b.PoItemBillID)} aria-label="Delete billing"><Trash2 size={13} /></button></td></tr>)}</tbody></table>
+                <Grid className="grid compact"><thead><tr><th>Date</th><th>Item</th><th className="num">Qty</th><th /></tr></thead>
+                  <tbody>{d.bills.map((b) => <tr key={b.PoItemBillID}><td>{fmtDate(b.BilledDate)}</td><td>{b.InvItem}</td><td className="num">{int(b.BilledQty)}</td><td className="actions"><button className="btn small ghost danger" onClick={() => delBill(b.PoItemBillID)} aria-label="Delete billing"><Trash2 size={13} /></button></td></tr>)}</tbody></Grid>
               </section>
             </div>
           )}
@@ -232,10 +233,10 @@ export function PoPrint() {
             <div><span className="muted small">Entered by</span><b>{p.UserEntered || '—'}</b></div>
           </div>
           {p.Notes && <p><b>Notes:</b> {p.Notes}</p>}
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th>Item</th><th>Description</th><th className="num">Qty</th><th className="num">Cost</th><th className="num">Amount</th></tr></thead>
             <tbody>{d.lines.map((l) => <tr key={l.PoItemID}><td>{l.AlternateCode || l.InvItem}</td><td className="wrap">{l.Description}{l.Notes ? ` — ${l.Notes}` : ''}</td><td className="num">{int(l.Quantity)}</td><td className="num">{money(l.EffCost, 4)}</td><td className="num">{money(l.ExtCost)}</td></tr>)}</tbody>
-          </table>
+          </Grid>
           <dl className="totals po-totals">
             <div><dt>Items</dt><dd>{money(p.ExtCost)}</dd></div>
             <div><dt>Sales tax ({p.TaxRate}%)</dt><dd>{money(p.TaxAmt)}</dd></div>

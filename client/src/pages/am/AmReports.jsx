@@ -2,12 +2,16 @@
 // AmAccountInfo, AmAccountInfoTech (one account: pick it, then open the printable sheet), AmAccountsCreated, AmAccountsCreatedYear, AmAccountsCancelled, AmAccountsExpiring, AmAccountsExpiringMonthly.
 import { Fragment, useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { BarChart3, CalendarClock, CalendarX2, Download, FileText, Printer, Repeat, Search, UserPlus, Wrench } from 'lucide-react'
+import { AlertTriangle, BarChart3, CalendarClock, LayoutList, Table2, CalendarX2, Download, FileText, Printer, Repeat, Search, Sparkles, UserPlus, Wrench } from 'lucide-react'
 import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { download } from '../po/shared'
 import AmTabs from './AmTabs'
+import { AiAnswer, AiLoading, useAiAsk } from './aiShared'
+import AmReportCharts from './amReportCharts'
+import { usePref } from '../../prefs'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { key: 'info', label: 'Account information', icon: FileText, account: true, text: 'Full account sheet with zones and call list (Access report Account information)' },
@@ -32,6 +36,11 @@ export default function AmReports() {
   const [d, setD] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const ai = useAiAsk()
+  const [view, setView] = usePref('sw_am_report_view', 'table') // table | chart | both
+  const [aiOn, setAiOn] = useState(false)
+  useEffect(() => { api('/am/ai/status').then((s) => setAiOn(!!s.configured)).catch(() => setAiOn(false)) }, [])
+  useEffect(() => { ai.reset() }, [rep.key, f.from, f.to, f.monitoringTypeId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { api('/am/lookups').then((l) => setTypes(l.monitoringTypes)).catch(() => {}) }, [])
   useEffect(() => {
@@ -66,6 +75,12 @@ export default function AmReports() {
     <div className="page">
       <PageHeader title="Alarm monitoring reports" subtitle="The report buttons from the Access Alarm Monitoring switchboard"
         actions={<>
+          {!rep.account && aiOn && (
+            <button className="btn ai-btn" disabled={!d || ai.loading} title="Have Claude explain this report from the live data"
+              onClick={() => ai.ask({ report: rep.key, params: { ...(rep.dates ? { from: f.from, to: f.to } : {}), ...(rep.type && f.monitoringTypeId !== '0' ? { monitoringType: typeName } : {}) } })}>
+              <Sparkles size={15} /> AI insights
+            </button>
+          )}
           {!rep.account && <button className="btn" disabled={!d?.rows?.length} onClick={csv}><Download size={15} /> CSV</button>}
           {!rep.account && <button className="btn primary" disabled={!d} onClick={() => window.print()}><Printer size={15} /> Print</button>}
         </>} />
@@ -96,8 +111,21 @@ export default function AmReports() {
         </div>
       )}
 
+      {!rep.account && (ai.loading || ai.error || ai.data) && (
+        <div className="am-report-ai">
+          {ai.loading && <AiLoading label={`Explaining: ${rep.label}`} />}
+          {ai.error && <div className="error-state" role="alert"><AlertTriangle size={16} /><span>{ai.error}</span></div>}
+          {ai.data && <AiAnswer data={ai.data} title={`${rep.label}${rep.dates ? ` · ${fmtDate(f.from)} – ${fmtDate(f.to)}` : ''}`} />}
+        </div>
+      )}
+
       {!rep.account && <article className="card am-report">
         <header className="am-report-head">
+          <span className="seg dash-seg am-view-toggle no-print" role="group" aria-label="Report view">
+            {[['table', 'Table', Table2], ['chart', 'Chart', BarChart3], ['both', 'Both', LayoutList]].map(([k, l, Icon]) => (
+              <button key={k} type="button" className={`seg-btn${view === k ? ' active' : ''}`} aria-pressed={view === k} onClick={() => setView(k)}><Icon size={13} /> {l}</button>
+            ))}
+          </span>
           <h2>{rep.label}</h2>
           <div className="muted small">
             {rep.dates && <>From {fmtDate(f.from)} to {fmtDate(f.to)}</>}
@@ -108,8 +136,9 @@ export default function AmReports() {
         {error && <ErrorState message={error} />}
         {loading && <SkeletonRows rows={6} cols={4} />}
         {d && !d.rows.length && <EmptyState icon={rep.icon} title="Nothing to report">No accounts match these filters.</EmptyState>}
-        {d && d.rows.length > 0 && <ReportBody rep={rep.key} d={d} />}
-        {d && d.accounts?.length > 0 && <AccountDetails accounts={d.accounts} cancelled={rep.key === 'cancelled'} />}
+        {d && d.rows.length > 0 && view !== 'table' && <AmReportCharts rep={rep.key} d={d} />}
+        {d && d.rows.length > 0 && view !== 'chart' && <ReportBody rep={rep.key} d={d} />}
+        {d && d.accounts?.length > 0 && view !== 'chart' && <AccountDetails accounts={d.accounts} cancelled={rep.key === 'cancelled'} />}
       </article>}
     </div>
   )
@@ -140,7 +169,7 @@ function AccountChooser({ kind, label, text }) {
       {error && <ErrorState message={error} />}
       {rows && !rows.length && <EmptyState icon={FileText} title="No accounts found">Try a different search.</EmptyState>}
       {rows && rows.length > 0 && (
-        <div className="table-wrap"><table className="grid clickable">
+        <div className="table-wrap"><Grid className="grid clickable">
           <thead><tr><th>Acct #</th><th>Customer</th><th>Service address</th><th>Status</th><th /></tr></thead>
           <tbody>
             {rows.map((r) => (
@@ -152,7 +181,7 @@ function AccountChooser({ kind, label, text }) {
               </tr>
             ))}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
       {rows && <p className="muted small" style={{ marginTop: 8 }}>Showing up to 12 matches — type to narrow the list.</p>}
     </article>
@@ -170,7 +199,7 @@ function AccountDetails({ accounts, cancelled }) {
   return (
     <>
       <h3 style={{ marginTop: 20 }}>Account details ({accounts.length})</h3>
-      <div className="table-wrap"><table className="grid">
+      <div className="table-wrap"><Grid className="grid">
         <thead><tr><th>Period</th><th>Acct #</th><th>Customer</th><th>Type</th><th>Phone</th><th>Service address</th><th>Terms</th><th className="num">Monthly</th><th>Activated</th>{cancelled && <th>Disconnected</th>}{cancelled && <th>Reason</th>}</tr></thead>
         <tbody>
           {accounts.map((r) => (
@@ -186,7 +215,7 @@ function AccountDetails({ accounts, cancelled }) {
             </tr>
           ))}
         </tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -201,7 +230,7 @@ function ReportBody({ rep, d }) {
       g.rows.push(r); g.sum += r[countKey]
     }
     return (
-      <div className="table-wrap"><table className="grid">
+      <div className="table-wrap"><Grid className="grid">
         <thead><tr><th>{rep === 'created' ? 'Period active' : 'Period cancelled'}</th>{rep === 'cancelled' && <th>Cancellation reason</th>}<th className="num">{rep === 'created' ? 'New accounts' : 'Cancelled accounts'}</th>{rep === 'created' && <th className="num">% of total</th>}</tr></thead>
         <tbody>
           {groups.map((g) => (
@@ -220,21 +249,21 @@ function ReportBody({ rep, d }) {
           ))}
         </tbody>
         <tfoot><tr><td colSpan={rep === 'cancelled' ? 2 : 1}><b>Total</b></td><td className="num"><b>{d.total}</b></td>{rep === 'created' && <td className="num"><b>100%</b></td>}</tr></tfoot>
-      </table></div>
+      </Grid></div>
     )
   }
   if (rep === 'created-year') {
     return (
-      <div className="table-wrap"><table className="grid">
+      <div className="table-wrap"><Grid className="grid">
         <thead><tr><th>Year</th><th>Monitoring type</th><th className="num">New accounts</th></tr></thead>
         <tbody>{d.rows.map((r) => <tr key={r.PeriodActive}><td>{r.PeriodActive}</td><td>{r.MonitorType}</td><td className="num">{r.NewAccounts}</td></tr>)}</tbody>
         <tfoot><tr><td colSpan={2}><b>Total</b></td><td className="num"><b>{d.total}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
     )
   }
   const expiring = rep === 'expiring'
   return (
-    <div className="table-wrap"><table className="grid">
+    <div className="table-wrap"><Grid className="grid">
       <thead><tr>{expiring && <th>Expires</th>}<th>Acct #</th><th>Customer</th><th>Phone</th><th>Email</th><th>Service address</th><th>Terms</th><th className="num">Monthly</th><th>Activated</th><th>Renewal</th></tr></thead>
       <tbody>
         {d.rows.map((r) => (
@@ -249,6 +278,6 @@ function ReportBody({ rep, d }) {
         ))}
       </tbody>
       <tfoot><tr><td colSpan={expiring ? 10 : 9} className="muted">{d.rows.length} account(s)</td></tr></tfoot>
-    </table></div>
+    </Grid></div>
   )
 }

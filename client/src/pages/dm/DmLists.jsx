@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, ListTree, Pencil, Plus, Save, ShieldCheck, Tra
 import { api } from '../../api'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { DmTabs } from './shared'
+import Grid from '../../components/Grid'
 
 export function DmLists() {
   const nav = useNavigate()
@@ -24,14 +25,14 @@ export function DmLists() {
       {!lists ? <SkeletonRows rows={8} cols={3} /> : groups.map((g) => (
         <section key={g} className="panel" style={{ marginBottom: 14 }}>
           <div className="panel-head"><h2>{g}</h2></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <tbody>{shown.filter((l) => l.group === g).map((l) => (
               <tr key={l.key} className="link-row" onClick={() => nav(l.key === 'logins' ? '/dm/logins' : `/dm/lists/${l.key}`)}>
                 <td>{l.key === 'logins' ? <ShieldCheck size={14} /> : <ListTree size={14} />} <a><b>{l.label}</b></a></td>
                 <td className="num muted">{l.count == null ? '' : `${l.count} row(s)`}</td>
               </tr>
             ))}</tbody>
-          </table></div>
+          </Grid></div>
         </section>
       ))}
     </div>
@@ -99,7 +100,7 @@ export function DmList() {
       {error && <ErrorState message={error} />}
       {msg && <div className="success-state" style={{ marginBottom: 12 }}><CheckCircle2 size={16} /> {msg}</div>}
       {!d ? <SkeletonRows rows={8} cols={4} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr>{m.cols.map((c) => <th key={c.name}>{c.label}{c.req ? ' *' : ''}</th>)}<th /></tr></thead>
           <tbody>
             {edit?.id === null && <tr className="new-row">{editRow(null)}</tr>}
@@ -117,7 +118,7 @@ export function DmList() {
             })}
             {!rows.length && edit?.id !== null && <tr><td colSpan={m.cols.length + 1}><EmptyState title="No rows" /></td></tr>}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </div>
   )

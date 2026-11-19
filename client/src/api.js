@@ -1,6 +1,14 @@
 // Demo build (GitHub Pages): no server, so GET calls are answered from a recorded snapshot (public/demo-data.json)
 // of the sample database and every change is refused. Normal builds never set VITE_DEMO.
 export const DEMO = import.meta.env.VITE_DEMO === '1';
+
+// Live vs prototype: only Alarm Monitoring (/am/*) and login (/auth/*) talk to the real API and database.
+// Every other module is a clickable prototype answered from the same snapshot as the demo build
+// (public/demo-data.json); its saves are simulated in memory and never reach the database.
+// VITE_LIVE_ALL=1 sends every call to the API again (used to re-record the snapshot).
+const LIVE_ALL = import.meta.env.VITE_LIVE_ALL === '1';
+const LIVE_PREFIXES = ['/auth/', '/am/'];
+export const isLive = (path) => !DEMO && (LIVE_ALL || LIVE_PREFIXES.some((p) => path.startsWith(p)));
 const BASE = import.meta.env.BASE_URL;
 let demoData = null;
 const demoKey = (path, params) => {
@@ -19,12 +27,35 @@ async function demoGet(path, params) {
   if (bare in demoData) return demoData[bare];
   const alt = Object.keys(demoData).find((k) => k.split('?')[0] === bare);
   if (alt) return demoData[alt];
+  // A record that wasn't recorded (e.g. /cm/jobs/123): answer with a recorded record of the same kind
+  // (/cm/jobs/45) so every detail screen opens.
+  const shape = (p) => p.split('/').map((seg) => (/^\d+$/.test(seg) ? '#' : seg)).join('/');
+  const want = shape(bare);
+  if (want !== bare) {
+    const same = Object.keys(demoData).find((k) => shape(k.split('?')[0]) === want);
+    if (same) return demoData[same];
+  }
   throw Object.assign(new Error('This screen has no sample data in the online demo.'), { status: 404 });
 }
 
 // Demo writes: changes are applied to the in-memory snapshot (lost on page reload) so a presenter can add, edit
 // and delete records and watch lists update. Action endpoints (post, process, ...) just report success.
 let demoSeq = 90000;
+// Screens read result fields after an action (r.posted, r.skipped.length, r.customer.Notes, ...), so a simulated
+// result carries safe empties for those and echoes what was saved.
+const DEMO_COUNTS = ['updated', 'posted', 'cleared', 'created', 'added', 'inserted', 'fixed', 'appended', 'billed', 'received',
+  'inactive', 'itemsRepriced', 'detailAdded', 'detailUpdated', 'detailRemoved', 'onOrderUpdated', 'laborHours', 'jobCostLines', 'stopped'];
+const DEMO_LISTS = ['rows', 'plans', 'packs', 'material', 'lots', 'lines', 'jobs', 'warnings', 'skipped', 'single', 'multi', 'ids',
+  'phones', 'receipts', 'missing', 'items', 'files', 'queued'];
+const DEMO_RECORDS = ['job', 'phase', 'property', 'customer', 'builder', 'tm', 'lot', 'bid', 'assembly', 'item', 'po', 'pack',
+  'invoice', 'quote', 'appointment', 'vendor', 'phone'];
+const demoResult = (body, extra) => ({
+  ...Object.fromEntries(DEMO_COUNTS.map((k) => [k, 0])),
+  ...Object.fromEntries(DEMO_LISTS.map((k) => [k, []])),
+  ...Object.fromEntries(DEMO_RECORDS.map((k) => [k, { ...body }])),
+  ...body,
+  ...extra,
+});
 const idKey = (row) => Object.keys(row || {}).find((k) => /id$/i.test(k)) || Object.keys(row || {})[0];
 const listsFor = (bare) => Object.entries(demoData).filter(([k, v]) => k.split('?')[0] === bare && v && Array.isArray(v.rows)).map(([, v]) => v);
 async function demoWrite(path, method, body) {
@@ -33,7 +64,7 @@ async function demoWrite(path, method, body) {
   const segs = bare.split('/');
   const last = segs[segs.length - 1];
   const parent = segs.slice(0, -1).join('/');
-  const numeric = /^d+$/.test(last);
+  const numeric = /^\d+$/.test(last);
   if (method === 'POST') {
     const id = ++demoSeq;
     for (const l of listsFor(bare)) {
@@ -41,7 +72,7 @@ async function demoWrite(path, method, body) {
       l.rows.unshift({ ...(k ? { [k]: id } : {}), ...body });
       if (typeof l.total === 'number') l.total += 1;
     }
-    return { ok: true, id, message: 'Saved (demo)' };
+    return demoResult(body, { ok: true, id, message: 'Saved (sample data — not stored in the database)' });
   }
   if (numeric && (method === 'PUT' || method === 'PATCH' || method === 'DELETE')) {
     for (const l of listsFor(parent)) {
@@ -53,7 +84,7 @@ async function demoWrite(path, method, body) {
     const d = demoData[bare];
     if (d && typeof d === 'object' && method !== 'DELETE') Object.assign(d, body);
   }
-  return { ok: true, id: numeric ? Number(last) : undefined, message: 'Done (demo)' };
+  return demoResult(body, { ok: true, id: numeric ? Number(last) : undefined, message: 'Done (sample data — not stored in the database)' });
 }
 
 const USER_KEY = 'sw_user';
@@ -104,7 +135,7 @@ export const CLIENT_HEADERS = { 'X-Staffware-Client': '1' };
 
 // Raw fetch for file downloads — same session cookie and header as api().
 export async function apiBlob(path) {
-  if (DEMO) {
+  if (!isLive(path)) {
     // Demo export: build the file in the browser from the recorded report data (CSV opens in Excel).
     const [p, q] = path.split('?');
     const data = await demoGet(p.replace(/\.(csv|json)$/, ''), Object.fromEntries(new URLSearchParams(q || '')));
@@ -122,11 +153,11 @@ export async function apiBlob(path) {
 }
 
 export async function api(path, { method = 'GET', body, params } = {}) {
-  if (DEMO) {
-    if (path === '/auth/login') {
-      if (body?.username !== 'demo' || body?.password !== 'demo') throw Object.assign(new Error('Invalid username or password.'), { status: 401 });
-      return demoGet('/auth/login');
-    }
+  if (DEMO && path === '/auth/login') {
+    if (body?.username !== 'demo' || body?.password !== 'demo') throw Object.assign(new Error('Invalid username or password.'), { status: 401 });
+    return demoGet('/auth/login');
+  }
+  if (!isLive(path)) {
     if (method !== 'GET') return demoWrite(path, method, body || {});
     return demoGet(path, params);
   }

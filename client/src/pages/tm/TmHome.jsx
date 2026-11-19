@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { TmTabs, lotLabel, money, statusOf, useTmLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function TmHome() {
   const nav = useNavigate()
@@ -56,7 +57,7 @@ export default function TmHome() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>T&M #</th><th>Date</th><th>Name</th><th>Type</th><th>Builder</th><th>Job / lot</th><th>By</th><th className="num">Subtotal</th><th className="num">Tax</th><th className="num">Total</th><th>Status</th></tr></thead>
             <tbody>
               {data.rows.map((r) => {
@@ -72,7 +73,7 @@ export default function TmHome() {
               })}
               {!data.rows.length && <tr><td colSpan={11}><EmptyState title="No T&M orders match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}

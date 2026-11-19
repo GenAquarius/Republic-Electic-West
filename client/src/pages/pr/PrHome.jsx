@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PayrollDatePicker, PrTabs, money, num, usePayrollDate } from './shared'
+import Grid from '../../components/Grid'
 
 function Step({ n, icon: Icon, title, text, status, children }) {
   return (
@@ -78,8 +79,8 @@ export default function PrHome() {
       )}
       {result?.problems?.length > 0 && (
         <div className="table-wrap" style={{ marginBottom: 16 }}>
-          <table className="grid compact"><thead><tr><th>Employee</th><th>Job</th><th>Lot</th><th>Pack</th><th>Item</th></tr></thead>
-            <tbody>{result.problems.map((p) => <tr key={p.TempLaborID}><td>{p.EmpName}</td><td>{p.JobName}</td><td>{p.Lot}{p.Block ? `/${p.Block}` : ''}</td><td>{p.PackName}</td><td>{p.Item}</td></tr>)}</tbody></table>
+          <Grid className="grid compact"><thead><tr><th>Employee</th><th>Job</th><th>Lot</th><th>Pack</th><th>Item</th></tr></thead>
+            <tbody>{result.problems.map((p) => <tr key={p.TempLaborID}><td>{p.EmpName}</td><td>{p.JobName}</td><td>{p.Lot}{p.Block ? `/${p.Block}` : ''}</td><td>{p.PackName}</td><td>{p.Item}</td></tr>)}</tbody></Grid>
         </div>
       )}
 
@@ -116,30 +117,30 @@ export default function PrHome() {
             <section className="panel">
               <div className="panel-head"><h2><ClipboardList size={16} /> Pending piece timecards</h2></div>
               {!data.pieceDates.length ? <p className="muted small">None.</p> : (
-                <table className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Lines</th><th className="num">Pay</th></tr></thead>
+                <Grid className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Lines</th><th className="num">Pay</th></tr></thead>
                   <tbody>{data.pieceDates.map((r) => {
                     const ds = String(r.PayrollDate).slice(0, 10)
                     return <tr key={ds} className="link-row" onClick={() => setDate(ds)}><td><a>{fmtDate(r.PayrollDate)}</a></td><td className="num">{r.lines}</td><td className="num">{money(r.pay)}</td></tr>
-                  })}</tbody></table>
+                  })}</tbody></Grid>
               )}
             </section>
             <section className="panel">
               <div className="panel-head"><h2><Clock3 size={16} /> Pending hourly</h2></div>
               {!data.hourlyDates.length ? <p className="muted small">None.</p> : (
-                <table className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Entries</th><th className="num">Hours</th></tr></thead>
+                <Grid className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Entries</th><th className="num">Hours</th></tr></thead>
                   <tbody>{data.hourlyDates.map((r) => {
                     const ds = String(r.PayrollDate).slice(0, 10)
                     return <tr key={ds} className="link-row" onClick={() => setDate(ds)}><td><a>{fmtDate(r.PayrollDate)}</a></td><td className="num">{r.lines}</td><td className="num">{num(r.hours)}</td></tr>
-                  })}</tbody></table>
+                  })}</tbody></Grid>
               )}
             </section>
             <section className="panel">
               <div className="panel-head"><h2><Wallet size={16} /> Recently posted</h2><Link className="panel-link" to="/pr/reports">Reports <ArrowRight size={13} /></Link></div>
-              <table className="grid compact"><thead><tr><th>Payroll date</th><th className="num"><Users size={12} /></th><th className="num">Pay</th></tr></thead>
+              <Grid className="grid compact"><thead><tr><th>Payroll date</th><th className="num"><Users size={12} /></th><th className="num">Pay</th></tr></thead>
                 <tbody>{data.postedDates.map((r) => {
                   const ds = String(r.PayrollDate).slice(0, 10)
                   return <tr key={ds} className="link-row" onClick={() => nav(`/insights/payroll-date?date=${ds}`)}><td><a>{fmtDate(r.PayrollDate)}</a></td><td className="num">{r.employees}</td><td className="num">{money(r.pay)}</td></tr>
-                })}</tbody></table>
+                })}</tbody></Grid>
             </section>
           </div>
         </>

@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, Warnings, changed, useConfirm, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const FIELDS = ['Phase', 'PhaseNum', 'PhaseTypeId', 'PmContractId', 'SuperId1', 'SuperId2', 'StartDate', 'EndDate', 'Notes']
 const today = () => new Date().toISOString().slice(0, 10)
@@ -180,7 +181,7 @@ export default function JsPhase() {
           )}
           {!d.lots.length ? <EmptyState icon={HomeIcon} title="No lots in this phase yet" /> : (
             <div className="table-wrap flat" style={{ marginTop: lot ? 16 : 0 }}>
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Lot/Block</th><th>Plan</th><th>Address</th><th>Start</th><th>End</th><th>Status</th><th>Permit</th><th className="num">Packs</th><th /></tr></thead>
                 <tbody>{d.lots.map((l) => (
                   <tr key={l.LotID} className={lot?.LotID === l.LotID ? 'row-selected' : l.EndDate ? 'dim' : ''}>
@@ -196,7 +197,7 @@ export default function JsPhase() {
                       <button type="button" className="btn small ghost danger" onClick={() => deleteLot(l)} aria-label={`Delete lot ${l.LotBlock}`}><Trash2 size={13} /></button>
                     </td>
                   </tr>))}</tbody>
-              </table>
+              </Grid>
             </div>
           )}
         </section>

@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { EsTabs, FormCard, Fields, int, money, money4, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const MAT_FIELDS = [['Quantity', 'Quantity *', 'num'], ['EstimatingPrice', 'Estimating price $ (blank = from item)', 'num'], ['StageId', 'Stage (blank = item default)', 'select', { list: 'stages' }],
   ['WorkId', 'Work (blank = item default)', 'select', { list: 'works' }], ['StatusId', 'Status', 'select', { list: 'statuses' }], ['ToggleNoChange', 'No change', 'check'], ['Notes', 'Notes', 'text', { span: 3, max: 255 }]]
@@ -19,7 +20,7 @@ function NameList({ title, rows, idKey, nameKey, sel, onSel, count, onAdd, onRen
       {onAdd && <form className="row" style={{ gap: 6, marginBottom: 8 }} onSubmit={(e) => { e.preventDefault(); onAdd(name).then((ok) => ok && setName('')) }}>
         <input aria-label={`New ${title}`} placeholder="New…" value={name} onChange={(e) => setName(e.target.value)} style={{ flex: 1 }} /><button className="btn small primary" disabled={!name.trim()}><Plus size={13} /></button></form>}
       {!rows ? <SkeletonRows rows={6} cols={1} /> : (
-        <div className="table-wrap" style={{ maxHeight: 480, overflow: 'auto' }}><table className="grid compact"><tbody>
+        <div className="table-wrap" style={{ maxHeight: 480, overflow: 'auto' }}><Grid className="grid compact"><tbody>
           {rows.map((r) => (
             <tr key={r[idKey]} className={`link-row${String(sel) === String(r[idKey]) ? ' selected' : ''}`} onClick={() => onSel(r[idKey])}>
               <td className="wrap">{r[nameKey]}{extra && extra(r)}</td><td className="num muted">{count(r)}</td>
@@ -29,7 +30,7 @@ function NameList({ title, rows, idKey, nameKey, sel, onSel, count, onAdd, onRen
               </td>
             </tr>
           ))}{!rows.length && <tr><td className="muted">None</td></tr>}
-        </tbody></table></div>
+        </tbody></Grid></div>
       )}
     </section>
   )
@@ -91,7 +92,7 @@ export default function EsAssemblies() {
               <label className="span3">Notes<input aria-label="Assembly notes" maxLength={255} value={asm.Notes} onChange={(e) => setAsm({ ...asm, Notes: e.target.value })} /></label>
             </FormCard>}
             {!asms ? <SkeletonRows rows={6} cols={1} /> : (
-              <div className="table-wrap" style={{ maxHeight: 480, overflow: 'auto' }}><table className="grid compact"><tbody>
+              <div className="table-wrap" style={{ maxHeight: 480, overflow: 'auto' }}><Grid className="grid compact"><tbody>
                 {asms.map((r) => (
                   <tr key={r.AsAssemblyID} className={`link-row${a === String(r.AsAssemblyID) ? ' selected' : ''}`} onClick={() => go({ a: String(r.AsAssemblyID) })}>
                     <td className="wrap">{r.Name}{r.Description && <div className="muted small">{r.Description}</div>}</td><td className="num">{money(r.Value)}</td>
@@ -101,7 +102,7 @@ export default function EsAssemblies() {
                     </td>
                   </tr>
                 ))}{!asms.length && <tr><td className="muted">None</td></tr>}
-              </tbody></table></div>
+              </tbody></Grid></div>
             )}
           </section>
         ) : <section className="panel"><EmptyState title="Choose an assembly type" /></section>}
@@ -115,7 +116,7 @@ export default function EsAssemblies() {
             <Fields fields={MAT_FIELDS} value={mat} onChange={setMat} lk={lk} />
           </FormCard>}
           {!mats ? <SkeletonRows rows={5} cols={6} /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Item</th><th>Description</th><th>Code</th><th className="num">Qty</th><th className="num">Est price</th><th className="num">Ext</th><th>Stage</th><th>Work</th><th>No change</th><th>Status</th><th /></tr></thead>
               <tbody>{mats.map((m) => (
                 <tr key={m.AsMaterialID}><td><b>{m.InvItem}</b></td><td className="wrap">{m.Description}</td><td>{m.CostCodeId}</td><td className="num">{m.Quantity}</td><td className="num">{money4(m.EstimatingPrice)}</td><td className="num">{money(m.ExtPrice)}</td><td>{m.Stage}</td><td>{m.WorkType}</td><td>{yes(m.ToggleNoChange) ? 'Yes' : ''}</td><td>{m.Status}</td>
@@ -124,7 +125,7 @@ export default function EsAssemblies() {
                     <button className="btn small icon" aria-label={`Delete ${m.InvItem}`} onClick={() => confirm('Delete this material line?') && act(() => api(`/es/as/material/${m.AsMaterialID}`, { method: 'DELETE' }), 'Line deleted')}><Trash2 size={12} /></button>
                   </td></tr>
               ))}{!mats.length && <tr><td colSpan={11}><EmptyState title="No material in this assembly" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
       )}

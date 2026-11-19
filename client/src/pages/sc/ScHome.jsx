@@ -6,6 +6,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ScTabs, daysFromToday, useScLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ScHome() {
   const [sp, setSp] = useSearchParams()
@@ -52,7 +53,7 @@ export default function ScHome() {
       )}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Job</th><th>Builder</th><th>Div</th><th>City</th><th className="num">Phases</th><th className="num">Open lots</th><th className="num">Open stages</th><th>Next delivery</th><th /></tr></thead>
             <tbody>
               {data.rows.map((r) => {
@@ -69,7 +70,7 @@ export default function ScHome() {
               })}
               {!data.rows.length && <tr><td colSpan={9}><EmptyState icon={Layers} title="No jobs match">Try a different search or include jobs without open lots.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(p) => setSp({ ...params, page: p })} />}

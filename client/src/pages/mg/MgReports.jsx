@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { MgTabs, download, int, money, money0, today, useMgLookups, yearAgo } from './shared'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { key: 'ready-to-close', label: 'Lots ready to close', icon: CheckSquare, needs: ['date'], text: 'Open lots started 4+ months before the date with no labor paid in the last 60 days' },
@@ -132,9 +133,9 @@ function Report({ k, d, p, label }) {
   if (k === 'ready-to-close') return (
     <>
       <Head title={label} sub={`As of ${fmtDate(d.date)} · ${d.rows.length} lot(s)`}><Csv rows={d.rows} cols={[['DivisionId', 'Div'], ['SuperName', 'Super'], ['CustName', 'Builder'], ['JobName', 'Job'], ['Phase', 'Phase'], ['BidNum', 'Bid'], ['LotBlock', 'Lot'], ['StartDate', 'Start'], ['LastPaid', 'Last labor paid']]} name="lots-ready-to-close.csv" /></Head>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Div</th><th>Superintendent</th><th>Builder</th><th>Job</th><th>Phase</th><th>Bid</th><th>Lot</th><th>Started</th><th>Last labor paid</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Div</th><th>Superintendent</th><th>Builder</th><th>Job</th><th>Phase</th><th>Bid</th><th>Lot</th><th>Started</th><th>Last labor paid</th></tr></thead>
         <tbody>{d.rows.map((r) => <tr key={r.LotID}><td>{r.DivisionId}</td><td>{r.SuperName}</td><td>{r.CustName}</td><td className="wrap">{r.JobName}</td><td>{r.Phase}</td><td>{r.BidNum}</td><td><Link to={`/mg/reports?report=lot-detail&lotId=${r.LotID}`}><b>{r.LotBlock}</b></Link></td><td>{fmtDate(r.StartDate)}</td><td>{fmtDate(r.LastPaid) || 'Never'}</td></tr>)}
-          {!d.rows.length && <tr><td colSpan={9}><EmptyState title="No lots ready to close" /></td></tr>}</tbody></table></div>
+          {!d.rows.length && <tr><td colSpan={9}><EmptyState title="No lots ready to close" /></td></tr>}</tbody></Grid></div>
     </>
   )
   if (k === 'lot-detail') {
@@ -153,17 +154,17 @@ function Report({ k, d, p, label }) {
         {l.LotNotes && <p><b>Notes:</b> {l.LotNotes}</p>}
         <div className="dash-grid" style={{ marginTop: 12 }}>
           <section className="panel span-2"><div className="panel-head"><h2>Packs</h2></div>
-            <table className="grid compact"><thead><tr><th>Pack</th><th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Revised ea</th><th className="num">Total</th></tr></thead>
+            <Grid className="grid compact"><thead><tr><th>Pack</th><th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Revised ea</th><th className="num">Total</th></tr></thead>
               <tbody>{d.packs.map((x, i) => <tr key={i}><td className="wrap">{x.PackName}</td><td className="num">{int(x.PackQty)}</td><td className="num">{money(x.ContractEa)}</td><td className="num">{x.RevContractEa == null ? '' : money(x.RevContractEa)}</td><td className="num">{money(x.Total)}</td></tr>)}</tbody>
-              <tfoot><tr><td colSpan={4}><b>Total</b></td><td className="num"><b>{money(d.packs.reduce((a, x) => a + Number(x.Total || 0), 0))}</b></td></tr></tfoot></table></section>
+              <tfoot><tr><td colSpan={4}><b>Total</b></td><td className="num"><b>{money(d.packs.reduce((a, x) => a + Number(x.Total || 0), 0))}</b></td></tr></tfoot></Grid></section>
           <section className="panel"><div className="panel-head"><h2>Job cost</h2></div>
-            <table className="grid compact"><thead><tr><th>Stage</th><th>Work</th><th>Code</th><th className="num">Total</th></tr></thead>
+            <Grid className="grid compact"><thead><tr><th>Stage</th><th>Work</th><th>Code</th><th className="num">Total</th></tr></thead>
               <tbody>{d.jobCost.map((x, i) => <tr key={i}><td>{x.ScheduleStage}</td><td>{x.WorkType}</td><td>{x.CostCodeId}</td><td className="num">{money(x.Total)}</td></tr>)}{!d.jobCost.length && <tr><td colSpan={4} className="muted">Nothing posted</td></tr>}</tbody>
-              <tfoot><tr><td colSpan={3}><b>Total</b></td><td className="num"><b>{money(d.jobCost.reduce((a, x) => a + Number(x.Total || 0), 0))}</b></td></tr></tfoot></table></section>
+              <tfoot><tr><td colSpan={3}><b>Total</b></td><td className="num"><b>{money(d.jobCost.reduce((a, x) => a + Number(x.Total || 0), 0))}</b></td></tr></tfoot></Grid></section>
           <section className="panel"><div className="panel-head"><h2>Billing</h2></div>
-            <table className="grid compact"><thead><tr><th>Pack type</th><th className="num">Billed</th></tr></thead>
+            <Grid className="grid compact"><thead><tr><th>Pack type</th><th className="num">Billed</th></tr></thead>
               <tbody>{d.billing.map((x, i) => <tr key={i}><td>{x.PackType}</td><td className="num">{money(x.Subtotal)}</td></tr>)}{!d.billing.length && <tr><td colSpan={2} className="muted">Nothing billed</td></tr>}</tbody>
-              <tfoot><tr><td><b>Total</b></td><td className="num"><b>{money(d.billing.reduce((a, x) => a + Number(x.Subtotal || 0), 0))}</b></td></tr></tfoot></table></section>
+              <tfoot><tr><td><b>Total</b></td><td className="num"><b>{money(d.billing.reduce((a, x) => a + Number(x.Subtotal || 0), 0))}</b></td></tr></tfoot></Grid></section>
         </div>
       </>
     )
@@ -172,28 +173,28 @@ function Report({ k, d, p, label }) {
     <>
       <Head title={label} sub={`${d.head?.CustName} · ${d.head?.JobName} · Lot ${d.head?.LotBlock} · Plan ${d.head?.PlanNum || '—'} · labor includes ${p.burden}% burden`} />
       <div className="kpis"><StatCard label="Budget" tone="blue" value={money0(d.totals.BudgetValue)} foot="From the packs" /><StatCard label="Job cost" tone="amber" value={money0(d.totals.JobCostValue)} foot="Posted" /><StatCard label="Remaining" tone={d.totals.BudgetValue - d.totals.JobCostValue < 0 ? 'red' : 'green'} value={money0(d.totals.BudgetValue - d.totals.JobCostValue)} foot="Budget − job cost" /></div>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Cost code</th><th>Stage</th><th>Work</th><th className="num">Budget</th><th className="num">Job cost</th><th className="num">Difference</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Cost code</th><th>Stage</th><th>Work</th><th className="num">Budget</th><th className="num">Job cost</th><th className="num">Difference</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td>{r.CostCodeId}</td><td>{r.ScheduleStage}</td><td>{r.WorkType}</td><td className="num">{money(r.BudgetValue)}</td><td className="num">{money(r.JobCostValue)}</td><td className={`num${r.BudgetValue - r.JobCostValue < 0 ? ' neg' : ''}`}>{money(r.BudgetValue - r.JobCostValue)}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={6}><EmptyState title="No budget or job cost on this lot" /></td></tr>}</tbody>
-        <tfoot><tr><td colSpan={3}><b>Total</b></td><td className="num"><b>{money(d.totals.BudgetValue)}</b></td><td className="num"><b>{money(d.totals.JobCostValue)}</b></td><td className="num"><b>{money(d.totals.BudgetValue - d.totals.JobCostValue)}</b></td></tr></tfoot></table></div>
+        <tfoot><tr><td colSpan={3}><b>Total</b></td><td className="num"><b>{money(d.totals.BudgetValue)}</b></td><td className="num"><b>{money(d.totals.JobCostValue)}</b></td><td className="num"><b>{money(d.totals.BudgetValue - d.totals.JobCostValue)}</b></td></tr></tfoot></Grid></div>
     </>
   )
   if (k === 'labor-paid') return (
     <>
       <Head title={label} sub={p.from || p.to ? `Payroll ${p.from || '…'} to ${p.to || '…'}` : 'All payroll dates'}><Csv rows={d.rows} cols={[['PayrollDate', 'Payroll date'], ['EmpName', 'Employee'], ['PackName', 'Pack'], ['Item', 'Item'], ['ExtItemQty', 'Qty'], ['ScheduleStage', 'Stage'], ['WorkType', 'Work'], ['PriceEa', 'Price ea'], ['PayPercent', 'Pay %'], ['PayHours', 'Hours'], ['HourlyRate', 'Rate'], ['Piece', 'Piece'], ['Hourly', 'Hourly'], ['Subtotal', 'Subtotal']]} name="labor-paid-lot.csv" /></Head>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Payroll</th><th>Employee</th><th>Pack</th><th>Item</th><th className="num">Qty</th><th>Stage</th><th>Work</th><th className="num">Price ea</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Piece</th><th className="num">Hourly</th><th className="num">Subtotal</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Payroll</th><th>Employee</th><th>Pack</th><th>Item</th><th className="num">Qty</th><th>Stage</th><th>Work</th><th className="num">Price ea</th><th className="num">Pay %</th><th className="num">Hours</th><th className="num">Rate</th><th className="num">Piece</th><th className="num">Hourly</th><th className="num">Subtotal</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td>{fmtDate(r.PayrollDate)}</td><td>{r.EmpName}</td><td className="wrap">{r.PackName}</td><td>{r.Item}</td><td className="num">{int(r.ExtItemQty)}</td><td>{r.ScheduleStage}</td><td>{r.WorkType}</td><td className="num">{money(r.PriceEa)}</td><td className="num">{r.PayPercent == null ? '' : `${Number(r.PayPercent)}%`}</td><td className="num">{r.PayHours == null ? '' : Number(r.PayHours)}</td><td className="num">{money(r.HourlyRate)}</td><td className="num">{money(r.Piece)}</td><td className="num">{money(r.Hourly)}</td><td className="num"><b>{money(r.Subtotal)}</b></td></tr>)}
           {!d.rows.length && <tr><td colSpan={14}><EmptyState title="No labor paid" /></td></tr>}</tbody>
-        <tfoot><tr><td colSpan={13}><b>Total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot></table></div>
+        <tfoot><tr><td colSpan={13}><b>Total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot></Grid></div>
     </>
   )
   if (k === 'material-posted' || k === 'material-counter') return (
     <>
       <Head title={label} />
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Work</th><th>Stage</th><th>Class</th><th>Item</th><th>Description</th><th>{k === 'material-counter' ? 'Reason' : 'Notes'}</th><th className="num">Qty</th><th className="num">Value</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Work</th><th>Stage</th><th>Class</th><th>Item</th><th>Description</th><th>{k === 'material-counter' ? 'Reason' : 'Notes'}</th><th className="num">Qty</th><th className="num">Value</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td>{r.WorkType}</td><td>{r.ScheduleStage}</td><td>{r.InvClass}</td><td><b>{r.InvItem}</b></td><td className="wrap">{r.Description}</td><td className="wrap">{r.Extra}</td><td className="num">{int(r.Qty)}</td><td className="num">{money(r.ExtVal)}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={8}><EmptyState title={k === 'material-counter' ? 'No counter material on this lot' : 'No material posted'} /></td></tr>}</tbody>
-        <tfoot><tr><td colSpan={7}><b>Total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot></table></div>
+        <tfoot><tr><td colSpan={7}><b>Total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot></Grid></div>
     </>
   )
   if (k === 'labor-vs-budget' || k === 'labor-vs-budget-employee') {
@@ -203,9 +204,9 @@ function Report({ k, d, p, label }) {
       <>
         <Head title={label} sub={`${d.rows.length} line(s)`}><Csv rows={d.rows} cols={[...(emp ? [] : [['JobType', 'Job type']]), ['CustName', 'Builder'], ['JobName', 'Job'], ['Lot', 'Lot'], ['Block', 'Block'], ['PlanNum', 'Plan'], ['ScheduleStage', 'Stage'], ['WorkType', 'Work'], ...(emp ? [['Employee', 'Employee']] : []), ['PayPiece', 'Piece paid'], ['PayHourly', 'Hourly paid'], ['PayContract', 'Budget']]} name={`${k}.csv`} /></Head>
         <div className="kpis"><StatCard label="Budget" tone="blue" value={money0(t.PayContract)} foot="Labor in the packs" /><StatCard label="Paid" tone="amber" value={money0(t.PayPiece + t.PayHourly)} foot={`Piece ${money0(t.PayPiece)} · hourly ${money0(t.PayHourly)}`} /><StatCard label="Difference" tone={t.PayContract - t.PayPiece - t.PayHourly < 0 ? 'red' : 'green'} value={money0(t.PayContract - t.PayPiece - t.PayHourly)} foot="Budget − paid" /></div>
-        <div className="table-wrap"><table className="grid compact"><thead><tr>{!emp && <th>Job type</th>}<th>Builder</th><th>Job</th><th>Lot</th><th>Plan</th><th>Stage</th><th>Work</th>{emp && <th>Employee</th>}<th className="num">Piece</th><th className="num">Hourly</th><th className="num">Budget</th></tr></thead>
+        <div className="table-wrap"><Grid className="grid compact"><thead><tr>{!emp && <th>Job type</th>}<th>Builder</th><th>Job</th><th>Lot</th><th>Plan</th><th>Stage</th><th>Work</th>{emp && <th>Employee</th>}<th className="num">Piece</th><th className="num">Hourly</th><th className="num">Budget</th></tr></thead>
           <tbody>{d.rows.map((r, i) => <tr key={i} className={r.Employee === 'Budget' ? 'mg-budget' : ''}>{!emp && <td>{r.JobType}</td>}<td>{r.CustName}</td><td className="wrap">{r.JobName}</td><td><b>{lotName(r)}</b></td><td>{r.PlanNum}</td><td>{r.ScheduleStage}</td><td>{r.WorkType}</td>{emp && <td>{r.Employee}</td>}<td className="num">{money(r.PayPiece)}</td><td className="num">{money(r.PayHourly)}</td><td className="num">{money(r.PayContract)}</td></tr>)}
-            {!d.rows.length && <tr><td colSpan={11}><EmptyState title="Nothing to show" /></td></tr>}</tbody></table></div>
+            {!d.rows.length && <tr><td colSpan={11}><EmptyState title="Nothing to show" /></td></tr>}</tbody></Grid></div>
       </>
     )
   }
@@ -213,33 +214,33 @@ function Report({ k, d, p, label }) {
     <>
       <Head title={label} sub={`Lots finished ${p.from} to ${p.to}`}><Csv rows={d.rows} cols={[['CustName', 'Builder'], ['JobName', 'Job'], ['Lot', 'Lot'], ['Block', 'Block'], ['PlanNum', 'Plan'], ['ScheduleStage', 'Stage'], ['CostCodeId', 'Cost code'], ['Estimate', 'Estimate'], ['Actual', 'Actual']]} name="job-cost-by-work.csv" /></Head>
       <div className="kpis"><StatCard label="Estimate" tone="blue" value={money0(d.totals.Estimate)} foot="From the packs" /><StatCard label="Actual" tone="amber" value={money0(d.totals.Actual)} foot="Job cost" /><StatCard label="Difference" tone={d.totals.Estimate - d.totals.Actual < 0 ? 'red' : 'green'} value={money0(d.totals.Estimate - d.totals.Actual)} foot="Estimate − actual" /></div>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Job</th><th>Lot</th><th>Plan</th><th>Stage</th><th>Code</th><th className="num">Estimate</th><th className="num">Actual</th><th className="num">Difference</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Job</th><th>Lot</th><th>Plan</th><th>Stage</th><th>Code</th><th className="num">Estimate</th><th className="num">Actual</th><th className="num">Difference</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td className="wrap">{r.JobName}</td><td><b>{lotName(r)}</b></td><td>{r.PlanNum}</td><td>{r.ScheduleStage}</td><td>{r.CostCodeId}</td><td className="num">{money(r.Estimate)}</td><td className="num">{money(r.Actual)}</td><td className={`num${r.Estimate - r.Actual < 0 ? ' neg' : ''}`}>{money(r.Estimate - r.Actual)}</td></tr>)}
-          {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No finished lots with this type of work" /></td></tr>}</tbody></table></div>
+          {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No finished lots with this type of work" /></td></tr>}</tbody></Grid></div>
     </>
   )
   if (k === 'option-packs') return (
     <>
       <Head title={label} sub={`Lots started ${p.from} to ${p.to}`}><Csv rows={d.rows} cols={[['JobName', 'Job'], ['PackName', 'Pack'], ['PackQty', 'Qty'], ['Packs', 'Buyers'], ['LotsInJob', 'Lots'], ['ContractValue', 'Value ea'], ['AvePerLot', 'Ave per lot'], ['AvePerBuyer', 'Ave per buyer']]} name="option-packs-by-job.csv" /></Head>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Job</th><th>Option pack</th><th className="num">Qty</th><th className="num">Buyers</th><th className="num">Lots in job</th><th className="num">Value ea</th><th className="num">Ave / lot</th><th className="num">Ave / buyer</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Job</th><th>Option pack</th><th className="num">Qty</th><th className="num">Buyers</th><th className="num">Lots in job</th><th className="num">Value ea</th><th className="num">Ave / lot</th><th className="num">Ave / buyer</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td className="wrap">{r.JobName}</td><td className="wrap"><b>{r.PackName}</b></td><td className="num">{int(r.PackQty)}</td><td className="num">{int(r.Packs)}</td><td className="num">{int(r.LotsInJob)}</td><td className="num">{money(r.ContractValue)}</td><td className="num">{r.AvePerLot == null ? '—' : Number(r.AvePerLot).toFixed(2)}</td><td className="num">{r.AvePerBuyer == null ? '—' : Number(r.AvePerBuyer).toFixed(2)}</td></tr>)}
-          {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No option packs in this period" /></td></tr>}</tbody></table></div>
+          {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No option packs in this period" /></td></tr>}</tbody></Grid></div>
     </>
   )
   if (k === 'open-lots') return (
     <>
       <Head title={label} sub={`Started ${p.from} to ${p.to} · ${d.length} lot(s)`}><Csv rows={d} cols={[['Period', 'Period'], ['CustName', 'Builder'], ['JobName', 'Job'], ['Phase', 'Phase'], ['BidNum', 'Bid'], ['LotBlock', 'Lot'], ['StartDate', 'Start'], ['DateEntered', 'Entered'], ['UserEntered', 'User']]} name="open-lots-per-period.csv" /></Head>
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Period</th><th>Builder</th><th>Job</th><th>Phase</th><th>Bid</th><th>Lot</th><th>Started</th><th>Entered</th><th>By</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Period</th><th>Builder</th><th>Job</th><th>Phase</th><th>Bid</th><th>Lot</th><th>Started</th><th>Entered</th><th>By</th></tr></thead>
         <tbody>{d.map((r) => <tr key={r.LotID}><td>{r.Period}</td><td>{r.CustName}</td><td className="wrap">{r.JobName}</td><td>{r.Phase}</td><td>{r.BidNum}</td><td><Link to={`/mg/reports?report=lot-detail&lotId=${r.LotID}`}><b>{r.LotBlock}</b></Link></td><td>{fmtDate(r.StartDate)}</td><td>{fmtDate(r.DateEntered)}</td><td>{r.UserEntered}</td></tr>)}
-          {!d.length && <tr><td colSpan={9}><EmptyState title="No open lots started in this period" /></td></tr>}</tbody></table></div>
+          {!d.length && <tr><td colSpan={9}><EmptyState title="No open lots started in this period" /></td></tr>}</tbody></Grid></div>
     </>
   )
   if (k === 'packs-no-value') return (
     <>
       <Head title={label} sub={`Lots finished ${p.from} to ${p.to}`} />
-      <div className="table-wrap"><table className="grid compact"><thead><tr><th>Div</th><th>Customer</th><th>Job</th><th>Bid</th><th>Release</th><th>Plan</th><th>Builder code</th><th>Pack</th><th className="num">Value ea</th><th>Status</th><th>Trued up</th><th className="num">Lots</th></tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Div</th><th>Customer</th><th>Job</th><th>Bid</th><th>Release</th><th>Plan</th><th>Builder code</th><th>Pack</th><th className="num">Value ea</th><th>Status</th><th>Trued up</th><th className="num">Lots</th></tr></thead>
         <tbody>{d.map((r, i) => <tr key={i}><td>{r.DivisionId}</td><td>{r.Customer}</td><td className="wrap">{r.Job}</td><td>{r.BidNum}</td><td>{r.BidRelease}</td><td>{r.PlanNum}</td><td>{r.BuilderCode}</td><td className="wrap"><b>{r.PackName}</b></td><td className="num">{money(r.ContractEa)}</td><td>{r.Status}</td><td>{r.TruedUp}</td><td className="num">{int(r.Lots)}</td></tr>)}
-          {!d.length && <tr><td colSpan={12}><EmptyState title="Every pack on these lots has a value" /></td></tr>}</tbody></table></div>
+          {!d.length && <tr><td colSpan={12}><EmptyState title="Every pack on these lots has a value" /></td></tr>}</tbody></Grid></div>
     </>
   )
   return null

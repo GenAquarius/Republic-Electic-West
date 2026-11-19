@@ -8,6 +8,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CxTabs, money, qty, useCxLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export function CxJobs() {
   const nav = useNavigate()
@@ -36,7 +37,7 @@ export function CxJobs() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={5} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Job</th><th>Customer</th><th>Div</th><th>Status</th><th>Cox job type</th><th className="num">Assessors</th><th className="num">Cox plans</th><th className="num">Lots</th></tr></thead>
             <tbody>{d.rows.map((r) => (
               <tr key={r.JobId} className="link-row" onClick={() => nav(`/cx/jobs/${r.JobId}`)}>
@@ -46,7 +47,7 @@ export function CxJobs() {
               </tr>
             ))}
               {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No jobs match" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -119,7 +120,7 @@ export function CxJob() {
           <div className="dash-grid" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Assessor job names</h2></div>
-              <table className="grid compact"><tbody>
+              <Grid className="grid compact"><tbody>
                 {d.assessors.map((a) => (
                   <tr key={a.AssessorID}>
                     <td>{editAssessor?.id === a.AssessorID ? <input className="cell-input wide" aria-label="Assessor job name" maxLength={255} value={editAssessor.name} onChange={(e) => setEditAssessor({ ...editAssessor, name: e.target.value })} /> : <b>{a.AssessorName}</b>}</td>
@@ -134,7 +135,7 @@ export function CxJob() {
                 ))}
                 <tr className="new-row"><td colSpan={2}><input className="cell-input wide" aria-label="New assessor job name" placeholder="Assessor job name (project name on the assessor's page)" maxLength={255} value={newAssessor} onChange={(e) => setNewAssessor(e.target.value)} /></td>
                   <td><button className="btn small primary" disabled={!newAssessor.trim()} onClick={addAssessor}><Plus size={13} /> Add</button></td></tr>
-              </tbody></table>
+              </tbody></Grid>
             </section>
 
             <section className="panel span-2">
@@ -149,7 +150,7 @@ export function CxJob() {
                   <label className="check"><input type="checkbox" checked={!!plan.CoxElegible} onChange={(e) => setPlan({ ...plan, CoxElegible: e.target.checked })} /> Cox eligible</label>
                 </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save plan</button><button type="button" className="btn" onClick={() => setPlan(null)}><X size={15} /> Cancel</button></div></form>
               )}
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Plan #</th><th>Sq ft</th><th>Bedrooms</th><th>Cox eligible</th><th className="num">Items</th><th className="num">Bill value</th><th /></tr></thead>
                 <tbody>
                   {d.plans.map((p) => (
@@ -164,7 +165,7 @@ export function CxJob() {
                   ))}
                   {!d.plans.length && <tr><td colSpan={7}><EmptyState title="No Cox plans yet" /></td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
             </section>
           </div>
           {selPlan && <PlanMaterial key={selPlan.CxPlanID} plan={selPlan} items={d.items} cxType={j.CxJobType} onChange={load} />}
@@ -199,7 +200,7 @@ function PlanMaterial({ plan, items, cxType, onChange }) {
         <span className="muted small">{cxType ? `Items of Cox job type ${cxType}` : 'Set the Cox job type of the job to list its items'}</span></div>
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={3} cols={4} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Item</th><th className="num">Cox pay qty</th><th className="num">True qty</th><th className="num">Bill price</th><th className="num">Ext bill</th><th /></tr></thead>
           <tbody>
             {d.rows.map((m) => edit?.id === m.CxMaterialID ? (
@@ -229,7 +230,7 @@ function PlanMaterial({ plan, items, cxType, onChange }) {
             </tr>
           </tbody>
           <tfoot><tr><td colSpan={4}><b>Total</b></td><td className="num"><b>{money(d.rows.reduce((a, r) => a + Number(r.ExtBill || 0), 0))}</b></td><td /></tr></tfoot>
-        </table></div>
+        </Grid></div>
       )}
     </section>
   )

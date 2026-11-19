@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { Frame, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 const COLS = [['SuperName', 'Superintendent'], ['CustName', 'Customer'], ['JobName', 'Job'], ['JobNum', 'Job #'], ['LotBlock', 'Lot/block'], ['BuilderCode', 'Code'], ['PackName', 'Pack name'], ['PackQty', 'Qty'], ['PlanNum', 'Plan'], ['BidNum', 'Bid'], ['WorkType', 'Type of work']]
 
@@ -11,7 +12,7 @@ export default function RptBillingBySuper({ params }) {
       {d?.groups?.map((g) => (
         <div key={g.superName} className="table-wrap">
           <div className="ar-block">Superintendent: {g.superName}</div>
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th>Ready</th><th>Code</th><th>Lot/block</th><th>Pack name</th><th className="num">Qty</th><th>Plan</th><th>Bid</th><th>Type of work</th></tr></thead>
             <tbody>
               {g.jobs.map((j) => (
@@ -23,7 +24,7 @@ export default function RptBillingBySuper({ params }) {
                 </Fragment>
               ))}
             </tbody>
-          </table>
+          </Grid>
           <div className="ar-sign">Superintendent {g.superName} signature</div>
         </div>
       ))}

@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, changed, nextParams, statusTone, useConfirm, useDebounced, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function JsBuilders() {
   const nav = useNavigate()
@@ -36,7 +37,7 @@ export function JsBuilders() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={6} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Builder</th><th>QB #</th><th>City</th><th>Status</th><th className="num">Jobs</th><th className="num">Active jobs</th><th className="num">Bill-to</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -48,7 +49,7 @@ export function JsBuilders() {
               ))}
               {!data.rows.length && <tr><td colSpan={7}><EmptyState icon={Building2} title="No builders match">Try a different search or status.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -155,7 +156,7 @@ export function JsBuilderDetail() {
           <section className="card">
             <div className="panel-head"><h2>Billing addresses per division ({d.billTo.length})</h2></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Division</th><th>Contact</th><th>Address</th><th>City</th><th>State</th><th>Zip</th><th /></tr></thead>
                 <tbody>
                   {d.billTo.map((x) => editB?.CustBillID === x.CustBillID ? (
@@ -176,21 +177,21 @@ export function JsBuilderDetail() {
                     <td className="actions"><button type="button" className="btn small primary" disabled={!nb.DivisionId} onClick={addBill}><Plus size={13} /> Add</button></td>
                   </tr>
                 </tbody>
-              </table>
+              </Grid>
             </div>
           </section>
           <section className="card">
             <div className="panel-head"><h2>Jobs ({d.jobs.length})</h2><Link className="btn small" to={`/js/jobs/new?builder=${id}`}><Plus size={13} /> New job</Link></div>
             {!d.jobs.length ? <EmptyState title="No jobs for this builder yet" /> : (
               <div className="table-wrap flat">
-                <table className="grid compact clickable">
+                <Grid className="grid compact clickable">
                   <thead><tr><th>Job</th><th>Job #</th><th>Div</th><th>City</th><th>Status</th><th>Start</th><th className="num">Phases</th><th className="num">Lots</th></tr></thead>
                   <tbody>{d.jobs.map((j) => (
                     <tr key={j.JobId} tabIndex={0} onClick={() => nav(`/js/jobs/${j.JobId}`)} onKeyDown={(e) => e.key === 'Enter' && nav(`/js/jobs/${j.JobId}`)}>
                       <td><b>{j.JobName}</b></td><td>{j.JobNum}</td><td>{j.DivisionId}</td><td>{j.City}</td><td>{j.Status && <Badge tone={statusTone(j.Status)}>{j.Status}</Badge>}</td>
                       <td>{fmtDate(j.StartDate)}</td><td className="num">{j.Phases}</td><td className="num">{j.Lots}</td>
                     </tr>))}</tbody>
-                </table>
+                </Grid>
               </div>
             )}
           </section>

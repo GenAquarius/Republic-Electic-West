@@ -2,15 +2,15 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   AlertCircle, ArrowRight, ArrowUpRight, Boxes, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, History, HardHat,
-  Home as HomeIcon, LayoutGrid, BarChart3, Wallet, Activity, Building2, RefreshCw,
+  Home as HomeIcon, LayoutGrid, Wallet, Activity, Building2, RefreshCw, SlidersHorizontal, Gauge,
 } from 'lucide-react'
 import { api, session } from '../api'
 import { GROUPS, MODULES, moduleByCode } from '../modules'
 import { recentVisits, usePref } from '../prefs'
 import { useLookups } from '../components/Pickers'
 import { Badge, EmptyState, ErrorState, Skeleton, SkeletonRows, StatCard } from '../components/ui'
-import BarChart from '../components/BarChart'
-import { fmtDate, fmtMoney } from '../format'
+import DashboardAnalytics, { rangeLabel } from './DashboardAnalytics'
+import { fmtDate } from '../format'
 
 const money0 = (v) => (v == null ? '—' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }))
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('en-US'))
@@ -72,38 +72,34 @@ function Section({ title, icon: Icon, action, children, className = '' }) {
   )
 }
 
-function ChartToggle({ table, onChange }) {
+function Seg({ label, value, options, onChange }) {
   return (
-    <span className="seg dash-seg" role="group" aria-label="Chart or table">
-      <button type="button" className={`seg-btn${!table ? ' active' : ''}`} aria-pressed={!table} onClick={() => onChange(false)}>Chart</button>
-      <button type="button" className={`seg-btn${table ? ' active' : ''}`} aria-pressed={table} onClick={() => onChange(true)}>Table</button>
+    <span className="seg dash-seg" role="group" aria-label={label}>
+      {options.map(([k, l]) => (
+        <button key={k} type="button" className={`seg-btn${value === k ? ' active' : ''}`} aria-pressed={value === k} onClick={() => onChange(k)}>{l}</button>
+      ))}
     </span>
   )
 }
 
-function SummaryStrip({ items }) {
-  return (
-    <div className="dash-sum">
-      {items.map(([label, value]) => <div key={label}><span>{label}</span><b>{value}</b></div>)}
-    </div>
-  )
-}
+const PERIODS = [['3m', '3 months'], ['6m', '6 months'], ['12m', '12 months'], ['ytd', 'Year to date']]
+const COMPARES = [['prev', 'Previous period'], ['yoy', 'Same period last year']]
 
 export default function Home() {
   const nav = useNavigate()
   const user = session.user
   const can = (c) => user?.modules?.includes(c)
-  const [division] = usePref('sw_division', '')
+  const [division, setDivision] = usePref('sw_division', '')
+  const [period, setPeriod] = usePref('sw_dash_period', '12m')
+  const [compare, setCompare] = usePref('sw_dash_compare', 'prev')
   const { divisions } = useLookups('divisions')
   const divName = divisions.find((d) => d.id === division)?.name
 
   const summary = useLoad(() => api('/dashboard/summary', { params: { division } }), [division])
   const attention = useLoad(() => api('/dashboard/attention'), [])
-  const charts = useLoad(() => api('/dashboard/charts'), [])
+  const analytics = useLoad(() => api('/dashboard/analytics', { params: { period, compare, division } }), [period, compare, division])
   const activity = useLoad(() => api('/dashboard/activity'), [])
   const [recent] = useState(() => recentVisits().slice(0, 6))
-  const [billTable, setBillTable] = useState(false)
-  const [payTable, setPayTable] = useState(false)
   const [showAllTasks, setShowAllTasks] = useState(false)
   const [prio, setPrio] = useState('all')
   const [showModDesc, setShowModDesc] = useState(false)
@@ -112,41 +108,15 @@ export default function Home() {
   useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(t) }, [])
 
   const refresh = () => {
-    summary.reload(); attention.reload(); charts.reload(); activity.reload()
+    summary.reload(); attention.reload(); analytics.reload(); activity.reload()
     setUpdatedAt(Date.now())
   }
-  const refreshing = summary.loading || attention.loading || charts.loading || activity.loading
+  const refreshing = summary.loading || attention.loading || analytics.loading || activity.loading
 
   const s = summary.data
   const att = attention.data?.items || []
   const prioCount = (p) => att.filter((a) => a.priority === p).length
   const shownAtt = prio === 'all' ? att : att.filter((a) => a.priority === prio)
-
-  const billing = (charts.data?.billing || []).map((r) => {
-    const d = new Date(r.month + '-01T00:00:00Z')
-    return {
-      key: r.month, value: r.total || 0,
-      label: d.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
-      short: d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }),
-      tip: [['Invoices', num(r.bills)]],
-    }
-  })
-  const payroll = (charts.data?.payroll || []).map((r) => ({
-    key: r.PayrollDate, value: r.piece || 0,
-    label: `Payroll ${fmtDate(r.PayrollDate)}`, short: fmtDate(r.PayrollDate).replace(/\/\d{4}$/, ''),
-    tip: [['Hourly hours', num(r.hours)], ['Employees', num(r.employees)], ['Labor lines', num(r.lines)]],
-  }))
-
-  const sumOf = (rows) => rows.reduce((t, r) => t + r.value, 0)
-  const maxOf = (rows) => rows.reduce((m, r) => (r.value > (m?.value ?? -1) ? r : m), null)
-  const billTotal = sumOf(billing)
-  const billAvg = billing.length ? billTotal / billing.length : 0
-  const billBest = maxOf(billing)
-  const billLast = billing[billing.length - 1]
-  const payTotal = sumOf(payroll)
-  const payBest = maxOf(payroll)
-  const payLast = payroll[payroll.length - 1]
-  const monthShort = (d) => (d ? d.label.replace(/ \d{4}$/, '').slice(0, 3) : '')
 
   const ph = s?.payrollPending
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
@@ -181,7 +151,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* KPIs */}
+      {/* Report filters: scope every KPI and chart in the reporting section below */}
+      <div className="dash-filters" role="toolbar" aria-label="Report filters">
+        <span className="dash-filter-label"><SlidersHorizontal size={14} /> Reporting period</span>
+        <Seg label="Reporting period" value={period} options={PERIODS} onChange={setPeriod} />
+        <span className="dash-filter-label">Compare with</span>
+        <Seg label="Compare with" value={compare} options={COMPARES} onChange={setCompare} />
+        <label className="dash-filter-label" htmlFor="dash-division">Division</label>
+        <select id="dash-division" className="dash-select" value={division} onChange={(e) => setDivision(e.target.value)}>
+          <option value="">All divisions</option>
+          {divisions.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+        </select>
+        {analytics.data && (
+          <span className="dash-range muted small">
+            {rangeLabel(analytics.data.current.months)} <span aria-hidden="true">vs</span><span className="sr-only">compared with</span> {rangeLabel(analytics.data.previous.months)}
+          </span>
+        )}
+      </div>
+
+      <DashboardAnalytics state={analytics} can={can} division={division} divisions={divisions} />
+
+      {/* Operations snapshot: live, point-in-time figures (not affected by the reporting period) */}
+      <div className="dash-section-head">
+        <h2><Gauge size={16} /> Operations snapshot</h2>
+        <span className="muted small">Live figures right now · not affected by the reporting period</span>
+      </div>
       {summary.error ? <ErrorState message={summary.error} onRetry={summary.reload} /> : (
         <div className="kpis">
           <StatCard label="Open lots – REW" icon={HardHat} tone="blue" loading={summary.loading}
@@ -262,58 +256,7 @@ export default function Home() {
         )}
       </Section>
 
-      {/* Modules: compact tiles */}
-      <Section title="Modules" icon={LayoutGrid} className="dash-block"
-        action={<div className="row">
-          <span className="muted small">{myModules.filter((m) => m.ready).length} of {myModules.length} available on the web</span>
-          <button className="btn small ghost" onClick={() => setShowModDesc((v) => !v)} aria-pressed={showModDesc}>
-            {showModDesc ? <>Hide descriptions <ChevronUp size={13} /></> : <>Show descriptions <ChevronDown size={13} /></>}
-          </button>
-        </div>}>
-        <div className={`mod-tiles${showModDesc ? ' with-desc' : ''}`}>
-          {myModules.map((m) => {
-            const Icon = m.icon
-            const stats = m.screens ? `${m.screens.forms} forms · ${m.screens.reports} reports · ${m.screens.actions} actions` : 'In development'
-            const body = (
-              <>
-                <span className={`mod-icon accent-${m.accent}`}><Icon size={16} /></span>
-                <span className="mod-tile-name">{m.name}</span>
-                {!m.ready && <Badge>Coming soon</Badge>}
-                {showModDesc && <span className="mod-tile-desc">{m.description}</span>}
-                {showModDesc && <span className="mod-tile-stats">{stats}</span>}
-              </>
-            )
-            return m.ready
-              ? <Link key={m.code} to={m.path} className="mod-tile" title={`${m.description} (${stats})`}>{body}</Link>
-              : <div key={m.code} className="mod-tile disabled" aria-disabled="true">{body}</div>
-          })}
-        </div>
-      </Section>
-
       <div className="dash-grid">
-        {/* Billing */}
-        {can('AR') && (
-          <Section title="Billing by month" icon={BarChart3} className="span-2"
-            action={<div className="row">
-              <Link to="/insights/billing" className="panel-link">All invoices <ArrowRight size={13} /></Link>
-              <ChartToggle table={billTable} onChange={setBillTable} />
-            </div>}>
-            {charts.loading ? <Skeleton h={220} /> : charts.error ? <ErrorState message={charts.error} onRetry={charts.reload} /> :
-              billing.length ? (
-                <>
-                  <SummaryStrip items={[
-                    ['12-month total', money0(billTotal)],
-                    ['Monthly average', money0(billAvg)],
-                    ['Best month', billBest ? `${monthShort(billBest)} · ${money0(billBest.value)}` : '—'],
-                    ['Latest month', billLast ? `${monthShort(billLast)} · ${money0(billLast.value)}` : '—'],
-                  ]} />
-                  <BarChart data={billing} format={money0} ariaLabel="Billing by month" showTable={billTable} showValues average={billAvg} fluid height={230}
-                    onBarClick={(d) => nav(`/insights/billing?month=${d.key}`)} />
-                </>
-              ) : <EmptyState title="No billing history" />}
-          </Section>
-        )}
-
         {/* Jump back in */}
         <Section title="Jump back in" icon={History}>
           {recent.length ? (
@@ -362,31 +305,8 @@ export default function Home() {
           )}
         </Section>
 
-        {/* Payroll */}
-        {can('PR') && (
-          <Section title="Piece-rate payroll by pay date" icon={Wallet} className="span-2"
-            action={<div className="row">
-              <Link to="/insights/payroll-pending" className="panel-link">Pending payroll <ArrowRight size={13} /></Link>
-              <ChartToggle table={payTable} onChange={setPayTable} />
-            </div>}>
-            {charts.loading ? <Skeleton h={220} /> : charts.error ? <ErrorState message={charts.error} onRetry={charts.reload} /> :
-              payroll.length ? (
-                <>
-                  <SummaryStrip items={[
-                    [`Last ${payroll.length} pay dates`, money0(payTotal)],
-                    ['Dates with piece pay', `${payroll.filter((p) => p.value > 0).length} of ${payroll.length}`],
-                    ['Highest', payBest ? `${payBest.short} · ${money0(payBest.value)}` : '—'],
-                    ['Latest', payLast ? `${payLast.short} · ${money0(payLast.value)}` : '—'],
-                  ]} />
-                  <BarChart data={payroll} format={(v) => fmtMoney(v)} ariaLabel="Piece-rate payroll by pay date" showTable={payTable} showValues fluid height={230}
-                    onBarClick={(d) => nav(`/insights/payroll-date?date=${String(d.key).slice(0, 10)}`)} />
-                </>
-              ) : <EmptyState title="No payroll history" />}
-          </Section>
-        )}
-
         {/* Activity */}
-        <Section title="Recent activity" icon={Activity}>
+        <Section title="Recent activity" icon={Activity} className="span-2">
           {activity.loading && <SkeletonRows rows={5} cols={2} />}
           {activity.error && <ErrorState message={activity.error} onRetry={activity.reload} />}
           {activity.data && !activity.data.rows.length && <EmptyState title="No recent activity" />}
@@ -415,6 +335,34 @@ export default function Home() {
           </div>
         </Section>
       </div>
+      {/* Modules: compact tiles */}
+      <Section title="Modules" icon={LayoutGrid} className="dash-block dash-modules"
+        action={<div className="row">
+          <span className="muted small">{myModules.filter((m) => m.ready).length} of {myModules.length} available on the web</span>
+          <button className="btn small ghost" onClick={() => setShowModDesc((v) => !v)} aria-pressed={showModDesc}>
+            {showModDesc ? <>Hide descriptions <ChevronUp size={13} /></> : <>Show descriptions <ChevronDown size={13} /></>}
+          </button>
+        </div>}>
+        <div className={`mod-tiles${showModDesc ? ' with-desc' : ''}`}>
+          {myModules.map((m) => {
+            const Icon = m.icon
+            const stats = m.screens ? `${m.screens.forms} forms · ${m.screens.reports} reports · ${m.screens.actions} actions` : 'In development'
+            const body = (
+              <>
+                <span className={`mod-icon accent-${m.accent}`}><Icon size={16} /></span>
+                <span className="mod-tile-name">{m.name}</span>
+                {!m.ready && <Badge>Coming soon</Badge>}
+                {showModDesc && <span className="mod-tile-desc">{m.description}</span>}
+                {showModDesc && <span className="mod-tile-stats">{stats}</span>}
+              </>
+            )
+            return m.ready
+              ? <Link key={m.code} to={m.path} className="mod-tile" title={`${m.description} (${stats})`}>{body}</Link>
+              : <div key={m.code} className="mod-tile disabled" aria-disabled="true">{body}</div>
+          })}
+        </div>
+      </Section>
+
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { money } from '../shared'
 import { Frame, fd, pctText, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 const COLS = [['CustName', 'Customer'], ['JobName', 'Job'], ['Phase', 'Phase'], ['LotBlock', 'Lot/block'], ['PlanNum', 'Plan'], ['BuilderCode', 'Code'], ['PackName', 'Pack name'], ['PackQty', 'Qty'], ['ContractEa', 'Contract ea'], ['RevContractEa', 'Rev cont ea'], ['ExtVal', 'Ext value'], ['Billing', 'Billing'], ['SumOfPayHours', 'Payroll hours']]
 
@@ -11,13 +12,13 @@ function Payroll({ lotId, params, all }) {
   if (!st.data) return <span>Loading payroll...</span>
   const d = st.data
   return (
-    <table className="grid compact">
+    <Grid className="grid compact">
       <thead><tr><th>Payroll date</th><th>Code</th><th>Pack name</th><th className="num">Hours</th><th>Employee</th><th>Type</th><th>PR notes</th></tr></thead>
       <tbody>
         {d.rows.map((r, i) => <tr key={i}><td>{fd(r.PayrollDate)}</td><td>{r.BuilderCode}</td><td>{r.PackName}</td><td className="num">{r.PayHours}</td><td>{r.EmpName}</td><td>{r.HourType}</td><td>{r.PrNotes}</td></tr>)}
         <tr className="ar-sum"><td colSpan={3}>{d.header.address} - total hours</td><td className="num">{Number(d.totals.hours).toFixed(2)}</td><td colSpan={3} /></tr>
       </tbody>
-    </table>
+    </Grid>
   )
 }
 
@@ -31,7 +32,7 @@ export default function RptLotPackToBill({ params }) {
       {d?.groups?.map((g) => (
         <div key={g.customer} className="table-wrap">
           <div className="ar-block">{g.customer}</div>
-          <table className="grid compact">
+          <Grid className="grid compact">
             <thead><tr><th>Code</th><th>Lot/block</th><th>Pack name</th><th>Plan</th><th>Phase</th><th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Rev cont ea</th><th className="num">Ext value</th><th className="num">Billing</th><th className="num">Remain %</th></tr></thead>
             <tbody>
               {g.jobs.map((j) => (
@@ -53,10 +54,10 @@ export default function RptLotPackToBill({ params }) {
               ))}
               <tr className="ar-sum"><td colSpan={8}>Total for {g.customer}</td><td className="num">{money(g.extVal)}</td><td className="num">{money(g.billing)}</td><td className="num">{pctText(g.extVal ? 1 - g.billing / g.extVal : null)}</td></tr>
             </tbody>
-          </table>
+          </Grid>
         </div>
       ))}
-      {d && <table className="grid compact"><tbody><tr className="ar-grand"><td>Total for period {params.from} to {params.to}</td><td className="num">{money(d.totals.extVal)}</td><td className="num">{money(d.totals.billing)}</td><td className="num">{pctText(d.totals.remainPct)}</td></tr></tbody></table>}
+      {d && <Grid className="grid compact"><tbody><tr className="ar-grand"><td>Total for period {params.from} to {params.to}</td><td className="num">{money(d.totals.extVal)}</td><td className="num">{money(d.totals.billing)}</td><td className="num">{pctText(d.totals.remainPct)}</td></tr></tbody></Grid>}
     </Frame>
   )
 }

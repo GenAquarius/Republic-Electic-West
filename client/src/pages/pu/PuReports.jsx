@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PuTabs, download, groupBy, int, money, usePick, usePuLookups } from './shared'
+import Grid from '../../components/Grid'
 
 // needs: job, lot, phase, division, status (statusAll = "1-All status" allowed), pm (customer → plan), stage
 const REPORTS = [
@@ -135,7 +136,7 @@ function Report({ k, d, label }) {
   return (
     <>
       <div className="fm-head"><div><h2>{label}</h2><div className="muted">{sub}</div></div></div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr>{cols.map((c) => <th key={c} className={NUM.has(c) ? 'num' : ''}>{LABEL[c]}</th>)}</tr></thead>
         {groups.map(([g, rows]) => {
           const r0 = rows[0]
@@ -151,7 +152,7 @@ function Report({ k, d, label }) {
           )
         })}
         {labor && <tfoot><tr><td colSpan={cols.length - 1}><b>Total</b></td><td className="num"><b>{money(lotTotal(d))}</b></td></tr></tfoot>}
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -172,10 +173,10 @@ export function LotSheet({ rows, title }) {
       <dl className="mg-dl">{dl.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v || '—'}</dd></div>)}</dl>
       <h3 className="section-title">Packs</h3>
       {!packs.length ? <EmptyState title="No packs on this lot" /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Pack</th><th>Builder code</th><th className="num">Qty</th></tr></thead>
           <tbody>{packs.map((x, i) => <tr key={i}><td>{x.PackName}</td><td>{x.BuilderCode}</td><td className="num">{int(x.PackQty)}</td></tr>)}</tbody>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )

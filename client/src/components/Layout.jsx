@@ -162,7 +162,6 @@ function Topbar({ openSearch, openMobile }) {
             <span className="avatar lg">{initials}</span>
             <div>
               <div className="menu-user-name">{user?.username}</div>
-              <div className="muted small">{user?.modules?.length} modules enabled</div>
             </div>
           </div>
           <div className="menu-sep" />

@@ -6,6 +6,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { IcTabs, int, money, useIcLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function IcItems() {
   const nav = useNavigate()
@@ -44,7 +45,7 @@ export function IcItems() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Item</th><th>Description</th><th>Class</th><th>Code</th><th>UOM</th><th className="num">Job cost</th><th className="num">Avg cost</th><th className="num">On hand</th><th className="num">Reorder</th><th className="num">On order</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -57,7 +58,7 @@ export function IcItems() {
               ))}
               {!data.rows.length && <tr><td colSpan={10}><EmptyState title="No items match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -189,7 +190,7 @@ export function IcItemDetail() {
         <div className="dash-grid">
           <section className="panel">
             <div className="panel-head"><h2>Stock by division</h2></div>
-            <table className="grid compact">
+            <Grid className="grid compact">
               <thead><tr><th>Division</th><th className="num">On hand</th><th className="num">On order</th><th className="num">Reorder at</th><th /></tr></thead>
               <tbody>{d.stock.map((s) => (
                 <tr key={s.DivisionId}>
@@ -199,12 +200,12 @@ export function IcItemDetail() {
                   <td className="actions">{stageEdit[s.DivisionId] !== undefined && String(stageEdit[s.DivisionId]) !== String(s.QtyReOrder) && <button className="btn small primary" onClick={() => saveStock(s.DivisionId)}><Save size={13} /></button>}</td>
                 </tr>
               ))}</tbody>
-            </table>
+            </Grid>
             <p className="muted small" style={{ margin: '8px 0 0' }}>On-hand changes only through adjustments, receiving, job cost and counts.</p>
           </section>
           <section className="panel span-2">
             <div className="panel-head"><h2>Vendor prices</h2></div>
-            <table className="grid compact">
+            <Grid className="grid compact">
               <thead><tr><th>Vendor</th><th>Part #</th><th className="num">Default</th><th className="num">Last</th><th>Quoted</th><th /></tr></thead>
               <tbody>
                 {d.vendorItems.map((v) => <tr key={v.VendItemID}><td><Link to={`/ic/vendors/${v.VendorId}`}>{v.Vendor}</Link></td><td>{v.PartNum}</td><td className="num">{money(v.DefaultPrice)}</td><td className="num">{money(v.LastPrice)}</td><td>{fmtDate(v.DateQuote)}</td>
@@ -216,13 +217,13 @@ export function IcItemDetail() {
                   <td colSpan={2} /><td className="actions"><button className="btn small primary" disabled={!vp.vendor} onClick={addVp}><Plus size={13} /> Add</button></td>
                 </tr>
               </tbody>
-            </table>
+            </Grid>
           </section>
           <section className="panel span-2">
             <div className="panel-head"><h2>Recent transactions</h2><Link className="panel-link" to={`/ic/transactions?itemId=${id}`}>All transactions</Link></div>
             {!d.history.length ? <p className="muted small">No transactions.</p> : (
-              <table className="grid compact"><thead><tr><th>Date</th><th>Div</th><th>Type</th><th className="num">Qty</th><th className="num">Value</th><th>Posted</th><th>Notes</th></tr></thead>
-                <tbody>{d.history.map((h) => <tr key={h.TransactionID}><td>{fmtDate(h.TransacDate)}</td><td>{h.DivisionId}</td><td>{h.TransacType}</td><td className="num">{int(h.Quantity)}</td><td className="num">{money(h.Value)}</td><td>{h.IcTransacPosted ? <Badge tone="green">Yes</Badge> : <Badge tone="amber">No</Badge>}</td><td className="wrap">{h.Notes}</td></tr>)}</tbody></table>
+              <Grid className="grid compact"><thead><tr><th>Date</th><th>Div</th><th>Type</th><th className="num">Qty</th><th className="num">Value</th><th>Posted</th><th>Notes</th></tr></thead>
+                <tbody>{d.history.map((h) => <tr key={h.TransactionID}><td>{fmtDate(h.TransacDate)}</td><td>{h.DivisionId}</td><td>{h.TransacType}</td><td className="num">{int(h.Quantity)}</td><td className="num">{money(h.Value)}</td><td>{h.IcTransacPosted ? <Badge tone="green">Yes</Badge> : <Badge tone="amber">No</Badge>}</td><td className="wrap">{h.Notes}</td></tr>)}</tbody></Grid>
             )}
           </section>
         </div>

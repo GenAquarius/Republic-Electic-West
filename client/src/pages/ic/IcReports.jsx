@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { IcTabs, download, int, money, money0, useIcLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const TABS = [['reorder', 'Need to order'], ['negative', 'Negative on hand'], ['value', 'Inventory value'], ['top', 'Count differences'], ['posted', 'Material posted']]
 
@@ -77,7 +78,7 @@ export default function IcReports() {
           {p.tab === 'posted' && (
             <>
               <div className="kpis"><StatCard label="Lines" tone="blue" value={int(data.total)} foot="Material posted to job cost" /><StatCard label="Value" tone="green" value={money0(data.value)} foot="Quantity × job cost price" /></div>
-              <div className="table-wrap" style={{ marginBottom: 12 }}><table className="grid compact"><thead><tr><th>Class</th><th className="num">Lines</th><th className="num">Value</th></tr></thead><tbody>{data.byClass.slice(0, 8).map((c) => <tr key={c.InvClass}><td>{c.InvClass}</td><td className="num">{int(c.Lines)}</td><td className="num">{money0(c.Value)}</td></tr>)}</tbody></table></div>
+              <div className="table-wrap" style={{ marginBottom: 12 }}><Grid serverPaged className="grid compact"><thead><tr><th>Class</th><th className="num">Lines</th><th className="num">Value</th></tr></thead><tbody>{data.byClass.slice(0, 8).map((c) => <tr key={c.InvClass}><td>{c.InvClass}</td><td className="num">{int(c.Lines)}</td><td className="num">{money0(c.Value)}</td></tr>)}</tbody></Grid></div>
               <Table cols={['Date', 'Div', 'Job', 'Lot', 'Item', 'Class', 'Qty', 'Price', 'Value']} nums={[6, 7, 8]} empty="Nothing posted in this range."
                 rows={data.rows.map((r) => [fmtDate(r.DateEntered), r.DivisionId, r.JobName, `${r.Lot ?? ''}${r.Block ? `/${r.Block}` : ''}`, <b key="i">{r.InvItem}</b>, r.InvClass, int(r.ExtItemQty), money(r.JobCostPrice, 4), money(r.Value)])} />
               <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => set({ page: pg })} />
@@ -92,13 +93,13 @@ export default function IcReports() {
 function Table({ cols, rows, nums = [], empty }) {
   return (
     <div className="table-wrap">
-      <table className="grid compact">
+      <Grid className="grid compact">
         <thead><tr>{cols.map((c, i) => <th key={c} className={nums.includes(i) ? 'num' : ''}>{c}</th>)}</tr></thead>
         <tbody>
           {rows.map((r, i) => <tr key={i}>{r.map((v, j) => <td key={j} className={nums.includes(j) ? 'num' : j === 3 && cols[j] === 'Description' ? 'wrap' : ''}>{v}</td>)}</tr>)}
           {!rows.length && <tr><td colSpan={cols.length}><EmptyState title={empty} /></td></tr>}
         </tbody>
-      </table>
+      </Grid>
     </div>
   )
 }

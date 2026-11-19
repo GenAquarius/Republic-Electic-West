@@ -8,6 +8,7 @@ import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../componen
 import BidHeader from './BidHeader'
 import { PackForm } from './EsBid'
 import { EsTabs, FormCard, PACK_FIELDS, PLAN_FIELDS, PLAN_TABS, TabbedFields, bidLabel, blankPack, blankPlan, money, toForm, useEsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const CALC = [['Mat', 'Material'], ['MatTax', 'Tax'], ['MatCont', 'Mat conting'], ['Labor', 'Labor'], ['LaborCont', 'Labor conting'], ['Burden', 'Burden'], ['Basic', 'Basic'], ['OH', 'Overhead'], ['Profit', 'Profit'], ['Wrap', 'Wrap'], ['Disc', 'Discount']]
 
@@ -59,7 +60,7 @@ export default function EsMaterial() {
           <section className="panel">
             <div className="panel-head"><h2>Plans ({d.plans.length})</h2><button className="btn small primary" onClick={() => setPlan(blankPlan())}><Plus size={13} /> New plan</button></div>
             {plan && <FormCard legend={plan.id ? 'Edit plan' : 'New plan'} onSubmit={savePlan} onCancel={() => setPlan(null)} saveLabel="Save plan" busy={busy}><TabbedFields tabs={PLAN_TABS} value={plan} onChange={setPlan} lk={lk} /></FormCard>}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Plan</th><th>Name</th><th className="num">Sq ft</th><th>Status</th><th className="num">Packs</th><th className="num">Material + tax + cont</th><th className="num">Labor + cont + burden</th><th className="num">Basic</th><th className="num">O/H + profit + wrap</th><th className="num">Discount</th><th className="num">Plan adjust</th><th className="num">Total</th><th className="num">Contract val</th><th /></tr></thead>
               <tbody>{d.plans.map((p) => {
                 const m = p.matCalc
@@ -75,7 +76,7 @@ export default function EsMaterial() {
                   </tr>
                 )
               })}{!d.plans.length && <tr><td colSpan={14}><EmptyState title="No plans in this bid" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
 
           {selPlan && (
@@ -83,12 +84,12 @@ export default function EsMaterial() {
               <section className="panel">
                 <div className="panel-head"><h2>Calculation · plan {selPlan.PlanNum}</h2></div>
                 {!c ? <EmptyState title="No standard pack material" /> : (
-                  <table className="grid compact"><tbody>
+                  <Grid className="grid compact"><tbody>
                     {CALC.map(([k, l]) => <tr key={k}><td>{l}</td><td className="num">{k === 'Disc' ? `(${money(c[k])})` : money(c[k])}</td></tr>)}
                     <tr><td>Plan adjust</td><td className="num">{money(selPlan.ContractValAdjNum)}</td></tr>
                     <tr><td><b>Total</b></td><td className="num"><b>{money(selPlan.PlanTotal)}</b></td></tr>
                     <tr><td>Contract value</td><td className="num">{money(selPlan.ContractValNum)}</td></tr>
-                  </tbody></table>
+                  </tbody></Grid>
                 )}
                 <p className="muted small">Standard packs only (pack type Standard), quantities × pack quantity × estimating price.</p>
               </section>
@@ -96,7 +97,7 @@ export default function EsMaterial() {
                 <div className="panel-head"><h2>Packs of plan {selPlan.PlanNum}</h2><button className="btn small primary" onClick={() => setPack(blankPack('1'))}><Plus size={13} /> New pack</button></div>
                 {pack && <PackForm pack={pack} setPack={setPack} lk={lk} jobId={b.PmJobID} customerId={b.PmCustID} onSubmit={savePack} busy={busy} />}
                 {!pd ? <SkeletonRows rows={5} cols={4} /> : (
-                  <div className="table-wrap"><table className="grid compact">
+                  <div className="table-wrap"><Grid className="grid compact">
                     <thead><tr><th>Type</th><th>Pack</th><th>Builder code</th><th className="num">Qty</th><th className="num">Items</th><th className="num">Value</th><th className="num">Contract</th><th>Status</th><th /></tr></thead>
                     <tbody>{pd.packs.map((k) => (
                       <tr key={k.EsPackID} className="link-row" onClick={() => nav(`/es/packs/${k.EsPackID}`)}>
@@ -107,7 +108,7 @@ export default function EsMaterial() {
                         </td>
                       </tr>
                     ))}{!pd.packs.length && <tr><td colSpan={9}><EmptyState title="No packs in this plan" /></td></tr>}</tbody>
-                  </table></div>
+                  </Grid></div>
                 )}
               </section>
             </div>

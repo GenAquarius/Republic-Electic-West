@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { REPORTS } from './reportList'
 import { SaTabs, int } from './shared'
+import Grid from '../../components/Grid'
 
 export default function SaHome() {
   const nav = useNavigate()
@@ -30,7 +31,7 @@ export default function SaHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Latest leads</h2><Link className="panel-link" to="/sa/leads?sort=entered">All leads <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={5} cols={4} /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Address</th><th>Job</th><th>Priority</th><th className="num">Homeowners</th><th>Entered</th></tr></thead>
               <tbody>
                 {d.recent.map((r) => (
@@ -42,18 +43,18 @@ export default function SaHome() {
                 ))}
                 {!d.recent.length && <tr><td colSpan={5} className="muted">No leads yet</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel">
           <div className="panel-head"><h2>Leads by sale priority</h2></div>
           {!d ? <SkeletonRows rows={4} cols={2} /> : (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <tbody>
                 {d.priorities.map((p) => <tr key={p.id} className="link-row" onClick={() => nav(`/sa/leads?priorityId=${p.id}`)}><td><a>{p.name}</a></td><td className="num">{int(p.n)}</td></tr>)}
                 <tr className="link-row" onClick={() => nav('/sa/leads?priorityId=none')}><td><a>No priority</a></td><td className="num">{int(d.noPriority)}</td></tr>
               </tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-3" style={{ gridColumn: '1 / -1' }}>

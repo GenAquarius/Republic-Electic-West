@@ -8,6 +8,7 @@ import { api } from '../../api'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import BidHeader from './BidHeader'
 import { AssemblySelector, EsTabs, FormCard, Fields, PACK_FIELDS, PLAN_FIELDS, PLAN_TABS, PackNameInput, TabbedFields, bidLabel, blankPack, blankPlan, int, money, toForm, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export function PackForm({ pack, setPack, lk, jobId, customerId, onSubmit, busy }) {
   async function suggest() {
@@ -83,7 +84,7 @@ export default function EsBid() {
           <section className="panel">
             <div className="panel-head"><h2>Plans ({d.plans.length})</h2><button className="btn small primary" onClick={() => setPlan(blankPlan())}><Plus size={13} /> New plan</button></div>
             {plan && <FormCard legend={plan.id ? 'Edit plan' : 'New plan'} onSubmit={savePlan} onCancel={() => setPlan(null)} saveLabel="Save plan" busy={busy}><TabbedFields tabs={PLAN_TABS} value={plan} onChange={setPlan} lk={lk} /></FormCard>}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Plan</th><th>Name</th><th className="num">Sq ft</th><th>Bed</th><th className="num">Assemblies</th><th>Unposted</th><th className="num">Packs</th><th className="num">Assembly material</th><th className="num">Assembly labor</th><th className="num">Assembly total</th><th className="num">Contract</th><th /></tr></thead>
               <tbody>{d.plans.map((p) => (
                 <tr key={p.EsPlanID} className={`link-row${planId === p.EsPlanID ? ' selected' : ''}`} onClick={() => setSp({ plan: p.EsPlanID })}>
@@ -96,7 +97,7 @@ export default function EsBid() {
                   </td>
                 </tr>
               ))}{!d.plans.length && <tr><td colSpan={12}><EmptyState title="No plans in this bid" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
             <p className="muted small">Assembly total = material + tax + material contingency + labor + labor contingency, plus overhead, profit and wrap, less discount (frmEsBidAssCalc).</p>
           </section>
 
@@ -106,7 +107,7 @@ export default function EsBid() {
                 <div className="panel-head"><h2>Assemblies of plan {selPlan.PlanNum}</h2><button className="btn small primary" onClick={() => setSelecting('plan')}><ListPlus size={13} /> Select assemblies for std packs</button></div>
                 {selecting === 'plan' && <AssemblySelector title={`Select assemblies for plan ${selPlan.PlanNum}`} busy={busy} onAdd={addAssemblies} onCancel={() => setSelecting(null)} />}
                 {!pd ? <SkeletonRows rows={6} cols={4} /> : (
-                  <div className="table-wrap"><table className="grid compact">
+                  <div className="table-wrap"><Grid className="grid compact">
                     <thead><tr><th>Assembly</th><th>Group / type</th><th className="num">Qty</th><th className="num">Unit value</th><th className="num">Value</th><th>Posted</th><th /></tr></thead>
                     <tbody>{pd.assemblies.map((a) => (
                       <tr key={a.EsAssemblyID}>
@@ -120,15 +121,15 @@ export default function EsBid() {
                       </tr>
                     ))}{!pd.assemblies.length && <tr><td colSpan={7}><EmptyState title="No assemblies on this plan" /></td></tr>}</tbody>
                     {pd.assemblies.length > 0 && <tfoot><tr><td colSpan={4}><b>Total (estimating price, before tax / markups)</b></td><td className="num"><b>{money(asmTotal)}</b></td><td colSpan={2} /></tr></tfoot>}
-                  </table></div>
+                  </Grid></div>
                 )}
               </section>
               <section className="panel">
                 <div className="panel-head"><h2><Layers size={15} /> Cost by cost code</h2></div>
                 {!pd ? <SkeletonRows rows={3} cols={2} /> : (
-                  <table className="grid compact"><thead><tr><th>Code</th><th className="num">Material</th><th className="num">Tax</th><th className="num">Labor</th></tr></thead>
+                  <Grid className="grid compact"><thead><tr><th>Code</th><th className="num">Material</th><th className="num">Tax</th><th className="num">Labor</th></tr></thead>
                     <tbody>{pd.byCode.map((r) => <tr key={r.CostCodeId || '-'}><td>{r.CostCodeId} {r.CostCode}</td><td className="num">{money(r.MaterialCost)}</td><td className="num">{money(r.MaterialTax)}</td><td className="num">{money(r.LaborCost)}</td></tr>)}
-                      {!pd.byCode.length && <tr><td colSpan={4} className="muted">No assembly material</td></tr>}</tbody></table>
+                      {!pd.byCode.length && <tr><td colSpan={4} className="muted">No assembly material</td></tr>}</tbody></Grid>
                 )}
               </section>
 
@@ -137,7 +138,7 @@ export default function EsBid() {
                 {pack && <PackForm pack={pack} setPack={setPack} lk={lk} jobId={b.PmJobID} customerId={b.PmCustID} onSubmit={savePack} busy={busy} />}
                 {typeof selecting === 'number' && <AssemblySelector title={`Select assemblies for ${selPackName || 'the'} pack`} requireQty busy={busy} onAdd={addOptAssemblies} onCancel={() => setSelecting(null)} />}
                 {pd && (
-                  <div className="table-wrap"><table className="grid compact">
+                  <div className="table-wrap"><Grid className="grid compact">
                     <thead><tr><th>Type</th><th>Pack</th><th>Builder code</th><th className="num">Qty</th><th className="num">Items</th><th className="num">Value</th><th className="num">Contract</th><th>Status</th><th /></tr></thead>
                     <tbody>{pd.packs.map((k) => (
                       <tr key={k.EsPackID} className="link-row" onClick={() => nav(`/es/packs/${k.EsPackID}`)}>
@@ -149,7 +150,7 @@ export default function EsBid() {
                         </td>
                       </tr>
                     ))}{!pd.packs.length && <tr><td colSpan={9}><EmptyState title="No packs yet – create standard packs or add an option pack" /></td></tr>}</tbody>
-                  </table></div>
+                  </Grid></div>
                 )}
               </section>
             </div>

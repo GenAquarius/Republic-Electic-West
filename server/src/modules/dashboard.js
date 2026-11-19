@@ -147,6 +147,138 @@ router.get('/charts', h(async (req, res) => {
   res.json({ billing, payroll: payroll ? payroll.reverse() : null });
 }));
 
+// ---------------------------------------------------------------------------
+// Analytics: period KPIs, monthly trends and breakdowns for the management dashboard.
+// ?period=3m|6m|12m|ytd  ?compare=prev|yoy  ?division=REW
+// The current window ends with the current month; the comparison window is either the
+// same number of months immediately before it (prev) or the same months a year earlier (yoy).
+// Every figure comes from posted records: ArBilling, PrLaborPaid and JsStage.
+// ---------------------------------------------------------------------------
+const PERIOD_MONTHS = { '3m': 3, '6m': 6, '12m': 12 };
+
+function monthKey(d) { return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`; }
+function addMonths(d, n) { return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1)); }
+// yyyymmdd is the one date literal SQL Server reads the same way under every language setting
+function sqlDate(d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); }
+
+function analyticsWindows(period, compare) {
+  const now = new Date();
+  const thisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  const months = period === 'ytd' ? now.getUTCMonth() + 1 : (PERIOD_MONTHS[period] || 12);
+  const curStart = addMonths(thisMonth, -(months - 1));
+  const curEnd = addMonths(thisMonth, 1); // exclusive
+  const shift = compare === 'yoy' ? 12 : months;
+  const prevStart = addMonths(curStart, -shift);
+  const prevEnd = addMonths(curEnd, -shift);
+  const list = (start) => Array.from({ length: months }, (_, i) => monthKey(addMonths(start, i)));
+  return {
+    months, curStart, curEnd, prevStart, prevEnd,
+    current: list(curStart), previous: list(prevStart),
+    // one query range that covers both windows (they may overlap for neither, but never leave a gap that matters)
+    from: prevStart < curStart ? prevStart : curStart,
+    to: curEnd,
+  };
+}
+
+router.get('/analytics', h(async (req, res) => {
+  const period = ['3m', '6m', '12m', 'ytd'].includes(req.query.period) ? req.query.period : '12m';
+  const compare = req.query.compare === 'yoy' ? 'yoy' : 'prev';
+  const div = await divisionFilter(req);
+  const w = analyticsWindows(period, compare);
+  const p = {
+    div, from: sqlDate(w.from), to: sqlDate(w.to),
+    cs: sqlDate(w.curStart), ce: sqlDate(w.curEnd), ps: sqlDate(w.prevStart), pe: sqlDate(w.prevEnd),
+  };
+  // Flags a row as current (1), previous (2) or outside both windows (0), for a given date column
+  const win = (col) => `CASE WHEN ${col} >= @cs AND ${col} < @ce THEN 1 WHEN ${col} >= @ps AND ${col} < @pe THEN 2 ELSE 0 END`;
+
+  const [billMonthly, billCustomers, billTotals, laborMonthly, laborTotals, stageMonthly, stageTotals] = await Promise.all([
+    has(req, 'AR')
+      ? query(`SELECT FORMAT(b.[Date],'yyyy-MM') AS month, b.DivisionId AS division, COUNT(*) AS bills, SUM(${MONEY('b.BillTotal')}) AS total
+                 FROM ArBilling b
+                WHERE b.[Date] >= @from AND b.[Date] < @to AND (@div IS NULL OR b.DivisionId = @div)
+                GROUP BY FORMAT(b.[Date],'yyyy-MM'), b.DivisionId`, p)
+      : null,
+    has(req, 'AR')
+      ? query(`SELECT ISNULL(NULLIF(LTRIM(RTRIM(b.CustName)),''),'(No customer)') AS customer,
+                      SUM(CASE WHEN ${win('b.[Date]')} = 1 THEN ${MONEY('b.BillTotal')} ELSE 0 END) AS cur,
+                      SUM(CASE WHEN ${win('b.[Date]')} = 2 THEN ${MONEY('b.BillTotal')} ELSE 0 END) AS prev,
+                      SUM(CASE WHEN ${win('b.[Date]')} = 1 THEN 1 ELSE 0 END) AS curBills
+                 FROM ArBilling b
+                WHERE b.[Date] >= @from AND b.[Date] < @to AND (@div IS NULL OR b.DivisionId = @div)
+                GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(b.CustName)),''),'(No customer)')`, p)
+      : null,
+    has(req, 'AR')
+      ? query(`SELECT ${win('b.[Date]')} AS w, COUNT(*) AS bills, SUM(${MONEY('b.BillTotal')}) AS total,
+                      COUNT(DISTINCT b.CustName) AS customers, COUNT(DISTINCT b.LotId) AS lots
+                 FROM ArBilling b
+                WHERE b.[Date] >= @from AND b.[Date] < @to AND (@div IS NULL OR b.DivisionId = @div)
+                GROUP BY ${win('b.[Date]')}`, p)
+      : null,
+    has(req, 'PR')
+      ? query(`SELECT FORMAT(x.PayrollDate,'yyyy-MM') AS month, ISNULL(wk.WorkType,'Other') AS workType, COUNT(*) AS lines,
+                      SUM(ISNULL(CAST(x.ExtItemQty AS decimal(18,4)),0) * ISNULL(x.PriceEa,0) * ISNULL(x.PayPercent,0) / 100) AS piece,
+                      SUM(ISNULL(x.PayHours,0)) AS hours
+                 FROM PrLaborPaid x LEFT JOIN LsWork wk ON wk.WorkID = x.WorkId LEFT JOIN JsJob j ON j.JobId = x.JobId
+                WHERE x.PayrollDate >= @from AND x.PayrollDate < @to AND (@div IS NULL OR j.DivisionId = @div)
+                GROUP BY FORMAT(x.PayrollDate,'yyyy-MM'), ISNULL(wk.WorkType,'Other')`, p)
+      : null,
+    has(req, 'PR')
+      ? query(`SELECT ${win('x.PayrollDate')} AS w, COUNT(DISTINCT x.EmployeeId) AS employees, COUNT(DISTINCT CAST(x.PayrollDate AS date)) AS payrolls,
+                      COUNT(DISTINCT x.LotId) AS lots
+                 FROM PrLaborPaid x LEFT JOIN JsJob j ON j.JobId = x.JobId
+                WHERE x.PayrollDate >= @from AND x.PayrollDate < @to AND (@div IS NULL OR j.DivisionId = @div)
+                GROUP BY ${win('x.PayrollDate')}`, p)
+      : null,
+    has(req, 'SC')
+      ? query(`SELECT FORMAT(s.DatePosted,'yyyy-MM') AS month, COUNT(*) AS completed,
+                      SUM(CASE WHEN s.DeliveryDate IS NULL OR CAST(s.DatePosted AS date) <= CAST(s.DeliveryDate AS date) THEN 1 ELSE 0 END) AS onTime
+                 FROM JsStage s JOIN JsLot l ON l.LotID = s.LotId JOIN JsJob j ON j.JobId = l.JobId
+                WHERE s.DatePosted >= @from AND s.DatePosted < @to AND (@div IS NULL OR j.DivisionId = @div)
+                GROUP BY FORMAT(s.DatePosted,'yyyy-MM')`, p)
+      : null,
+    has(req, 'SC')
+      ? query(`SELECT ${win('s.DatePosted')} AS w,
+                      AVG(CASE WHEN s.DeliveryDate IS NOT NULL AND CAST(s.DatePosted AS date) > CAST(s.DeliveryDate AS date)
+                               THEN CAST(DATEDIFF(day, s.DeliveryDate, s.DatePosted) AS float) END) AS avgDaysLate
+                 FROM JsStage s JOIN JsLot l ON l.LotID = s.LotId JOIN JsJob j ON j.JobId = l.JobId
+                WHERE s.DatePosted >= @from AND s.DatePosted < @to AND (@div IS NULL OR j.DivisionId = @div)
+                GROUP BY ${win('s.DatePosted')}`, p)
+      : null,
+  ]);
+
+  const byWin = (rows) => {
+    const out = { cur: {}, prev: {} };
+    for (const r of rows || []) { if (r.w === 1) out.cur = r; else if (r.w === 2) out.prev = r; }
+    return out;
+  };
+
+  // Top customers this period (top 6 + everything else as "Other")
+  let customers = null;
+  if (billCustomers) {
+    const rows = billCustomers.filter((r) => r.cur || r.prev).sort((a, b) => (b.cur || 0) - (a.cur || 0));
+    const top = rows.slice(0, 6);
+    const rest = rows.slice(6);
+    customers = top.map((r) => ({ name: r.customer, cur: r.cur || 0, prev: r.prev || 0, bills: r.curBills }));
+    if (rest.length) {
+      customers.push({
+        name: `Other (${rest.length})`, other: true,
+        cur: rest.reduce((t, r) => t + (r.cur || 0), 0), prev: rest.reduce((t, r) => t + (r.prev || 0), 0),
+        bills: rest.reduce((t, r) => t + (r.curBills || 0), 0),
+      });
+    }
+  }
+
+  res.json({
+    period, compare, division: div, months: w.months,
+    current: { start: w.curStart, end: w.curEnd, months: w.current },
+    previous: { start: w.prevStart, end: w.prevEnd, months: w.previous },
+    billing: billMonthly ? { monthly: billMonthly, totals: byWin(billTotals), customers } : null,
+    labor: laborMonthly ? { monthly: laborMonthly, totals: byWin(laborTotals) } : null,
+    stages: stageMonthly ? { monthly: stageMonthly, totals: byWin(stageTotals) } : null,
+  });
+}));
+
 // Recent activity across modules (last records entered, with who entered them).
 router.get('/activity', h(async (req, res) => {
   const parts = [];
@@ -269,8 +401,11 @@ router.get('/drill/billing', h(async (req, res) => {
   if (!has(req, 'AR')) return deny(res, 'AR');
   const pg = paging(req.query);
   const m = /^\d{4}-\d{2}$/.test(req.query.month || '') ? req.query.month : null;
-  const p = { m, s: req.query.search ? `%${req.query.search}%` : null };
+  // Optional date range (from inclusive, to exclusive, YYYY-MM-DD) and division, used by the dashboard's customer chart
+  const ymd = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v.replace(/-/g, '') : null);
+  const p = { m, s: req.query.search ? `%${req.query.search}%` : null, df: ymd(req.query.from), dt: ymd(req.query.to), div: req.query.division || null };
   const from = `FROM ArBilling b WHERE (@m IS NULL OR FORMAT(b.[Date],'yyyy-MM') = @m)
+    AND (@df IS NULL OR b.[Date] >= @df) AND (@dt IS NULL OR b.[Date] < @dt) AND (@div IS NULL OR b.DivisionId = @div)
     AND (@s IS NULL OR b.CustName LIKE @s OR b.JobName LIKE @s OR CAST(b.BillNum AS nvarchar(30)) LIKE @s OR b.LotBlock LIKE @s)`;
   const out = await paged(from,
     `b.BillID, b.BillNum, b.[Date], b.CustName, b.JobName, b.JobNum, b.LotBlock, b.DivisionId, b.Terms, b.BillTotal, ${MONEY('b.BillTotal')} AS Amount`,

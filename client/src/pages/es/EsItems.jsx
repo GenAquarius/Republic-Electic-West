@@ -9,6 +9,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { EsTabs, money4, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export function EsItems() {
   const nav = useNavigate()
@@ -38,7 +39,7 @@ export function EsItems() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={6} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Class</th><th>Item</th><th>Description</th><th>Code</th><th className="num">Last cost</th><th className="num">Average cost</th><th className="num">Job cost price</th><th className="num">Estimating price</th><th className="num">Mk up %</th><th>Status</th></tr></thead>
             <tbody>{d.rows.map((r) => {
               const low = r.StatusId === 1 && (r.EstimatingPrice < r.LastCost || r.EstimatingPrice < r.AverageCost || r.EstimatingPrice < r.LaborCost)
@@ -49,7 +50,7 @@ export function EsItems() {
                 </tr>
               )
             })}{!d.rows.length && <tr><td colSpan={10}><EmptyState title="No items match" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -131,11 +132,11 @@ export function EsItem() {
 
 function ResearchTable({ rows }) {
   return (
-    <div className="table-wrap" style={{ maxHeight: 360, overflow: 'auto' }}><table className="grid compact">
+    <div className="table-wrap" style={{ maxHeight: 360, overflow: 'auto' }}><Grid className="grid compact">
       <thead><tr><th>Class</th><th>Item</th><th>Description</th></tr></thead>
       <tbody>{rows.map((r) => <tr key={r.InvItemID}><td>{r.InvClass}</td><td><Link to={`/es/items/${r.InvItemID}`}>{r.InvItem}</Link></td><td className="wrap">{r.Description}</td></tr>)}
         {!rows.length && <tr><td colSpan={3}><EmptyState title="No item description contains these words" /></td></tr>}</tbody>
-    </table></div>
+    </Grid></div>
   )
 }
 
@@ -164,12 +165,12 @@ export function EsResearch() {
         <section className="panel">
           <div className="panel-head"><h2>Item PO research</h2></div>
           <SearchSelect endpoint="/es/pick/items" value="" label="" placeholder="Add an item…" onSelect={(r) => r && setPicked((p) => (p.includes(r.id) ? p : [...p, r.id]))} />
-          <div className="table-wrap" style={{ marginTop: 8 }}><table className="grid compact">
+          <div className="table-wrap" style={{ marginTop: 8 }}><Grid className="grid compact">
             <thead><tr><th>Item</th><th className="num">Avg cost</th><th className="num">Last cost</th><th>Vendor</th><th>Part #</th><th /></tr></thead>
             <tbody>{po.map((r) => <tr key={r.InvItemID}><td><Link to={`/es/items/${r.InvItemID}`}>{r.InvItem}</Link></td><td className="num">{money4(r.AverageCost)}</td><td className="num">{money4(r.LastCost)}</td><td>{r.Vendor}</td><td>{r.PartNum}</td>
               <td><button className="btn small icon" aria-label={`Remove ${r.InvItem}`} onClick={() => setPicked((p) => p.filter((x) => x !== r.InvItemID))}><Trash2 size={12} /></button></td></tr>)}
               {!po.length && <tr><td colSpan={6} className="muted">Pick items to compare</td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
         </section>
       </div>
     </div>

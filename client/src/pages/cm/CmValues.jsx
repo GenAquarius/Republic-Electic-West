@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { Cascade, CmTabs, MoneyCell, PM_LEVELS, int, money, useCmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export default function CmValues() {
   const lk = useCmLookups()
@@ -101,7 +102,7 @@ export default function CmValues() {
 
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Plans ({plans.length})</h2></div>
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Plan</th><th>Name</th><th className="num">Sq ft</th><th>Universal</th><th className="num">Contract value</th><th className="num">Lots</th><th /></tr></thead>
               <tbody>{plans.map((pl) => (
                 <tr key={pl.PmPlanID} className={`link-row${planId === pl.PmPlanID ? ' row-selected' : ''}`} onClick={() => set({ plan: pl.PmPlanID, pack: '' })}>
@@ -111,13 +112,13 @@ export default function CmValues() {
                   <td>{badPlan.has(pl.PmPlanID) && <Badge tone="amber" icon={AlertTriangle}>Packs don't add up</Badge>}</td>
                 </tr>
               ))}{!plans.length && <tr><td colSpan={7}><EmptyState title="No plans in this bid" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
 
           {planId && plans.some((x) => x.PmPlanID === planId) && (
             <section className="panel" style={{ marginTop: 16 }}>
               <div className="panel-head"><h2>Packs of plan {plans.find((x) => x.PmPlanID === planId).PlanNum} ({packs.length})</h2></div>
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>ID</th><th>Pack</th><th>Builder code</th><th className="num">Qty</th><th className="num">Contract value</th><th className="num">Contract cost</th><th>Status</th><th>Type</th><th>T-up</th><th /></tr></thead>
                 <tbody>{packs.map((k) => (
                   <tr key={k.PmPackID} className={`link-row${packId === k.PmPackID ? ' row-selected' : ''}`} onClick={() => set({ pack: k.PmPackID })}>
@@ -131,7 +132,7 @@ export default function CmValues() {
                     <td>{badPack.has(k.PmPackID) && <Badge tone="amber" icon={AlertTriangle}>Breakdown doesn't add up</Badge>}</td>
                   </tr>
                 ))}{!packs.length && <tr><td colSpan={10}><EmptyState title="No packs in this plan" /></td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
           )}
           {pack && <Breakdown key={pack.PmPackID} pack={pack} values={d.values.filter((v) => v.PmPackId === pack.PmPackID)} lk={lk} run={run} />}
@@ -159,7 +160,7 @@ function Breakdown({ pack, values, lk, run }) {
   return (
     <section className="panel" style={{ marginTop: 16 }}>
       <div className="panel-head"><h2>Breakdown of {pack.PackName}</h2><span className="muted">Pack value {money(pack.ContractVal)}</span></div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Work</th><th>Schedule stage</th><th className="num">Value</th><th /></tr></thead>
         <tbody>{values.map((v) => (
           <tr key={v.PmValueID}>
@@ -177,7 +178,7 @@ function Breakdown({ pack, values, lk, run }) {
           </tr>
         </tbody>
         <tfoot><tr><td colSpan={2}><b>Sum of breakdown values</b></td><td className={`num${values.length && Math.round(total * 100) !== Math.round(Number(pack.ContractVal || 0) * 100) ? ' neg' : ''}`}><b>{money(total)}</b></td><td /></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </section>
   )
 }

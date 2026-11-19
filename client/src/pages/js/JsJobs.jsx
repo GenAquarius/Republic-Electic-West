@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { JsTabs, Warnings, changed, nextParams, statusTone, useConfirm, useDebounced, useJsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function JsJobs() {
   const nav = useNavigate()
@@ -39,7 +40,7 @@ export function JsJobs() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Job</th><th>Builder</th><th>Div</th><th>Type</th><th>City</th><th>Status</th><th>Start</th><th className="num">Phases</th><th className="num">Lots</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -52,7 +53,7 @@ export function JsJobs() {
               ))}
               {!data.rows.length && <tr><td colSpan={9}><EmptyState icon={HardHat} title="No jobs match">Try a different search or filter.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -191,7 +192,7 @@ export function JsJobDetail() {
           <div className="panel-head"><h2>Phases ({d.phases.length})</h2><Link className="btn small primary" to={`/js/jobs/${id}/phases/new`}><Plus size={13} /> Add new phase</Link></div>
           {!d.phases.length ? <EmptyState title="No phases yet">Add a phase to choose the bid, superintendents and lots.</EmptyState> : (
             <div className="table-wrap flat">
-              <table className="grid compact clickable">
+              <Grid className="grid compact clickable">
                 <thead><tr><th>Phase</th><th>Type</th><th>Bid</th><th>Superintendents</th><th>Start</th><th>End</th><th className="num">Lots</th><th className="num">Open lots</th></tr></thead>
                 <tbody>{d.phases.map((p) => (
                   <tr key={p.PhaseID} tabIndex={0} onClick={() => nav(`/js/phases/${p.PhaseID}`)} onKeyDown={(e) => e.key === 'Enter' && nav(`/js/phases/${p.PhaseID}`)}>
@@ -200,7 +201,7 @@ export function JsJobDetail() {
                     <td>{[p.Super1, p.Super2].filter(Boolean).join(', ')}</td><td>{fmtDate(p.StartDate)}</td><td>{fmtDate(p.EndDate)}</td>
                     <td className="num">{p.Lots}</td><td className="num">{p.OpenLots}</td>
                   </tr>))}</tbody>
-              </table>
+              </Grid>
             </div>
           )}
         </section>

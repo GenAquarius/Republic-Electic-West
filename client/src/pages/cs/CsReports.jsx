@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, download, money, num, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const D = (v) => fmtDate(v) || ''
 const yes = (v) => (v ? 'Yes' : '')
@@ -91,10 +92,10 @@ function Grouped({ rep, rows, extra }) {
 }
 function Table({ cols, rows }) {
   return (
-    <div className="table-wrap flat"><table className="grid compact">
+    <div className="table-wrap flat"><Grid className="grid compact">
       <thead><tr>{cols.map(([k, l, f]) => <th key={k} className={['num', 'num3', 'money'].includes(f) ? 'num' : undefined}>{l}</th>)}</tr></thead>
       <tbody>{rows.map((r, i) => <tr key={i}>{cols.map(([k, , f]) => <td key={k} className={['num', 'num3', 'money'].includes(f) ? 'num' : 'wrap'}>{fmt(r[k], f)}</td>)}</tr>)}</tbody>
-    </table></div>
+    </Grid></div>
   )
 }
 function TicketSheets({ rows, hv }) {
@@ -194,10 +195,10 @@ function ReportBody({ rep, d, mailBody, p }) {
   if (rep.exportFiles) {
     return (
       <div className="cs-sheet">
-        <div className="table-wrap flat"><table className="grid compact">
+        <div className="table-wrap flat"><Grid className="grid compact">
           <thead><tr><th>File</th><th className="num">Rows</th><th /></tr></thead>
           <tbody>{d.files.map((f) => <tr key={f.name}><td>{f.name}.csv</td><td className="num">{f.rows.length}</td><td><button className="btn small" disabled={!f.rows.length} onClick={() => download(f.rows, null, `${f.name}.csv`)}><Download size={13} /> CSV</button></td></tr>)}</tbody>
-        </table></div>
+        </Grid></div>
         <div className="row" style={{ gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
           <button className="btn primary" onClick={() => d.files.forEach((f, i) => setTimeout(() => download(f.rows, null, `${f.name}.csv`), i * 300))}><Download size={15} /> Download all six</button>
           <a className="btn" href={`mailto:?subject=${encodeURIComponent(`Appointment data ${p.from} to ${p.to}`)}&body=${mailBody}`}><Mail size={15} /> Email…</a>

@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ArTabs, ConfirmDialog, LIENS, SnapshotsInUse, int, money, pct, today, useArLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function ArBilling() {
   const lk = useArLookups()
@@ -52,7 +53,7 @@ export function ArBilling() {
           <>
             {!d.billTo && <div className="banner"><AlertTriangle size={16} /> This builder has no bill-to address for division {p.division}. Invoices will be posted without an address.</div>}
             {d.billTo && <p className="muted" style={{ margin: '0 0 10px' }}>Bill to: {[d.billTo.CustContact, d.billTo.BillAddress, d.billTo.BillCity, d.billTo.BillState, d.billTo.BillZip].filter(Boolean).join(', ')}</p>}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Job</th><th>Lot / block</th><th>Plan</th><th>Phase</th><th>Address</th><th className="num">Contract</th><th className="num">Billed</th><th className="num">Left</th><th className="num">Invoices</th><th className="num">Packs paid (payroll)</th><th>Submitted</th></tr></thead>
               <tbody>
                 {d.lots.map((l) => (
@@ -65,7 +66,7 @@ export function ArBilling() {
                 {!d.lots.length && <tr><td colSpan={11}><EmptyState title="No open lots for this builder and division" /></td></tr>}
               </tbody>
               {d.lots.length > 0 && <tfoot><tr><td colSpan={5}><b>{d.lots.length} lot(s)</b></td><td className="num"><b>{money(totals.c)}</b></td><td className="num"><b>{money(totals.b)}</b></td><td className="num"><b>{money(totals.c - totals.b)}</b></td><td /><td /><td><b>{totals.q ? money(totals.q) : ''}</b></td></tr></tfoot>}
-            </table></div>
+            </Grid></div>
           </>
         )}
     </div>
@@ -159,7 +160,7 @@ export function ArBillLot() {
               <button className="btn small" disabled={!setX} onClick={() => setAll(setX)}>Set X%</button>
             </div>
           </div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Pack</th><th>Stage</th><th>Work</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Ext value</th><th className="num">Billed</th><th>Status</th><th className="num">Bill %</th><th className="num">or amount $</th><th>Notes</th><th className="num">To bill</th></tr></thead>
             <tbody>
               {d.lines.map((l) => {
@@ -181,15 +182,15 @@ export function ArBillLot() {
               {!d.lines.length && <tr><td colSpan={12}><EmptyState title="This lot has no packs to bill" /></td></tr>}
             </tbody>
             <tfoot><tr><td colSpan={11}><b>{entered} line(s) to bill</b></td><td className="num"><b>{money(total)}</b></td></tr></tfoot>
-          </table></div>
+          </Grid></div>
           <div className="row form-actions"><button className="btn primary" disabled={busy || !entered} onClick={() => submit(false)}><Send size={15} /> {busy ? 'Submitting…' : 'Submit invoice'}</button></div>
           {d.history.length > 0 && (
             <section className="panel" style={{ marginTop: 16 }}>
               <div className="panel-head"><h2>Billed on this lot</h2></div>
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Invoice</th><th>Date</th><th>Pack</th><th>Stage</th><th>Work</th><th className="num">%</th><th className="num">Amount</th><th>Notes</th></tr></thead>
                 <tbody>{d.history.map((h, i) => <tr key={i}><td><Link to={`/ar/invoices/${h.BillID}`}>{h.BillID}</Link></td><td>{fmtDate(h.Date)}</td><td className="wrap">{h.PackName}</td><td>{h.ScheduleStage}</td><td>{h.WorkType}</td><td className="num">{pct(h.BillPercent)}</td><td className="num">{h.ItemTotal}</td><td className="wrap">{h.Notes}</td></tr>)}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
           )}
         </>

@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { CsTabs, Options, StatusBadge, int, today, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function CsHome() {
   const nav = useNavigate()
@@ -40,19 +41,19 @@ export default function CsHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Upcoming appointments</h2><Link className="panel-link" to={`/cs/calendar${div ? `?division=${div}` : ''}`}>Calendar <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={4} cols={4} /> : d.upcoming.length ? (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Ticket</th><th>Date</th><th>Time</th><th>Homeowner</th><th>Property</th><th>Type</th></tr></thead>
               <tbody>{d.upcoming.map((r) => (
                 <tr key={r.TicketID} className="link-row" onClick={() => nav(`/cs/tickets/${r.TicketID}`)}>
                   <td><a>{r.TicketID}</a></td><td>{fmtDate(r.ApptDate)}</td><td>{r.ApptTime}</td><td>{r.Homeowner}</td><td className="wrap">{r.Property}</td><td>{r.TicketType}</td>
                 </tr>))}</tbody>
-            </table></div>
+            </Grid></div>
           ) : <EmptyState icon={CalendarDays} title="No upcoming appointments"><Link to="/cs/schedule">Schedule one</Link></EmptyState>}
         </section>
         <section className="panel">
           <div className="panel-head"><h2>Tickets by resolution</h2></div>
           {!d ? <SkeletonRows rows={4} cols={2} /> : (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <tbody>{d.byResolution.map((r) => {
                 const res = lk.resolutions.find((x) => x.name === r.Resolution)
                 return (
@@ -61,19 +62,19 @@ export default function CsHome() {
                   </tr>
                 )
               })}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-2">
           <div className="panel-head"><h2>Latest tickets</h2><Link className="panel-link" to="/cs/tickets">All tickets <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={4} cols={4} /> : (
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Ticket</th><th>Date</th><th>Homeowner</th><th>Property</th><th>Status</th><th>Resolution</th></tr></thead>
               <tbody>{d.recent.map((r) => (
                 <tr key={r.TicketID} className="link-row" onClick={() => nav(`/cs/tickets/${r.TicketID}`)}>
                   <td><a>{r.TicketID}</a></td><td>{fmtDate(r.ApptDate)}</td><td>{r.Homeowner}</td><td className="wrap">{r.Property}</td><td><StatusBadge status={r.Status} /></td><td>{r.Resolution || '—'}</td>
                 </tr>))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel">

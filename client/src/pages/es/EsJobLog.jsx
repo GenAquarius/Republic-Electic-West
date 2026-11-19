@@ -7,6 +7,7 @@ import { api, session } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { EsTabs, FormCard, Fields, toForm, useEsLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const LOG_FIELDS = [['TypeId', 'Type', 'select', { list: 'contractTypes' }], ['Description', 'Title', 'text', { span: 2, max: 255 }], ['EffectivePhase', 'Effective phase', 'text', { max: 255 }],
   ['EffectiveDate', 'Effective date', 'date'], ['Notes', 'Notes', 'area', { rows: 3 }]]
@@ -41,10 +42,10 @@ export default function EsJobLog() {
           <div className="panel-head"><h2>Go to job</h2></div>
           <input type="search" aria-label="Search jobs" placeholder="Search job, customer or number…" value={q} onChange={(e) => setQ(e.target.value)} style={{ width: '100%', marginBottom: 8 }} />
           {!jobs ? <SkeletonRows rows={8} cols={1} /> : (
-            <div className="table-wrap" style={{ maxHeight: 560, overflow: 'auto' }}><table className="grid compact"><tbody>
+            <div className="table-wrap" style={{ maxHeight: 560, overflow: 'auto' }}><Grid className="grid compact"><tbody>
               {jobs.map((r) => <tr key={r.PmJobID} className={`link-row${jobId === String(r.PmJobID) ? ' selected' : ''}`} onClick={() => setSp({ job: r.PmJobID })}><td className="wrap"><b>{r.Job}</b><div className="muted small">{r.Customer} · {r.DivisionId}</div></td><td className="num muted">{r.Entries || ''}</td></tr>)}
               {!jobs.length && <tr><td className="muted">No jobs match</td></tr>}
-            </tbody></table></div>
+            </tbody></Grid></div>
           )}
         </section>
         <section className="panel span-2">
@@ -57,7 +58,7 @@ export default function EsJobLog() {
                 <label className="span3">Notes<input readOnly tabIndex={-1} value={j.Notes || ''} /></label>
               </fieldset></div>
               {entry && <FormCard legend={entry.id ? 'Edit entry' : 'New entry'} onSubmit={save} onCancel={() => setEntry(null)}><Fields fields={LOG_FIELDS} value={entry} onChange={setEntry} lk={lk} /></FormCard>}
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Date</th><th>User</th><th>Type</th><th>Title</th><th>Effective phase</th><th>Effective date</th><th>Notes</th><th /></tr></thead>
                 <tbody>{d.entries.map((n) => (
                   <tr key={n.CmContractID}><td>{fmtDate(n.DateEntered)}</td><td>{n.UserEntered}</td><td>{n.Type}</td><td className="wrap"><b>{n.Description}</b></td><td>{n.EffectivePhase}</td><td>{fmtDate(n.EffectiveDate)}</td><td className="wrap">{n.Notes}</td>
@@ -66,7 +67,7 @@ export default function EsJobLog() {
                       <button className="btn small icon" aria-label={`Delete entry ${n.Description || n.CmContractID}`} onClick={() => run(async () => { if (!confirm('Delete this entry?')) return false; await api(`/es/log/${n.CmContractID}`, { method: 'DELETE' }) }, 'Entry deleted')}><Trash2 size={12} /></button>
                     </>}</td></tr>
                 ))}{!d.entries.length && <tr><td colSpan={8}><EmptyState title="No log entries for this job" /></td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
               <p className="muted small">You cannot edit somebody else's notes. Please create your own.</p>
             </>
           )}

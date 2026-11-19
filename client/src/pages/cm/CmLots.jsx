@@ -7,6 +7,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { Cascade, CmTabs, JS_LEVELS, JS_LOT, MoneyCell, amt, money, useCmLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const LEVELS = [...JS_LEVELS, JS_LOT]
 
@@ -61,13 +62,13 @@ export default function CmLots() {
 
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Packs ({d.packs.length})</h2></div>
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Pack</th><th>Type</th><th className="num">Qty</th><th className="num">Contract ea</th><th className="num">Rev contract ea</th><th className="num">Ext contract</th><th className="num">Ext rev contract</th></tr></thead>
               <tbody>{d.packs.map((k) => (
                 <PackRows key={k.PackID} k={k} ro={ro} lk={lk} values={d.values.filter((v) => v.PackId === k.PackID)} savePack={savePack} run={run} />
               ))}{!d.packs.length && <tr><td colSpan={7}><EmptyState title="No packs scheduled on this lot" /></td></tr>}</tbody>
               <tfoot><tr><td colSpan={6}><b>Lot total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot>
-            </table></div>
+            </Grid></div>
           </section>
         </>
       )}

@@ -10,6 +10,7 @@ import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { REPORTS } from './reportList'
 import { Options, SaTabs, download, int, money, pct, today, useSaLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const yearStart = () => `${today().slice(0, 4)}-01-01`
 
@@ -95,7 +96,7 @@ export default function SaReports() {
                 <button className="btn small" onClick={() => tick(shown.map((x) => x.name), true)}>Tick all{packFilter ? ' shown' : ''}</button>
                 <button className="btn small" onClick={() => tick(shown.map((x) => x.name), false)}>Untick all{packFilter ? ' shown' : ''}</button>
               </div>
-              <div className="table-wrap flat" style={{ maxHeight: 420, overflow: 'auto' }}><table className="grid compact">
+              <div className="table-wrap flat" style={{ maxHeight: 420, overflow: 'auto' }}><Grid className="grid compact">
                 <thead><tr><th style={{ width: 40 }} /><th>Pack name</th><th className="num">Packs</th></tr></thead>
                 <tbody>{shown.map((x) => (
                   <tr key={x.name} className="link-row" onClick={() => tick([x.name], !ticked.has(x.name))}>
@@ -103,7 +104,7 @@ export default function SaReports() {
                     <td className="wrap">{x.name}</td><td className="num">{int(x.n)}</td>
                   </tr>
                 ))}</tbody>
-              </table></div>
+              </Grid></div>
               <div className="row form-actions"><button className="btn primary" disabled={!ticked.size || busy} onClick={display}><Play size={15} /> {busy ? 'Running…' : 'Display report'}</button></div>
             </>}
           </section>
@@ -169,7 +170,7 @@ function SalesByPlan({ d, label, f }) {
   return (
     <>
       <Head label={label} sub={`Division ${d.division} · ${period(f)}`} note={`Cost values include burden of ${d.burden}% and corresponding material tax. PO work is included in billing but not in cost.`} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Customer / job / plan</th><th className="num">Lot #</th><th className="num">Standard billing</th><th className="num">Option billing</th><th className="num">Standard cost</th><th className="num">Option cost</th><th className="num">Opt/Std</th><th className="num">Est GP</th></tr></thead>
         <tbody>
           {groupBy(d.rows, (r) => r.CustName).map(([cust, cr]) => [
@@ -181,7 +182,7 @@ function SalesByPlan({ d, label, f }) {
           ])}
         </tbody>
         <tfoot><tr><td><b>Total</b></td><SbpCells t={all} bold /></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -194,7 +195,7 @@ function BillingByLot({ d, f }) {
   return (
     <>
       <Head label="Contract & billing values by lot-pack type" sub={`${head.CustName} · division ${head.DivisionId} · ${period(f)}`} note="Lots displayed are those with a start date that falls between the From and To dates selected." />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Lot/Block - plan</th><th>Start</th><th>Pack type</th><th className="num">Contract value</th><th className="num">Rev contract</th><th className="num">Total billing</th></tr></thead>
         <tbody>
           {groupBy(d.rows, (r) => r.JobName).map(([job, jr]) => [
@@ -208,12 +209,12 @@ function BillingByLot({ d, f }) {
           ])}
         </tbody>
         <tfoot><tr><td colSpan={3}><b>Total</b></td><Cells3 t={t3(d.rows)} bold /></tr></tfoot>
-      </table></div>
+      </Grid></div>
       <h3 className="fm-sub">By pack type</h3>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Pack type</th><th className="num">Total contract</th><th className="num">Total rev contract</th><th className="num">Total billing</th></tr></thead>
         <tbody>{d.packTypes.map((r) => <tr key={r.PackType}><td>{r.PackType}</td><Cells3 t={{ c: r.TotalContract, r: r.TotalRevContract, b: r.SumOfTotalBilling }} /></tr>)}</tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -223,7 +224,7 @@ function OptionsReport({ rows, label, f }) {
   return (
     <>
       <Head label={`${label} – options search`} sub={`${head.CustName} · ${head.JobName} · ${period(f)}`} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Bid #</th><th>Phase</th><th>Bid date</th><th>Lot/Block</th><th>Plan</th><th>Start date</th><th>End date</th><th className="num">Qty</th><th className="num">Value</th><th className="num">Rev value</th><th className="num">Ext val</th></tr></thead>
         <tbody>
           {groupBy(rows, (r) => `${r.PackName}\u0000${r.BuilderCode ?? ''}`).map(([g, gr]) => [
@@ -236,7 +237,7 @@ function OptionsReport({ rows, label, f }) {
           ])}
         </tbody>
         <tfoot><tr><td colSpan={7}><b>Total</b></td><td className="num"><b>{int(sum(rows, 'PackQty'))}</b></td><td /><td /><td className="num"><b>{money(sum(rows, 'ExtVal'))}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -246,7 +247,7 @@ function GlobalOptions({ rows, label, f }) {
   return (
     <>
       <Head label={`${label} – global options search`} sub={`Division ${f.division} · ${period(f)}`} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Customer - job</th><th>Lot/Block</th><th>Address</th><th>Plan</th><th>Start date</th><th>End date</th><th className="num">Qty</th><th className="num">Ext val</th></tr></thead>
         <tbody>
           {groupBy(rows, (r) => r.PackName).map(([g, gr]) => [
@@ -258,7 +259,7 @@ function GlobalOptions({ rows, label, f }) {
           ])}
         </tbody>
         <tfoot><tr><td colSpan={6}><b>Total</b></td><td className="num"><b>{int(sum(rows, 'PackQty'))}</b></td><td className="num"><b>{money(sum(rows, 'ExtVal'))}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -268,7 +269,7 @@ function LaborPaid({ rows, label, f }) {
   return (
     <>
       <Head label={`Labor paid by division ${rows[0].DivisionId}`} sub={`${period(f)} · Stage: ${rows[0].ScheduleStage}`} note={label} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Lot/Block | Plan</th><th>Start date</th><th>Address</th><th>Payroll date</th><th>Packs scheduled</th></tr></thead>
         <tbody>
           {groupBy(rows, (r) => r.CustName).map(([cust, cr]) => [
@@ -284,7 +285,7 @@ function LaborPaid({ rows, label, f }) {
             ]),
           ])}
         </tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -295,7 +296,7 @@ function Lots({ rows, label, f, stage }) {
   return (
     <>
       <Head label={title} sub={`Division ${rows[0].DivisionId} · ${period(f)} · ${int(rows.length)} lot(s)`} />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Lot/block</th><th>Phase</th><th>Plan #</th><th>Beds</th><th className="num">Sq Ft</th><th>Panel</th><th>Tv outlet</th><th>Island</th><th>Floor plug</th><th>Detached</th><th>Start date</th><th>{stage ? 'Schedule date' : 'End date'}</th></tr></thead>
         <tbody>
           {groupBy(rows, (r) => `${r.CustName} - ${r.JobName}`).map(([g, gr]) => [
@@ -306,7 +307,7 @@ function Lots({ rows, label, f, stage }) {
             )),
           ])}
         </tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }

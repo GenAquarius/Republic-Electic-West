@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PmTabs, download, int, money, usePmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const blankPlan = { PlanNum: '', PlanName: '', SqFt: '', Bedrooms: '', ACunits: false, TvOutlet: '', Island: '', FloorPlug: '', Detached: '', GrGearId: '', Universal: false, ContractVal: '', StatusId: '1', Notes: '' }
 const blankPack = { PackName: '', PackTypeId: '1', BuilderCode: '', Quantity: '1', ContractVal: '', ContractValCost: '', EstBuildTime: '', Verified: false, Substitution: false, TruedUp: false, StatusId: '1', Notes: '' }
@@ -97,7 +98,7 @@ export default function PmBid() {
                 <label className="span3">Notes<input maxLength={255} {...pf('Notes')} /></label>
               </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save plan</button><button type="button" className="btn" onClick={() => setPlan(null)}><X size={15} /> Cancel</button></div></form>
             )}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Plan</th><th>Name</th><th className="num">Sq ft</th><th>Bed</th><th className="num">Contract</th><th>Status</th><th className="num">Packs</th><th className="num">Lots</th><th /></tr></thead>
               <tbody>{d.plans.map((p) => (
                 <tr key={p.PmPlanID} className={`link-row${planId === p.PmPlanID ? ' selected' : ''}`} onClick={() => setSp({ plan: p.PmPlanID })}>
@@ -108,7 +109,7 @@ export default function PmBid() {
                   </td>
                 </tr>
               ))}{!d.plans.length && <tr><td colSpan={9}><EmptyState title="No plans in this bid" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
 
           {selPlan && (
@@ -133,7 +134,7 @@ export default function PmBid() {
                 </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save pack</button><button type="button" className="btn" onClick={() => setPack(null)}><X size={15} /> Cancel</button></div></form>
               )}
               {!packs ? <SkeletonRows rows={6} cols={4} /> : (
-                <div className="table-wrap"><table className="grid compact">
+                <div className="table-wrap"><Grid className="grid compact">
                   <thead><tr><th>Type</th><th>Pack</th><th>Code</th><th className="num">Qty</th><th className="num">Items</th><th className="num">Cost</th><th className="num">Contract</th><th>Flags</th><th className="num">On lots</th><th /></tr></thead>
                   <tbody>{packs.packs.map((k) => (
                     <tr key={k.PmPackID} className="link-row" onClick={() => nav(`/pm/packs/${k.PmPackID}`)}>
@@ -146,7 +147,7 @@ export default function PmBid() {
                       </td>
                     </tr>
                   ))}{!packs.packs.length && <tr><td colSpan={10}><EmptyState title="No packs in this plan" /></td></tr>}</tbody>
-                </table></div>
+                </Grid></div>
               )}
             </section>
           )}

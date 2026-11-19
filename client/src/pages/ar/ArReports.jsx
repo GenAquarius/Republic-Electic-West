@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { ArTabs, download, int, money, money0, useArLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const KINDS = [['invoices', 'Invoice totals'], ['to-bill', 'Lots left to bill'], ['wip', 'Work in progress']]
 const GROUPS = [['division', 'Division'], ['customer', 'Builder'], ['job', 'Job'], ['month', 'Month'], ['day', 'Day']]
@@ -62,11 +63,11 @@ export default function ArReports() {
       {!ready ? <SkeletonRows rows={8} cols={4} /> : p.kind === 'invoices' ? (
         <>
           <div className="kpis"><StatCard label="Invoices" tone="blue" value={int(data.totals.Invoices)} foot="In the range" /><StatCard label="Billed" tone="green" value={money0(data.totals.Total)} foot="Credits subtract" /></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>{GROUPS.find(([x]) => x === p.groupBy)[1]}</th><th className="num">Invoices</th><th className="num">Total</th><th>First</th><th>Last</th></tr></thead>
             <tbody>{data.rows.map((r) => <tr key={r.GroupKey ?? r.GroupLabel} className="link-row" onClick={() => drill(r)}><td><a><b>{r.GroupLabel}</b></a></td><td className="num">{int(r.Invoices)}</td><td className="num">{money(r.Total)}</td><td>{fmtDate(r.First)}</td><td>{fmtDate(r.Last)}</td></tr>)}
               {!data.rows.length && <tr><td colSpan={5}><EmptyState title="No invoices in this range" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
         </>
       ) : p.kind === 'to-bill' ? (
         <>
@@ -76,13 +77,13 @@ export default function ArReports() {
             <StatCard label="Billed" tone="green" value={money0(data.summary.billed)} foot="So far" />
             <StatCard label="Left to bill" tone="amber" value={money0(data.summary.remaining)} foot="Contract − billed" />
           </div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Div</th><th>Builder</th><th>Job</th><th>Lot</th><th>Plan</th><th className="num">Contract</th><th className="num">Billed</th><th className="num">Billed %</th><th className="num">Left</th><th className="num">Posted stages</th></tr></thead>
             <tbody>{data.rows.map((r) => (
               <tr key={r.LotID}><td>{r.DivisionId}</td><td>{r.CustName}</td><td className="wrap">{r.JobName}</td><td><Link to={`/ar/billing/lots/${r.LotID}`}><b>{r.Lot}/{r.Block}</b></Link></td><td>{r.PlanNum}</td>
                 <td className="num">{money(r.Contract)}</td><td className="num">{money(r.Billed)}</td><td className="num">{r.BilledPct == null ? '' : `${Number(r.BilledPct).toFixed(0)}%`}</td><td className="num"><b>{money(r.Remaining)}</b></td><td className="num">{int(r.PostedStages)}</td></tr>
             ))}{!data.rows.length && <tr><td colSpan={10}><EmptyState title="Every open lot is fully billed" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => set({ page: pg })} />
         </>
       ) : (
@@ -93,13 +94,13 @@ export default function ArReports() {
             <StatCard label="Labor paid" tone="blue" value={money0(data.totals.Labor)} foot="Piece and hourly" />
             <StatCard label="Material posted" tone="amber" value={money0(data.totals.Material)} foot="Job cost" />
           </div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr><th>Job</th><th>Div</th><th>Builder</th><th className="num">Lots</th><th className="num">Contract</th><th className="num">Billed</th><th className="num">Left</th><th className="num">Labor paid</th><th className="num">Material</th></tr></thead>
             <tbody>{data.rows.map((r) => (
               <tr key={r.JobId} className="link-row" onClick={() => nav(`/ar/invoices?jobId=${r.JobId}`)}><td className="wrap"><a><b>{r.JobName}</b></a></td><td>{r.DivisionId}</td><td>{r.CustName}</td><td className="num">{int(r.Lots)}</td>
                 <td className="num">{money(r.Contract)}</td><td className="num">{money(r.Billed)}</td><td className="num"><b>{money((r.Contract || 0) - (r.Billed || 0))}</b></td><td className="num">{money(r.LaborPaid)}</td><td className="num">{money(r.MaterialPosted)}</td></tr>
             ))}{!data.rows.length && <tr><td colSpan={9}><EmptyState title="No jobs" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
         </>
       )}
     </div>

@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { DmTabs } from './shared'
+import Grid from '../../components/Grid'
 
 export default function DmHistory() {
   const [rows, setRows] = useState(null)
@@ -29,7 +30,7 @@ export default function DmHistory() {
       <div className="filters no-print"><div className="search-wrap"><input type="search" aria-label="Filter" placeholder="Filter by customer, job, lot or user…" value={q} onChange={(e) => setQ(e.target.value)} /></div></div>
       {error && <ErrorState message={error} />}
       {!rows ? <SkeletonRows rows={8} cols={5} /> : !groups.length ? <EmptyState title="No changes recorded" /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Action</th><th>Previous close date</th><th>New close date</th><th>Changed by</th><th>Changed on</th></tr></thead>
           {groups.map((g) => (
             <tbody key={g.LotID}>
@@ -38,7 +39,7 @@ export default function DmHistory() {
               {g.rows.map((r) => <tr key={r.LotCloseChangeID}><td>{r.Action}</td><td>{fmtDate(r.EndDatePrevious)}</td><td>{fmtDate(r.EndDateNew)}</td><td>{r.ChangeUser}</td><td>{fmtDate(r.ChangeDate)}</td></tr>)}
             </tbody>
           ))}
-        </table></div>
+        </Grid></div>
       )}
     </div>
   )

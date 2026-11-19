@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import { api } from '../../api'
 import ModuleTabs from '../../components/ModuleTabs'
+import Grid from '../../components/Grid'
 
 export { money, money0, int, download } from '../po/shared'
 
@@ -60,7 +61,7 @@ export function SnapshotsInUse({ customerId, division, reloadKey, onData }) {
     <section className="panel" style={{ marginBottom: 16 }}>
       <div className="panel-head"><h2>Customer snapshot in use</h2></div>
       {err ? <p className="muted" style={{ padding: '0 14px 12px' }}>{err}</p> : !d ? <p className="muted" style={{ padding: '0 14px 12px' }}>Loading…</p> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>DIV</th><th>Customer</th><th>User</th><th className="num">Lots</th></tr></thead>
           <tbody>
             {d.rows.map((r) => {
@@ -69,7 +70,7 @@ export function SnapshotsInUse({ customerId, division, reloadKey, onData }) {
             })}
             {!d.rows.length && <tr><td colSpan={4} className="muted">No customer has a billing snapshot right now.</td></tr>}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </section>
   )

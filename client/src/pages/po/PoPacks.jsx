@@ -6,6 +6,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { JobLotPicker, Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PoTabs, int, money, usePoLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function PoPacks() {
   const nav = useNavigate()
@@ -26,7 +27,7 @@ export function PoPacks() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={6} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Pack PO</th><th>Date</th><th>Vendor</th><th>Builder</th><th>Job</th><th className="num">Lines</th><th className="num">Value</th><th>Status</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -37,7 +38,7 @@ export function PoPacks() {
               ))}
               {!data.rows.length && <tr><td colSpan={8}><EmptyState title="No pack POs" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -130,7 +131,7 @@ export function PoPack() {
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Packs to order ({d.items.length})</h2></div>
             <div className="table-wrap flat">
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Job</th><th>Lot</th><th>Pack</th><th className="num">Package items</th><th className="num">Qty</th><th className="num">Cost</th><th className="num">Ext</th><th /></tr></thead>
                 <tbody>
                   {d.items.map((x) => (
@@ -144,7 +145,7 @@ export function PoPack() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Grid>
             </div>
             {!converted && (
               <form className="card form" style={{ margin: '12px 0 0' }} onSubmit={addItem}>

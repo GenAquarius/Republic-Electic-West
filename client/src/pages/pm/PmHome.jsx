@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PmTabs, int } from './shared'
+import Grid from '../../components/Grid'
 
 export default function PmHome() {
   const nav = useNavigate()
@@ -37,7 +38,7 @@ export default function PmHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Latest bids</h2><Link className="panel-link" to="/pm/customers">All customers <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={5} cols={4} /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Customer</th><th>Job</th><th>Div</th><th>Bid</th><th>Date</th><th className="num">Plans</th><th /></tr></thead>
               <tbody>{d.recent.map((r) => (
                 <tr key={r.PmContractID} className="link-row" onClick={() => nav(`/pm/bids/${r.PmContractID}`)}>
@@ -45,7 +46,7 @@ export default function PmHome() {
                   <td>{r.Lock ? <Badge tone="amber" icon={Lock}>Locked</Badge> : null}</td>
                 </tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
         <section className="panel span-2">

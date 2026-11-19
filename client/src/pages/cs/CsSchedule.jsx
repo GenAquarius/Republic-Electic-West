@@ -8,6 +8,7 @@ import { api } from '../../api'
 import { SearchSelect } from '../../components/Pickers'
 import { ErrorState, PageHeader } from '../../components/ui'
 import { CsTabs, Options, addDays, today, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const tomorrow = () => addDays(today(), 1) // Access default: Date()+1
 const blank = () => ({
@@ -187,13 +188,13 @@ export default function CsSchedule() {
         <section className="panel" style={{ marginTop: 16 }}>
           <div className="panel-head"><h2>Already on {f.ApptDate}{f.DivisionId ? ` · ${f.DivisionId}` : ''} ({day.appointments.length})</h2><Link className="panel-link" to={`/cs/calendar?from=${f.ApptDate}${f.DivisionId ? `&division=${f.DivisionId}` : ''}`}>Calendar</Link></div>
           {day.notes.map((n) => <div key={n.DivisionId} className="cs-note" style={{ marginBottom: 6 }}>{n.DivisionId}: {n.CalendarNotes}</div>)}
-          <div className="table-wrap flat"><table className="grid compact">
+          <div className="table-wrap flat"><Grid className="grid compact">
             <thead><tr><th>Ticket</th><th>Time</th><th>Homeowner</th><th>Property</th><th>Techs</th></tr></thead>
             <tbody>
               {day.appointments.map((a) => <tr key={a.TicketID}><td><Link to={`/cs/tickets/${a.TicketID}`}>{a.TicketID}</Link></td><td>{a.ApptTime}</td><td>{a.Homeowner}</td><td className="wrap">{a.Property}</td><td className="wrap">{a.Technicians || '—'}</td></tr>)}
               {!day.appointments.length && <tr><td colSpan={5} className="muted">Nothing scheduled yet</td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
         </section>
       )}
     </div>

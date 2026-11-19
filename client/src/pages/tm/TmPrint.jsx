@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { lotLabel, money, qty } from './shared'
+import Grid from '../../components/Grid'
 
 export function TmPrint() {
   const { id } = useParams()
@@ -39,13 +40,13 @@ export function TmPrint() {
             <section key={p.TmPackID} className="po-pack">
               <div className="po-pack-head"><b>{p.TmPackName}</b><b>{money(p.Price)}</b></div>
               {p.Notes && <div className="muted small">{p.Notes}</div>}
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Item</th><th>Description</th><th className="num">Qty</th></tr></thead>
                 <tbody>{p.materials.map((m) => {
                   const labor = m.CostCode === 'L'
                   return <tr key={m.TmMaterialID}><td>{labor ? (Number(t.LaborRateFlat) > 0 ? 'Flat labor rate' : 'Labor') : (m.AlternateCode || m.InvItem)}</td><td className="wrap">{labor ? '' : m.Description}{m.Notes ? ` ${m.Notes}` : ''}</td><td className="num">{labor && Number(t.LaborRateFlat) > 0 ? 1 : qty(m.Quantity)}</td></tr>
                 })}</tbody>
-              </table>
+              </Grid>
             </section>
           ))}
           <dl className="totals po-totals">
@@ -75,13 +76,13 @@ export function TmPick() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={6} cols={3} /> : (
         <div className="table-wrap">
-          <table className="grid">
+          <Grid className="grid">
             <thead><tr><th>Pack</th><th>Item</th><th>Description</th><th>Notes</th><th className="num">Qty</th><th style={{ width: 70 }}>Picked</th></tr></thead>
             <tbody>
               {d.rows.map((r, i) => <tr key={i}><td className="wrap">{r.TmPackName}</td><td><b>{r.InvItem}</b></td><td className="wrap">{r.Description}</td><td className="wrap">{r.LineNotes}</td><td className="num"><b>{qty(r.Qty)}</b></td><td><span className="tick-box" /></td></tr>)}
               {!d.rows.length && <tr><td colSpan={6} className="muted">No material lines — labor only.</td></tr>}
             </tbody>
-          </table>
+          </Grid>
         </div>
       )}
     </div>

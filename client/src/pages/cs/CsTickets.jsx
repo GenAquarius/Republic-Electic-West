@@ -8,6 +8,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, StatusBadge, Warnings, download, hhmm, int, money, num, resetCsLookups, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function CsTickets() {
   const nav = useNavigate()
@@ -45,7 +46,7 @@ export function CsTickets() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={6} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Ticket</th><th>Date</th><th>Time</th><th>Div</th><th>Homeowner</th><th>Property</th><th>Type</th><th>Status</th><th>Resolution</th><th className="num">Techs</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -56,7 +57,7 @@ export function CsTickets() {
               ))}
               {!d.rows.length && <tr><td colSpan={10}><EmptyState title="No tickets match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -193,7 +194,7 @@ export function CsTicket() {
 
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Technicians ({d.technicians.length})</h2></div>
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <thead><tr><th>Technician</th><th>Date</th><th>Time in</th><th>Time out</th><th className="num">Hours</th><th /></tr></thead>
               <tbody>
                 {d.technicians.map((t) => (
@@ -207,7 +208,7 @@ export function CsTicket() {
                 ))}
                 {!d.technicians.length && <tr><td colSpan={6} className="muted">No technicians yet</td></tr>}
               </tbody>
-            </table></div>
+            </Grid></div>
             <div className="cs-inline" style={{ marginTop: 10 }}>
               <label>Add technician<select value={newTech} onChange={(e) => setNewTech(e.target.value)}><option value="" />{lk.technicians.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.TechType}{x.Active ? '' : ' (inactive)'}</option>)}</select></label>
               <button className="btn" disabled={!newTech} onClick={addTech}><Plus size={14} /> Add</button>
@@ -217,7 +218,7 @@ export function CsTicket() {
           <div className="cs-grid2" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Ticket findings ({d.errors.length})</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <thead><tr><th>Error</th><th>Stage</th><th>Lead technician</th><th /></tr></thead>
                 <tbody>
                   {d.errors.map((x) => (
@@ -229,7 +230,7 @@ export function CsTicket() {
                   ))}
                   {!d.errors.length && <tr><td colSpan={4} className="muted">No findings entered</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
               <form className="form" onSubmit={submitFinding} style={{ marginTop: 10 }}>
                 <fieldset>
                   <legend>Enter ticket findings</legend>
@@ -246,7 +247,7 @@ export function CsTicket() {
               <div className="panel-head"><h2>Material{selErr ? ` · finding #${selErr}` : ''}</h2></div>
               {!selErr ? <p className="muted">First click on the finding on the left before you enter material.</p> : (
                 <>
-                  <div className="table-wrap flat"><table className="grid compact">
+                  <div className="table-wrap flat"><Grid className="grid compact">
                     <thead><tr><th>Item</th><th className="num">Qty</th><th className="num">Cost ea</th><th className="num">Ext</th><th /></tr></thead>
                     <tbody>
                       {mats.map((m) => (
@@ -261,7 +262,7 @@ export function CsTicket() {
                       {!mats.length && <tr><td colSpan={5} className="muted">No material on this finding</td></tr>}
                     </tbody>
                     {mats.length > 0 && <tfoot><tr><td colSpan={3}><b>Total</b></td><td className="num"><b>{money(mats.reduce((s, m) => s + Number(m.ExtCost || 0), 0))}</b></td><td /></tr></tfoot>}
-                  </table></div>
+                  </Grid></div>
                   <form className="cs-inline" style={{ marginTop: 10 }} onSubmit={addMat}>
                     <label style={{ flexBasis: 220 }}>Item<SearchSelect endpoint="/cs/items/search" value={mat.InvItemId} label={mat.label} placeholder="Search item…" onSelect={(r) => setMat({ ...mat, InvItemId: r?.id ?? null, label: r?.name ?? '', ItemCostEa: r?.JobCostPrice != null ? String(Number(r.JobCostPrice)) : '' })} /></label>
                     <label style={{ flexBasis: 70 }}>Qty<input inputMode="decimal" value={mat.Quantity} onChange={(e) => setMat({ ...mat, Quantity: e.target.value })} /></label>

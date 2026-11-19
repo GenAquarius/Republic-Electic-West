@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PmTabs, int, usePmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 export function PmCustomers() {
   const nav = useNavigate()
@@ -40,11 +41,11 @@ export function PmCustomers() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={3} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Customer</th><th>Status</th><th className="num">Jobs</th><th>Notes</th></tr></thead>
             <tbody>{d.rows.map((r) => <tr key={r.PmCustID} className="link-row" onClick={() => nav(`/pm/customers/${r.PmCustID}`)}><td><a><b>{r.Customer}</b></a></td><td><Badge tone={r.StatusId === 1 ? 'green' : 'neutral'}>{r.Status || '—'}</Badge></td><td className="num">{r.Jobs}</td><td className="wrap">{r.Notes}</td></tr>)}
               {!d.rows.length && <tr><td colSpan={4}><EmptyState title="No customers match" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -116,7 +117,7 @@ export function PmCustomer() {
                 <label className="span3">Notes<input maxLength={255} {...jf('Notes')} /></label>
               </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save job</button><button type="button" className="btn" onClick={() => setJob(null)}><X size={15} /> Cancel</button></div></form>
             )}
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Job</th><th>Div</th><th>Type</th><th>Number</th><th>Status</th><th className="num">Bids</th><th>In Job setup</th><th /></tr></thead>
               <tbody>{d.jobs.map((j) => (
                 <tr key={j.PmJobID} className={`link-row${selJob === j.PmJobID ? ' selected' : ''}`} onClick={() => setSelJob(j.PmJobID)}>
@@ -127,7 +128,7 @@ export function PmCustomer() {
                   </td>
                 </tr>
               ))}{!d.jobs.length && <tr><td colSpan={8}><EmptyState title="No jobs yet" /></td></tr>}</tbody>
-            </table></div>
+            </Grid></div>
           </section>
 
           {sj && (
@@ -144,7 +145,7 @@ export function PmCustomer() {
                   <label className="span3">Notes<input maxLength={255} {...bf('Notes')} /></label>
                 </fieldset><div className="row form-actions"><button className="btn primary"><Save size={15} /> Save bid</button><button type="button" className="btn" onClick={() => setBid(null)}><X size={15} /> Cancel</button></div></form>
               )}
-              <div className="table-wrap"><table className="grid compact">
+              <div className="table-wrap"><Grid className="grid compact">
                 <thead><tr><th>Bid</th><th>Release</th><th>Name</th><th>Date</th><th>Status</th><th className="num">Plans</th><th /><th /></tr></thead>
                 <tbody>{bids.map((b) => (
                   <tr key={b.PmContractID} className="link-row" onClick={() => nav(`/pm/bids/${b.PmContractID}`)}>
@@ -156,7 +157,7 @@ export function PmCustomer() {
                     </td>
                   </tr>
                 ))}{!bids.length && <tr><td colSpan={8}><EmptyState title="No bids for this job" /></td></tr>}</tbody>
-              </table></div>
+              </Grid></div>
             </section>
           )}
         </>

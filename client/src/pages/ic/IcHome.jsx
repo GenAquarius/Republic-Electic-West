@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { IcTabs, int, money0 } from './shared'
+import Grid from '../../components/Grid'
 
 export default function IcHome() {
   const nav = useNavigate()
@@ -57,7 +58,7 @@ export default function IcHome() {
         <div className="dash-grid">
           <section className="panel span-2">
             <div className="panel-head"><h2><RefreshCw size={16} /> Update on-hand &amp; on-order quantities</h2><span className="muted small">Posts job-cost use, PO receipts and adjustments per division</span></div>
-            <table className="grid">
+            <Grid className="grid">
               <thead><tr><th>Division</th><th className="num">Items stocked</th><th className="num">Value</th><th className="num">Job-cost lines</th><th className="num">Receipts</th><th className="num">Adjustments</th><th /></tr></thead>
               <tbody>
                 {ov.stock.map((d) => {
@@ -74,15 +75,15 @@ export default function IcHome() {
                   )
                 })}
               </tbody>
-            </table>
+            </Grid>
           </section>
           <section className="panel">
             <div className="panel-head"><h2>Recent counts</h2><Link to="/ic/counts" className="panel-link">All counts <ArrowRight size={13} /></Link></div>
             {!ov.recentCounts.length ? <p className="muted small">No counts yet.</p> : (
-              <table className="grid compact"><thead><tr><th>Date</th><th>Div</th><th>Status</th></tr></thead>
+              <Grid className="grid compact"><thead><tr><th>Date</th><th>Div</th><th>Status</th></tr></thead>
                 <tbody>{ov.recentCounts.map((c) => (
                   <tr key={c.InventoryID} className="link-row" onClick={() => nav(`/ic/counts/${c.InventoryID}`)}><td><a>{fmtDate(c.InvDate)}</a></td><td>{c.DivisionId}</td><td>{c.Posted ? <Badge tone="green">Posted</Badge> : <Badge tone="amber">Open</Badge>}</td></tr>
-                ))}</tbody></table>
+                ))}</tbody></Grid>
             )}
             {ov.recentCounts.some((c) => !c.Posted) && <div className="banner" style={{ marginTop: 10 }}><AlertTriangle size={16} /> A count is open and not yet posted.</div>}
           </section>

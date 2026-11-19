@@ -5,6 +5,7 @@ import { api } from '../../api'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CmTabs, useCmLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export default function CmJobs() {
   const nav = useNavigate()
@@ -35,7 +36,7 @@ export default function CmJobs() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={4} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Job</th><th>Div</th><th>Customer</th><th>Job #</th><th>Status</th><th className="num">Contracts</th><th className="num">Not executed</th></tr></thead>
             <tbody>{d.rows.map((r) => (
               <tr key={r.PmJobID} className="link-row" onClick={() => nav(`/cm/jobs/${r.PmJobID}`)}>
@@ -44,7 +45,7 @@ export default function CmJobs() {
                 <td className="num">{r.Contracts || ''}</td><td className="num">{r.NotExecuted ? <Badge tone="amber">{r.NotExecuted}</Badge> : ''}</td>
               </tr>
             ))}{!d.rows.length && <tr><td colSpan={7}><EmptyState title="No jobs match" /></td></tr>}</tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}

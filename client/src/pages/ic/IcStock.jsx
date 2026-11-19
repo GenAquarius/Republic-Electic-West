@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { IcTabs, int, money, money0, useIcLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function IcTransactions() {
   const lk = useIcLookups()
@@ -66,7 +67,7 @@ export function IcTransactions() {
       </div>
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid">
+          <Grid serverPaged className="grid">
             <thead><tr><th>#</th><th>Date</th><th>Div</th><th>Item</th><th>Type</th><th className="num">Qty</th><th className="num">Value ea</th><th className="num">Ext value</th><th>Status</th><th>Notes</th><th /></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -79,7 +80,7 @@ export function IcTransactions() {
               ))}
               {!data.rows.length && <tr><td colSpan={11}><EmptyState title="No transactions match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => setSp({ ...p, page: pg })} />}
@@ -120,7 +121,7 @@ export function IcCounts() {
       </form>
       <div className="table-wrap">
         {!rows ? <div style={{ padding: 16 }}><SkeletonRows rows={5} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid className="grid clickable">
             <thead><tr><th>Date</th><th>Division</th><th>Activity period</th><th className="num">Lines</th><th className="num">Changed</th><th className="num">Difference value</th><th>Status</th><th>By</th></tr></thead>
             <tbody>
               {rows.map((c) => (
@@ -131,7 +132,7 @@ export function IcCounts() {
               ))}
               {!rows.length && <tr><td colSpan={8}><EmptyState title="No counts yet" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>
@@ -190,7 +191,7 @@ export function IcCountDetail() {
       </div>
       <div className="table-wrap">
         {!d ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={4} /></div> : (
-          <table className="grid compact">
+          <Grid serverPaged className="grid compact">
             <thead><tr><th>Class</th><th>Item</th><th>Description</th><th className="num">Value ea</th><th className="num">System qty</th><th className="num">Counted</th><th className="num">Diff</th><th className="num">Diff value</th></tr></thead>
             <tbody>
               {d.rows.map((r) => {
@@ -205,7 +206,7 @@ export function IcCountDetail() {
               })}
               {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No lines match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {d && <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />}

@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, money, num, today, useCsLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function CsQuotes() {
   const nav = useNavigate()
@@ -25,7 +26,7 @@ export function CsQuotes() {
       <div className="filters"><div className="search-wrap"><input type="search" aria-label="Search quotes" placeholder="Quote #, name, homeowner or address…" value={q} onChange={(e) => setQ(e.target.value)} /></div></div>
       {error && <ErrorState message={error} />}
       {!rows ? <SkeletonRows rows={6} cols={5} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Quote</th><th>Date</th><th>Name</th><th>Homeowner</th><th>Property</th><th>Approved</th><th>Paid</th><th className="num">Total</th></tr></thead>
           <tbody>
             {rows.map((r) => (
@@ -36,7 +37,7 @@ export function CsQuotes() {
             ))}
             {!rows.length && <tr><td colSpan={8}><EmptyState title="No quotes yet"><Link to="/cs/quotes/new">Create the first quote</Link></EmptyState></td></tr>}
           </tbody>
-        </table></div>
+        </Grid></div>
       )}
     </div>
   )
@@ -145,7 +146,7 @@ export function CsQuote() {
             return (
               <section key={c.QuoteCategoryID} className="panel" style={{ marginTop: 16 }}>
                 <div className="panel-head"><h2>{c.CategoryName}</h2>{d.categories.length > 1 && <button className="btn small icon no-print" aria-label="Delete category" onClick={() => delCategory(c)}><Trash2 size={13} /></button>}</div>
-                <div className="table-wrap flat"><table className="grid compact">
+                <div className="table-wrap flat"><Grid className="grid compact">
                   <thead><tr><th>Assembly / item</th><th>CC</th><th className="num">Qty</th><th className="num">Cost ea</th><th className="num">Price ea</th><th className="num">Ext price</th><th className="no-print" /></tr></thead>
                   <tbody>
                     {qa.map((a) => (
@@ -175,7 +176,7 @@ export function CsQuote() {
                     ))}
                     {!qa.length && !it.length && <tr><td colSpan={7} className="muted">No lines yet</td></tr>}
                   </tbody>
-                </table></div>
+                </Grid></div>
                 <div className="cs-inline no-print" style={{ marginTop: 10 }}>
                   <label>Add assembly<select value={addA[c.QuoteCategoryID]?.CsAssemblyId || ''} onChange={(e) => setAddA({ ...addA, [c.QuoteCategoryID]: { ...addA[c.QuoteCategoryID], CsAssemblyId: e.target.value } })}><option value="" />{asms.map((a) => <option key={a.CsAssemblyID} value={a.CsAssemblyID}>{a.AssemblyName} ({money(a.SalePrice)})</option>)}</select></label>
                   <label style={{ flexBasis: 70 }}>Qty<input inputMode="decimal" value={addA[c.QuoteCategoryID]?.Quantity ?? '1'} onChange={(e) => setAddA({ ...addA, [c.QuoteCategoryID]: { ...addA[c.QuoteCategoryID], Quantity: e.target.value } })} /></label>
@@ -195,7 +196,7 @@ export function CsQuote() {
           </form>
           <section className="panel" style={{ marginTop: 16 }}>
             <div className="panel-head"><h2>Totals</h2></div>
-            <div className="table-wrap flat"><table className="grid compact">
+            <div className="table-wrap flat"><Grid className="grid compact">
               <tbody>
                 <tr><td>Assemblies</td><td className="num">{money(t.assemblies)}</td></tr>
                 <tr><td>Items and labor</td><td className="num">{money(t.items)}</td></tr>
@@ -207,7 +208,7 @@ export function CsQuote() {
                 <tr><td><b>Total</b></td><td className="num"><b>{money(t.total)}</b></td></tr>
                 <tr className="no-print cs-mini"><td>Cost (labor at hourly rate) · real cost at job cost price · profit</td><td className="num">{money(t.cost)} · {money(t.realCost)} · {money(t.profit)}</td></tr>
               </tbody>
-            </table></div>
+            </Grid></div>
           </section>
         </>
       )}

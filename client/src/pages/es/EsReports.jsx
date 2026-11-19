@@ -8,6 +8,7 @@ import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { useEsCascade } from './EsTransfer'
 import { EsTabs, download, money, money4, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { key: 'bid-detail', label: 'Bid full detail', icon: FileText, needs: 'bid', text: 'Every plan, pack and item of an estimating bid with its total value' },
@@ -75,7 +76,7 @@ function BidDetail({ d }) {
     <>
       <div className="fm-head"><div><h2>Estimating bid</h2><div className="muted">{h.Customer} · Project {h.Job} · Bid {h.BidNum} · {fmtDate(h.BidDate)} · Recipient {h.Recipient || '—'} · Estimator {h.Estimator || '—'}</div></div></div>
       {!plans.length ? <EmptyState title="This bid has no pack material" /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Item / description</th><th className="num">Quantity</th><th className="num">Total value</th></tr></thead>
           <tbody>{plans.map((p) => (
             <Fragment key={p.id}>
@@ -93,7 +94,7 @@ function BidDetail({ d }) {
             <tr><td colSpan={2} style={{ textAlign: 'right' }}>Contingency labor</td><td className="num">{money(h.ContingencyLaborTotalValue)}</td></tr>
             <tr><td colSpan={2} style={{ textAlign: 'right' }}><b>Bid total</b></td><td className="num"><b>{money(h.BidTotal)}</b></td></tr>
           </tfoot>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )
@@ -106,11 +107,11 @@ function JobHistory({ d }) {
       <div className="fm-head"><div><h2>Job history log</h2><div className="muted">{j.Customer}{j.CustomerNotes ? ` (${j.CustomerNotes})` : ''} · {j.Job} · {j.JobType || '—'} · Job # {j.JobNumber || '—'}</div>
         <div className="muted small">Spec level {j.SpecLevel || '—'} · Jurisdiction {j.Juris || '—'} · Division {j.DivisionId} · Est {fmtDate(j.EstStartDate) || '—'} – {fmtDate(j.EstEndDate) || '—'} · Units {j.UnitQty ?? '—'} · {j.Status}{j.Notes ? ` · ${j.Notes}` : ''}</div></div>
         <Link className="btn small no-print" to={`/es/job-log?job=${j.PmJobID}`}>Open log</Link></div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Date entered</th><th>User</th><th>Title</th><th>Effective phase</th><th>Effective date</th><th>Type</th><th>Contract #</th><th>Work agree #</th><th>Addendum #</th><th>Executed</th><th>Notes</th></tr></thead>
         <tbody>{d.entries.map((n) => <tr key={n.CmContractID}><td>{fmtDate(n.DateEntered)}</td><td>{n.UserEntered}</td><td className="wrap">{n.Description}</td><td>{n.EffectivePhase}</td><td>{fmtDate(n.EffectiveDate)}</td><td>{n.Type}</td><td>{n.ContractNumber}</td><td>{n.WorkAgreeNum}</td><td>{n.AddendumNumber}</td><td>{yes(n.Executed) ? 'Yes' : ''}</td><td className="wrap">{n.Notes}</td></tr>)}
           {!d.entries.length && <tr><td colSpan={11}><EmptyState title="No log entries" /></td></tr>}</tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -120,10 +121,10 @@ function LowPrices({ d }) {
     <>
       <div className="fm-head"><div><h2>Low estimating prices – check</h2><div className="muted">Active items only · {d.length} item(s) · Disc: (higher of last cost and average cost) minus estimating price</div></div></div>
       {!d.length ? <EmptyState title="No low estimating prices" /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>Class</th><th>Inventory item</th><th className="num">Last cost</th><th className="num">Average cost</th><th className="num">Labor cost</th><th className="num">Estimating price</th><th className="num">Disc</th><th>Last purchase</th><th>Notes</th></tr></thead>
           <tbody>{d.map((r) => <tr key={r.InvItemID}><td>{r.InvClass}</td><td><Link to={`/es/items/${r.InvItemID}`}>{r.InvItem}</Link></td><td className="num">{money4(r.LastCost)}</td><td className="num">{money4(r.AverageCost)}</td><td className="num">{money4(r.LaborCost)}</td><td className="num">{money4(r.EstimatingPrice)}</td><td className={`num${r.Disc > 0 ? ' neg' : ''}`}>{money4(r.Disc)}</td><td>{fmtDate(r.LastPurchase)}</td><td className="wrap">{r.Notes}</td></tr>)}</tbody>
-        </table></div>
+        </Grid></div>
       )}
     </>
   )

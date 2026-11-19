@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PoTabs, download, int, money, money0, usePoLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const KINDS = [['backordered', 'Back ordered'], ['not-billed', 'Received, not billed'], ['overages', 'Overages'], ['all', 'All PO lines'], ['by', 'Totals'], ['price', 'Price fluctuation']]
 
@@ -51,23 +52,23 @@ export default function PoReports() {
       {!ready ? <SkeletonRows rows={8} cols={4} /> : p.kind === 'by' ? (
         <>
           <div className="kpis"><StatCard label="Purchase orders" tone="blue" value={int(data.totals.Pos)} foot="In the range" /><StatCard label="Value" tone="green" value={money0(data.totals.Value)} foot="Quantity × cost" /></div>
-          <div className="table-wrap"><table className="grid compact"><thead><tr><th>{p.groupBy === 'vendor' ? 'Vendor' : p.groupBy === 'division' ? 'Division' : 'Class'}</th><th className="num">POs</th><th className="num">Lines</th><th className="num">Value</th></tr></thead>
-            <tbody>{data.rows.map((r) => <tr key={r.GroupLabel}><td><b>{r.GroupLabel}</b></td><td className="num">{int(r.Pos)}</td><td className="num">{int(r.Lines)}</td><td className="num">{money0(r.Value)}</td></tr>)}{!data.rows.length && <tr><td colSpan={4}><EmptyState title="Nothing in this range" /></td></tr>}</tbody></table></div>
+          <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>{p.groupBy === 'vendor' ? 'Vendor' : p.groupBy === 'division' ? 'Division' : 'Class'}</th><th className="num">POs</th><th className="num">Lines</th><th className="num">Value</th></tr></thead>
+            <tbody>{data.rows.map((r) => <tr key={r.GroupLabel}><td><b>{r.GroupLabel}</b></td><td className="num">{int(r.Pos)}</td><td className="num">{int(r.Lines)}</td><td className="num">{money0(r.Value)}</td></tr>)}{!data.rows.length && <tr><td colSpan={4}><EmptyState title="Nothing in this range" /></td></tr>}</tbody></Grid></div>
         </>
       ) : p.kind === 'price' ? (
-        <div className="table-wrap"><table className="grid compact"><thead><tr><th>Item</th><th>Description</th><th>Class</th><th className="num">PO lines</th><th className="num">Lowest</th><th className="num">Highest</th><th className="num">Average</th><th className="num">Spread</th></tr></thead>
+        <div className="table-wrap"><Grid className="grid compact"><thead><tr><th>Item</th><th>Description</th><th>Class</th><th className="num">PO lines</th><th className="num">Lowest</th><th className="num">Highest</th><th className="num">Average</th><th className="num">Spread</th></tr></thead>
           <tbody>{data.rows.map((r) => <tr key={r.InvItemID}><td><Link to={`/ic/items/${r.InvItemID}`}><b>{r.InvItem}</b></Link></td><td className="wrap">{r.Description}</td><td>{r.InvClass}</td><td className="num">{int(r.Lines)}</td><td className="num">{money(r.MinCost, 4)}</td><td className="num">{money(r.MaxCost, 4)}</td><td className="num">{money(r.AvgCost, 4)}</td><td className="num"><b>{r.SpreadPct == null ? '' : `${Number(r.SpreadPct).toFixed(1)}%`}</b></td></tr>)}
-            {!data.rows.length && <tr><td colSpan={8}><EmptyState title="No item changed price in this range" /></td></tr>}</tbody></table></div>
+            {!data.rows.length && <tr><td colSpan={8}><EmptyState title="No item changed price in this range" /></td></tr>}</tbody></Grid></div>
       ) : (
         <>
           <div className="kpis"><StatCard label="Lines" tone="blue" value={int(data.total)} foot={KINDS.find(([k]) => k === p.kind)[1]} /><StatCard label="Ordered value" tone="green" value={money0(data.value)} foot="Quantity × cost" /></div>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>PO #</th><th>Date</th><th>Vendor</th><th>Div</th><th>Item</th><th>Description</th><th className="num">Ordered</th><th className="num">Received</th><th className="num">Billed</th><th className="num">{p.kind === 'backordered' ? 'Back ordered' : p.kind === 'not-billed' ? 'Not billed' : p.kind === 'overages' ? 'Overage' : 'Cost'}</th></tr></thead>
             <tbody>{data.rows.map((r) => <tr key={`${r.PoNum}-${r.InvItemID}`}>
               <td><Link to={`/po/orders/${r.PoNum}`}><b>{r.PoNum}</b></Link></td><td>{fmtDate(r.PoDate)}</td><td className="wrap">{r.Vendor}</td><td>{r.DivisionId}</td><td><b>{r.InvItem}</b></td><td className="wrap">{r.Description}</td>
               <td className="num">{int(r.Quantity)}</td><td className="num">{int(r.Received)}</td><td className="num">{int(r.Billed)}</td>
               <td className="num">{p.kind === 'backordered' ? int(r.BackOrdered) : p.kind === 'not-billed' ? int(r.NotBilled) : p.kind === 'overages' ? int(r.Overage) : money(r.Cost, 4)}</td></tr>)}
-              {!data.rows.length && <tr><td colSpan={10}><EmptyState title="Nothing to list" /></td></tr>}</tbody></table></div>
+              {!data.rows.length && <tr><td colSpan={10}><EmptyState title="Nothing to list" /></td></tr>}</tbody></Grid></div>
           <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}

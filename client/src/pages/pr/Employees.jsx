@@ -6,6 +6,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PrTabs, money, usePrLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function Employees() {
   const nav = useNavigate()
@@ -52,7 +53,7 @@ export function Employees() {
       {error && <ErrorState message={error} />}
       <div className="table-wrap">
         {!data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className="grid clickable">
+          <Grid serverPaged className="grid clickable">
             <thead><tr><th>Emp #</th><th>Name</th><th>Division</th><th>Title</th><th>Pay type</th><th>Hired</th><th>Last paid</th><th>Status</th></tr></thead>
             <tbody>
               {data.rows.map((r) => (
@@ -64,7 +65,7 @@ export function Employees() {
               ))}
               {!data.rows.length && <tr><td colSpan={8}><EmptyState icon={Users} title="No employees match" /></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && <Pager page={data.page} pageSize={data.pageSize} total={data.total} onPage={(p) => setSp({ ...params, page: p })} />}
@@ -172,12 +173,12 @@ export function EmployeeDetail() {
         <section className="panel">
           <div className="panel-head"><h2>Recent payrolls</h2><Link className="panel-link" to={`/pr/reports?employeeId=${id}&groupBy=payroll&name=${encodeURIComponent(name)}`}>All labor paid</Link></div>
           {!info.recentPayrolls.length ? <p className="muted small">Never paid.</p> : (
-            <table className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Lines</th><th className="num">Hours</th><th className="num">Pay</th></tr></thead>
+            <Grid className="grid compact"><thead><tr><th>Payroll date</th><th className="num">Lines</th><th className="num">Hours</th><th className="num">Pay</th></tr></thead>
               <tbody>{info.recentPayrolls.map((r) => {
                 const ds = String(r.PayrollDate).slice(0, 10)
                 return <tr key={ds} className="link-row" onClick={() => nav(`/pr/reports?employeeId=${id}&from=${ds}&to=${ds}&view=detail&name=${encodeURIComponent(name)}`)}>
                   <td><a>{fmtDate(r.PayrollDate)}</a></td><td className="num">{r.lines}</td><td className="num">{Number(r.hours || 0).toLocaleString()}</td><td className="num">{money(r.pay)}</td></tr>
-              })}</tbody></table>
+              })}</tbody></Grid>
           )}
         </section>
       )}

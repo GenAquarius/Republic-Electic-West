@@ -5,6 +5,8 @@ import { api } from '../api'
 import { fmtDate, fmtMoney } from '../format'
 import { EmptyState, ErrorState, SkeletonRows } from './ui'
 import { Pager } from './Pickers'
+import Grid from './Grid'
+import { fetchAllPages } from './gridExport'
 
 export const fmtCell = (v, type) => {
   if (v == null || v === '') return <span className="faint">—</span>
@@ -29,6 +31,12 @@ export default function DrillTable({ endpoint, columns, params = {}, rowLink, se
   const [loading, setLoading] = useState(true)
   const page = parseInt(sp.get('page') || '1', 10)
   const key = JSON.stringify(params) + sp.toString()
+
+  // Export: every record matching the current search / filters, not just this page
+  const exportAll = async () => {
+    const rows = await fetchAllPages((page, pageSize) => api(endpoint, { params: { ...params, ...Object.fromEntries(sp.entries()), page, pageSize } }))
+    return { columns: columns.map((c) => c.label), rows: rows.map((r) => columns.map((c) => (r[c.key] == null || r[c.key] === '' ? '' : c.type === 'date' ? fmtDate(r[c.key]) : c.type === 'money' ? fmtMoney(r[c.key]) : r[c.key]))) }
+  }
 
   const load = () => {
     setLoading(true); setError('')
@@ -66,7 +74,7 @@ export default function DrillTable({ endpoint, columns, params = {}, rowLink, se
       {error && <ErrorState message={error} onRetry={load} />}
       <div className="table-wrap">
         {loading && !data ? <div style={{ padding: 16 }}><SkeletonRows rows={8} cols={3} /></div> : (
-          <table className={`grid${rowLink ? ' clickable' : ''}`} aria-busy={loading}>
+          <Grid serverPaged exportAll={exportAll} className={`grid${rowLink ? ' clickable' : ''}`} aria-busy={loading}>
             <thead><tr>{columns.map((c) => <th key={c.key} className={['money', 'num'].includes(c.type) ? 'num' : ''}>{c.label}</th>)}</tr></thead>
             <tbody>
               {data?.rows.map((r, i) => {
@@ -86,7 +94,7 @@ export default function DrillTable({ endpoint, columns, params = {}, rowLink, se
                 <tr><td colSpan={columns.length}><EmptyState title={emptyTitle}>{sp.get('search') ? 'Try a different search.' : null}</EmptyState></td></tr>
               )}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
       {data && data.total > data.pageSize && (

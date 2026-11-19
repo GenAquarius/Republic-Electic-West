@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { JobLotPicker, SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { TmTabs, lotLabel, money, qty, statusOf, useTmLookups } from './shared'
+import Grid from '../../components/Grid'
 
 const pct = (v) => `${(Number(v || 0) * 100).toFixed(2).replace(/\.?0+$/, '')}%`
 
@@ -211,7 +212,7 @@ export default function TmDetail() {
                     )}
                   </div>
                   <div className="table-wrap flat">
-                    <table className="grid compact">
+                    <Grid className="grid compact">
                       <thead><tr><th>Item</th><th>Description</th><th>Code</th><th className="num">Qty</th><th className="num">Cost ea</th><th className="num">Price ea</th><th className="num">Ext price</th><th /></tr></thead>
                       <tbody>
                         {p.materials.map((m) => editLine?.id === m.TmMaterialID ? (
@@ -245,7 +246,7 @@ export default function TmDetail() {
                           </tr>
                         )}
                       </tbody>
-                    </table>
+                    </Grid>
                   </div>
                 </div>
               )

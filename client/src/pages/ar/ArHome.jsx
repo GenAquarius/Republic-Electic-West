@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import BarChart from '../../components/BarChart'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { ArTabs, int, money, money0 } from './shared'
+import Grid from '../../components/Grid'
 
 export default function ArHome() {
   const nav = useNavigate()
@@ -39,12 +40,12 @@ export default function ArHome() {
         <section className="panel span-2">
           <div className="panel-head"><h2>Latest invoices</h2><Link className="panel-link" to="/ar/invoices">All invoices <ArrowRight size={13} /></Link></div>
           {!d ? <SkeletonRows rows={4} cols={3} /> : (
-            <div className="table-wrap"><table className="grid compact">
+            <div className="table-wrap"><Grid className="grid compact">
               <thead><tr><th>Invoice</th><th>Date</th><th>Builder</th><th>Job</th><th>Lot</th><th className="num">Total</th></tr></thead>
               <tbody>{d.recent.map((r) => (
                 <tr key={r.BillID} className="link-row" onClick={() => nav(`/ar/invoices/${r.BillID}`)}><td><a>{r.BillID}</a></td><td>{fmtDate(r.Date)}</td><td>{r.CustName}</td><td className="wrap">{r.JobName}</td><td>{r.LotBlock}</td><td className="num">{r.Total < 0 ? <Badge tone="red">{money(r.Total)}</Badge> : money(r.Total)}</td></tr>
               ))}</tbody>
-            </table></div>
+            </Grid></div>
           )}
         </section>
       </div>

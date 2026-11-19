@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { Cascade, CmTabs, JS_LEVELS, JS_PHASE, PM_LEVELS, download, int, money, useCmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 // needs: pm (1 customer, 2 + job, 3 + bid), division, dates, phase (JS customer → job → phase), jsjob (JS customer → job)
 const CM = [['Type', 'Type'], ['ContractNumber', 'Contract'], ['WorkAgreeNum', 'Work agreement'], ['AddendumNumber', 'Addendum'], ['Description', 'Description'], ['EffectivePhase', 'Eff. phase'], ['EffectiveDate', 'Eff. date', 'date'], ['Executed', 'Executed', 'bool'], ['Notes', 'Notes']]
@@ -154,7 +155,7 @@ function Table({ rows, cols, group, sum, groupExtra }) {
   const total = (list, c) => list.reduce((a, r) => a + Number(r[c] || 0), 0)
   const numeric = (t) => t === 'money' || t === 'num'
   return (
-    <div className="table-wrap"><table className="grid compact">
+    <div className="table-wrap"><Grid className="grid compact">
       <thead><tr>{cols.map(([c, l, t]) => <th key={c} className={numeric(t) ? 'num' : ''}>{l}</th>)}</tr></thead>
       {groups.map((gr, gi) => (
         <tbody key={gi}>
@@ -164,7 +165,7 @@ function Table({ rows, cols, group, sum, groupExtra }) {
         </tbody>
       ))}
       {sum && <tfoot><tr>{cols.map(([c], i) => <td key={c} className="num">{i === 0 ? <b style={{ float: 'left' }}>Total</b> : sum.includes(c) ? <b>{money(total(rows, c))}</b> : ''}</td>)}</tr></tfoot>}
-    </table></div>
+    </Grid></div>
   )
 }
 

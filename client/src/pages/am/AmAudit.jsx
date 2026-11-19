@@ -8,6 +8,7 @@ import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { download } from '../po/shared'
 import AmTabs from './AmTabs'
+import Grid from '../../components/Grid'
 
 const KEYS = ['fromValue', 'toValue', 'contractTermsId', 'monitoringTypeId', 'cancellationReason', 'status']
 const money = (v) => (v == null ? '—' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD' }))
@@ -69,7 +70,7 @@ export default function AmAudit() {
       {!d && !error ? <SkeletonRows rows={8} cols={6} /> : d && (
         <>
           <p className="muted small">{d.rows.length} account(s) · total monthly value {money(d.total)}</p>
-          <div className="table-wrap"><table className="grid">
+          <div className="table-wrap"><Grid className="grid">
             <thead><tr><th>Acct #</th><th>Customer</th><th>Terms</th><th className="num">Monthly</th><th>City</th><th>Zip</th><th>Monitoring type</th><th>Activated</th><th>Renewal</th><th>Disconnected</th><th>Reason</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -82,7 +83,7 @@ export default function AmAudit() {
               ))}
               {!d.rows.length && <tr><td colSpan={11}><EmptyState icon={ClipboardCheck} title="No accounts">No accounts match these filters.</EmptyState></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
         </>
       )}
     </div>

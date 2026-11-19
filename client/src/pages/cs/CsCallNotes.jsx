@@ -7,6 +7,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, int, today } from './shared'
+import Grid from '../../components/Grid'
 
 const empty = () => ({ CallDate: today(), PropertyId: null, label: '', Customer: '', CallNotes: '', FollowUp: '' })
 
@@ -62,7 +63,7 @@ export default function CsCallNotes() {
       </div>
       {!d ? <SkeletonRows rows={6} cols={4} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Date</th><th>Property</th><th>Customer</th><th>Notes</th><th>Follow up</th><th>Entered</th><th /></tr></thead>
             <tbody>
               {d.rows.map((n) => edit?.id === n.CallNotesID ? (
@@ -87,7 +88,7 @@ export default function CsCallNotes() {
               ))}
               {!d.rows.length && <tr><td colSpan={7}><EmptyState title="No call notes" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}

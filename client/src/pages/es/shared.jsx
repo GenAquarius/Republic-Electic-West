@@ -3,6 +3,7 @@ import { Save, X } from 'lucide-react'
 import { api } from '../../api'
 import ModuleTabs from '../../components/ModuleTabs'
 import { SearchSelect } from '../../components/Pickers'
+import Grid from '../../components/Grid'
 
 export { int, download } from '../po/shared'
 
@@ -166,13 +167,13 @@ export function AssemblySelector({ title, onAdd, onCancel, requireQty, busy }) {
         <label>Assembly type<select aria-label="Assembly type" value={t} disabled={!g} onChange={(e) => setT(e.target.value)}><option value="">Choose…</option>{types.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></label>
       </fieldset></div>
       {t && (
-        <div className="table-wrap" style={{ maxHeight: 320, overflow: 'auto' }}><table className="grid compact">
+        <div className="table-wrap" style={{ maxHeight: 320, overflow: 'auto' }}><Grid className="grid compact">
           <thead><tr><th>Select</th><th>Assembly</th><th>Description</th><th className="num">Items</th><th className="num">Quantity</th></tr></thead>
           <tbody>{rows.map((r) => (
             <tr key={r.id}><td><input type="checkbox" aria-label={`Select ${r.name}`} checked={!!sel[r.id]} onChange={(e) => toggle(r, e.target.checked)} /></td><td>{r.name}</td><td className="wrap">{r.Description}</td><td className="num">{r.Items}</td>
               <td className="num">{sel[r.id] && <input aria-label={`Quantity ${r.name}`} inputMode="numeric" style={{ width: 80 }} value={sel[r.id].qty} onChange={(e) => setSel((s) => ({ ...s, [r.id]: { ...s[r.id], qty: e.target.value } }))} />}</td></tr>
           ))}{!rows.length && <tr><td colSpan={5} className="muted">No assemblies of this type</td></tr>}</tbody>
-        </table></div>
+        </Grid></div>
       )}
       {picked.length > 0 && <p className="muted small">Selected: {picked.map(([, v]) => `${v.name} × ${v.qty || 0}`).join(' · ')}</p>}
       <div className="row form-actions">

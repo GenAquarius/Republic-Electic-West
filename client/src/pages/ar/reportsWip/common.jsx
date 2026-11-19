@@ -93,23 +93,24 @@ export function WipTable({ rows, cols, level = 2 }) {
     out.push(totalRow(`Total for ${c.name}`, c.jobs.flatMap((j) => j.rows), `ct${c.name}`))
   }
   return (
-    <div className="table-wrap arw-wide"><table className="grid compact">
+    <div className="table-wrap arw-wide"><Grid className="grid compact">
       <thead><tr>{cols.map(([k, l, type]) => <th key={k} className={type === 'money' || type === 'pct' ? 'num' : ''}>{l}</th>)}</tr></thead>
       <tbody>{out}{totalRow('Total billing', rows, 'grand', true)}</tbody>
-    </table></div>
+    </Grid></div>
   )
 }
 
 export function Plain({ rows, cols, total }) {
   return (
-    <div className="table-wrap"><table className="grid compact">
+    <div className="table-wrap"><Grid className="grid compact">
       <thead><tr>{cols.map(([k, l, type]) => <th key={k} className={type === 'money' || type === 'num' ? 'num' : ''}>{l}</th>)}</tr></thead>
       <tbody>
         {rows.map((r, i) => <tr key={i}>{cols.map(([k, , type]) => <td key={k} className={type === 'money' || type === 'num' ? 'num' : ''}>{type === 'money' ? (r[k] == null ? '' : money(r[k])) : type === 'date' ? fmtDate(r[k]) : r[k] ?? ''}</td>)}</tr>)}
         {total && <tr className="subtotal">{cols.map(([k, , type], i) => <td key={k} className={type === 'money' || type === 'num' ? 'num' : ''}>{i === 0 ? <b>{total.label}</b> : total.values[k] !== undefined ? <b>{money(total.values[k])}</b> : ''}</td>)}</tr>}
       </tbody>
-    </table></div>
+    </Grid></div>
   )
 }
 
 export const Sec = ({ title, children }) => <section className="arw-sec"><h3>{title}</h3>{children}</section>
+import Grid from '../../../components/Grid'

@@ -5,6 +5,7 @@ import { Download, Printer } from 'lucide-react'
 import { api } from '../../api'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { MgTabs, download, int, money, money0, pct1, today, useMgLookups, yearAgo } from './shared'
+import Grid from '../../components/Grid'
 
 const KEY_LABEL = { DivisionId: 'Div', Customer: 'Builder', Job: 'Job', Phase: 'Phase', Lot: 'Lot', Block: 'Block', PlanNum: 'Plan', SuperName: 'Superintendent', SuperType: 'Type' }
 const COLS = [
@@ -61,7 +62,7 @@ export default function MgJobCost() {
             <StatCard label="Job cost" tone="amber" value={money0(t.JobCost)} foot={`Labor ${money0(t.JcLabor)} · material ${money0(t.JcMaterial)}`} />
             <StatCard label="Gross profit" tone={t.GrossProfit < 0 ? 'red' : 'green'} value={money0(t.GrossProfit)} foot={`${pct1(t.GrossProfitPer)} of ${money0(t.Billing)} billed`} />
           </div>
-          <div className="table-wrap"><table className="grid compact mg-jc">
+          <div className="table-wrap"><Grid className="grid compact mg-jc">
             <thead>
               <tr className="mg-band"><th colSpan={d.keys.length + 1} /><th colSpan={3}>Bid (estimating)</th><th colSpan={3}>Plan management</th><th colSpan={6}>Actual</th></tr>
               <tr>{d.keys.map((k) => <th key={k}>{KEY_LABEL[k] || k}</th>)}<th className="num">Lots</th>{COLS.map(([k, l]) => <th key={k} className="num">{l}</th>)}</tr>
@@ -77,7 +78,7 @@ export default function MgJobCost() {
               {!d.rows.length && <tr><td colSpan={d.keys.length + 1 + COLS.length}><EmptyState title="No lots finished in this range">Job cost covers lots with an end date between From and To.</EmptyState></td></tr>}
             </tbody>
             {d.rows.length > 0 && <tfoot><tr><td colSpan={d.keys.length}><b>Total</b></td><td className="num"><b>{int(t.Lots)}</b></td>{COLS.map(([k, , , f]) => <td key={k} className="num"><b>{f === 'pct' ? pct1(t[k]) : money(t[k])}</b></td>)}</tr></tfoot>}
-          </table></div>
+          </Grid></div>
           <p className="muted small">Bid columns come from the estimating bid linked to the contract (standard packs). Billed is everything invoiced on these lots; credits subtract.</p>
         </>
       )}

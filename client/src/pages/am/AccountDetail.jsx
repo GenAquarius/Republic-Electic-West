@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../../api'
 import { fmtDate, toInputDate } from '../../format'
 import ChildGrid from '../../components/ChildGrid'
-import { AlertTriangle, ArrowLeft, Printer, Save, Trash2, Wrench } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, CheckCircle2, Printer, Save, Trash2, Wrench } from 'lucide-react'
+import { toast } from '../../components/Toast'
 import { ErrorState, PageHeader } from '../../components/ui'
 
 const EMPTY = {
@@ -74,14 +75,17 @@ export default function AccountDetail() {
       }
       if (isNew) {
         const r = await api('/am/accounts', { method: 'POST', body })
+        toast(`Account ${body.AccountNumber ?? ''} ${body.CustomerName ? `– ${body.CustomerName} ` : ''}created`.replace(/\s+/g, ' '))
         nav(`/am/accounts/${r.id}`, { replace: true })
       } else {
         await api(`/am/accounts/${id}`, { method: 'PUT', body })
-        setMsg('Saved')
+        setMsg(`Changes saved ${new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`)
+        toast(`Account ${body.AccountNumber ?? ''} ${body.CustomerName ? `– ${body.CustomerName} ` : ''}updated`.replace(/\s+/g, ' '))
         await load()
       }
     } catch (err) {
       setError(err.message)
+      toast(`Could not save: ${err.message}`, 'error')
     } finally {
       setSaving(false)
     }
@@ -92,6 +96,7 @@ export default function AccountDetail() {
     setDeleting(true); setError('')
     try {
       await api(`/am/accounts/${id}`, { method: 'DELETE' })
+      toast(`Account ${form.AccountNumber ?? ''} ${form.CustomerName ? `– ${form.CustomerName} ` : ''}deleted`.replace(/\s+/g, ' '))
       nav('/am/accounts')
     } catch (err) {
       setError(err.message)
@@ -182,7 +187,7 @@ export default function AccountDetail() {
         </fieldset>
 
         {error && <ErrorState message={error} />}
-        {msg && <div className="ok">{msg}</div>}
+        {msg && <div className="success-state" role="status"><CheckCircle2 size={16} /> {msg}</div>}
         <div className="row form-actions">
           <button className="btn primary" disabled={saving}><Save size={15} /> {saving ? 'Saving…' : isNew ? 'Create account' : 'Save changes'}</button>
           {!isNew && <button type="button" className="btn danger" onClick={() => { setError(''); setConfirmDel(true) }}><Trash2 size={15} /> Delete account</button>}

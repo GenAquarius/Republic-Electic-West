@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { ScTabs, lotName } from './shared'
+import Grid from '../../components/Grid'
 
 const num = (v) => (v == null ? '' : Number(v).toLocaleString('en-US', { maximumFractionDigits: 2 }))
 
@@ -78,10 +79,10 @@ export default function ScTicket() {
             {!d.materials.length ? <p className="muted small">No material items for this stage.</p> : Object.entries(byStage).map(([name, rows]) => (
               <div key={name} style={{ marginBottom: 10 }}>
                 <div className="menu-label" style={{ padding: '4px 0' }}>{name}</div>
-                <table className="grid compact">
+                <Grid className="grid compact">
                   <thead><tr><th>Item</th><th>Description</th><th>Notes</th><th className="num">Qty</th></tr></thead>
                   <tbody>{rows.map((m, i) => <tr key={i}><td><b>{m.InvItem}</b></td><td className="wrap">{m.Description}</td><td className="wrap">{m.Notes}</td><td className="num"><b>{num(m.Qty)}</b></td></tr>)}</tbody>
-                </table>
+                </Grid>
               </div>
             ))}
           </section>
@@ -89,11 +90,11 @@ export default function ScTicket() {
           <section className="panel">
             <div className="panel-head"><h2>Labor lines for payroll ({d.labor.length})</h2></div>
             {!d.labor.length ? <p className="muted small">No labor items for this stage.</p> : (
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Pack</th><th>Labor item</th><th className="num">Qty</th><th className="num">Price</th><th className="num">Labor $</th></tr></thead>
                 <tbody>{d.labor.map((m, i) => <tr key={i}><td className="wrap">{m.PackName}</td><td className="wrap">{m.InvItem}{m.Description ? ` — ${m.Description}` : ''}</td><td className="num">{num(m.Qty)}</td><td className="num">{num(m.Price)}</td><td className="num">{num(Number(m.Qty) * Number(m.Price))}</td></tr>)}</tbody>
                 <tfoot><tr><td colSpan={4}>Total labor</td><td className="num">{num(d.labor.reduce((a, m) => a + Number(m.Qty) * Number(m.Price), 0))}</td></tr></tfoot>
-              </table>
+              </Grid>
             )}
           </section>
         </>

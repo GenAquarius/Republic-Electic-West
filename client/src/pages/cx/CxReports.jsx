@@ -8,6 +8,7 @@ import { SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { InvoiceRunSummary, Invoices, MaterialRequestDocs, RequestCheck, RequestSummary } from './CxDocs'
 import { CxTabs, download, groupBy, longDate } from './shared'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { key: 'roughed-lots', label: 'Roughed lots / ready bill', icon: ClipboardList, needs: ['from', 'to'], text: 'Roughed lots with a material request, not yet invoiced (first rough payroll in the period)' },
@@ -76,10 +77,10 @@ export default function CxReports() {
 
 function Table({ rows, cols, money: mcols = [], dates = [] }) {
   return (
-    <div className="table-wrap"><table className="grid compact">
+    <div className="table-wrap"><Grid className="grid compact">
       <thead><tr>{cols.map(([c, l]) => <th key={c} className={mcols.includes(c) ? 'num' : ''}>{l}</th>)}</tr></thead>
       <tbody>{rows.map((r, i) => <tr key={i}>{cols.map(([c]) => <td key={c} className={mcols.includes(c) ? 'num' : c === 'Address' || c === 'JobName' ? 'wrap' : ''}>{dates.includes(c) ? fmtDate(r[c]) : r[c]}</td>)}</tr>)}</tbody>
-    </table></div>
+    </Grid></div>
   )
 }
 

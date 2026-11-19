@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { DmTabs } from './shared'
+import Grid from '../../components/Grid'
 
 export default function DmLogins() {
   const [d, setD] = useState(null)
@@ -73,7 +74,7 @@ export default function DmLogins() {
         <div className="seg">{[['active', 'Active'], ['inactive', 'Inactive'], ['all', 'All']].map(([k, l]) => <button type="button" key={k} className={`seg-btn${show === k ? ' active' : ''}`} onClick={() => setShow(k)}>{l}</button>)}</div>
       </div>
       {!d ? <SkeletonRows rows={10} cols={6} /> : (
-        <div className="table-wrap"><table className="grid compact">
+        <div className="table-wrap"><Grid className="grid compact">
           <thead><tr><th>User name</th><th>Status</th>{d.modules.map((m) => <th key={m.code} title={m.label} style={{ textAlign: 'center' }}>{m.code}</th>)}<th>Added</th><th /></tr></thead>
           <tbody>{rows.map((r, i) => (
             <tr key={`${r.Username}-${i}`}>
@@ -88,7 +89,7 @@ export default function DmLogins() {
               </td>
             </tr>
           ))}</tbody>
-        </table></div>
+        </Grid></div>
       )}
     </div>
   )

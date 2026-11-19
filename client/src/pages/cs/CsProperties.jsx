@@ -8,6 +8,7 @@ import { fmtDate, toInputDate } from '../../format'
 import { Pager, SearchSelect } from '../../components/Pickers'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { CsTabs, Options, StatusBadge, int, useCsLookups, withConfirm } from './shared'
+import Grid from '../../components/Grid'
 
 export function CsProperties() {
   const [sp, setSp] = useSearchParams()
@@ -52,7 +53,7 @@ function PropertyList() {
       {error && <ErrorState message={error} />}
       {!d ? <SkeletonRows rows={10} cols={5} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Address</th><th>City</th><th>Community / lot</th><th>Builder</th><th>Escrow</th><th className="num">Homeowners</th><th className="num">Tickets</th></tr></thead>
             <tbody>
               {d.rows.map((r) => (
@@ -64,7 +65,7 @@ function PropertyList() {
               ))}
               {!d.rows.length && <tr><td colSpan={7}><EmptyState title="No properties match" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => set({ page: pg })} />
         </>
       )}
@@ -113,14 +114,14 @@ function ProductionLots() {
         </div>
       )}
       {res?.duplicates.length > 0 && (
-        <div className="table-wrap" style={{ marginBottom: 14 }}><table className="grid compact">
+        <div className="table-wrap" style={{ marginBottom: 14 }}><Grid className="grid compact">
           <thead><tr><th>Builder</th><th>Job</th><th>Address</th><th>City</th><th>Lot</th></tr></thead>
           <tbody>{res.duplicates.map((x, i) => <tr key={i}><td>{x.Builder}</td><td>{x.Job}</td><td>{x.Address}</td><td>{x.City}</td><td>{x.CsLot}</td></tr>)}</tbody>
-        </table></div>
+        </Grid></div>
       )}
       {!d ? <SkeletonRows rows={8} cols={5} /> : (
         <>
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid serverPaged className="grid compact">
             <thead><tr><th>Address</th><th>City</th><th>Div</th><th>Job</th><th>Lot</th><th>Start</th><th>End</th><th /></tr></thead>
             <tbody>
               {d.rows.map((l) => (
@@ -132,7 +133,7 @@ function ProductionLots() {
               ))}
               {!d.rows.length && <tr><td colSpan={8}><EmptyState title="Every production lot is already in CS" /></td></tr>}
             </tbody>
-          </table></div>
+          </Grid></div>
           <Pager page={d.page} pageSize={d.pageSize} total={d.total} onPage={(pg) => setF({ ...f, page: pg })} />
         </>
       )}
@@ -219,7 +220,7 @@ export function CsPropertyDetail() {
           <div className="cs-grid2" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Homeowners ({d.customers.length})</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <tbody>
                   {d.customers.map((c) => (
                     <tr key={c.CustomerId}>
@@ -229,7 +230,7 @@ export function CsPropertyDetail() {
                   ))}
                   {!d.customers.length && <tr><td className="muted">No homeowners linked</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
               <form className="cs-inline" style={{ marginTop: 10 }} onSubmit={addLink}>
                 <label>Homeowner<SearchSelect endpoint="/cs/customers/search" value={link.CustomerId} label={link.label} placeholder="Search name…" onSelect={(r) => setLink({ ...link, CustomerId: r?.id ?? null, label: r?.name ?? '' })} /></label>
                 <label>Type<select value={link.CustomerTypeId} onChange={(e) => setLink({ ...link, CustomerTypeId: e.target.value })}><Options list={lk.customerTypes} /></select></label>
@@ -238,41 +239,41 @@ export function CsPropertyDetail() {
             </section>
             <section className="panel">
               <div className="panel-head"><h2>Production job &amp; lot</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <thead><tr><th>Job</th><th>Lot</th><th>Start</th><th>End</th></tr></thead>
                 <tbody>
                   {d.links.map((k) => <tr key={k.CsPropertyLinkID}><td className="wrap">{k.JobName || k.CsJob} <span className="cs-mini">{k.DivisionId}</span></td><td>{k.LotBlock || k.CsLot}</td><td>{fmtDate(k.StartDate)}</td><td>{fmtDate(k.EndDate) || 'Open'}</td></tr>)}
                   {!d.links.length && v.LotId && <tr><td className="wrap">{v.JobName}</td><td>{v.LotBlock}</td><td /><td>{fmtDate(v.LotEndDate) || 'Open'}</td></tr>}
                   {!d.links.length && !v.LotId && <tr><td colSpan={4} className="muted">Not linked to a production lot</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
               {d.packs.length > 0 && (
-                <div className="table-wrap flat" style={{ marginTop: 10 }}><table className="grid compact">
+                <div className="table-wrap flat" style={{ marginTop: 10 }}><Grid className="grid compact">
                   <thead><tr><th>Pack</th><th>Type</th><th className="num">Qty</th><th className="num">Posted</th></tr></thead>
                   <tbody>{d.packs.map((pk, i) => <tr key={i}><td className="wrap">{pk.PackName}</td><td>{pk.PackType}</td><td className="num">{int(pk.PackQty)}</td><td className="num">{int(pk.PostedQty)}</td></tr>)}</tbody>
-                </table></div>
+                </Grid></div>
               )}
             </section>
           </div>
           <div className="cs-grid2" style={{ marginTop: 16 }}>
             <section className="panel">
               <div className="panel-head"><h2>Tickets ({d.tickets.length})</h2></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <thead><tr><th>Ticket</th><th>Date</th><th>Homeowner</th><th>Status</th><th>Resolution</th></tr></thead>
                 <tbody>
                   {d.tickets.map((tk) => <tr key={tk.TicketID} className="link-row" onClick={() => nav(`/cs/tickets/${tk.TicketID}`)}><td><a>{tk.TicketID}</a></td><td>{fmtDate(tk.ApptDate)}</td><td>{tk.Homeowner}</td><td><StatusBadge status={tk.Status} /></td><td>{tk.Resolution || '—'}</td></tr>)}
                   {!d.tickets.length && <tr><td colSpan={5} className="muted">No tickets</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
             </section>
             <section className="panel">
               <div className="panel-head"><h2>Call notes ({d.callNotes.length})</h2><Link className="panel-link" to={`/cs/call-notes?propertyId=${id}`}>Open</Link></div>
-              <div className="table-wrap flat"><table className="grid compact">
+              <div className="table-wrap flat"><Grid className="grid compact">
                 <tbody>
                   {d.callNotes.map((n) => <tr key={n.CallNotesID}><td>{fmtDate(n.CallDate)}</td><td className="wrap">{n.CallNotes}<div className="cs-mini">{[n.Customer, n.FollowUp && `follow up ${fmtDate(n.FollowUp)}`].filter(Boolean).join(' · ')}</div></td></tr>)}
                   {!d.callNotes.length && <tr><td className="muted">No call notes</td></tr>}
                 </tbody>
-              </table></div>
+              </Grid></div>
             </section>
           </div>
         </>

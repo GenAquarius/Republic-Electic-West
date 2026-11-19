@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { PmCascade, PmTabs, download, int, money, money4, usePmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const REPORTS = [
   { key: 'plan-standard', label: 'Plan standard data', icon: FileText, needs: 'plan', text: 'Standard packs and material of one plan' },
@@ -100,11 +101,11 @@ function Report({ k, d, label }) {
     return (
       <>
         <div className="fm-head"><div><h2>{label}</h2><div className="muted">Standard packs of active plans · {d.length} plan(s)</div></div></div>
-        <div className="table-wrap"><table className="grid compact"><thead><tr>{BC.map(([c, l]) => <th key={c} className={MONEY.has(c) || c === 'SqFt' ? 'num' : ''}>{l}</th>)}</tr></thead>
+        <div className="table-wrap"><Grid className="grid compact"><thead><tr>{BC.map(([c, l]) => <th key={c} className={MONEY.has(c) || c === 'SqFt' ? 'num' : ''}>{l}</th>)}</tr></thead>
           <tbody>{d.map((r) => <tr key={r.PmPlanID}><td className="wrap">{r.Job}</td><td>{[r.BidNum, r.BidRelease].filter(Boolean).join(' ')}</td><td><b>{r.PlanNum}</b></td><td>{r.PlanName}</td><td className="num">{int(r.SqFt)}</td>
             <td className="num">{money(r.Labor)}</td><td className="num">{money(r.Material)}</td><td className="num">{money(r.Other)}</td><td className="num"><b>{money(r.Cost)}</b></td><td className="num">{money(r.ContractVal)}</td>
             <td className={`num${r.Profit < 0 ? ' neg' : ''}`}><b>{money(r.Profit)}</b></td><td className="num">{r.PerSqFt == null ? '—' : money(r.PerSqFt)}</td></tr>)}</tbody>
-          <tfoot><tr><td colSpan={5}><b>Total</b></td><td className="num"><b>{money(t.Labor)}</b></td><td className="num"><b>{money(t.Material)}</b></td><td className="num"><b>{money(t.Other)}</b></td><td className="num"><b>{money(t.Cost)}</b></td><td className="num"><b>{money(t.ContractVal)}</b></td><td className="num"><b>{money(t.ContractVal - t.Cost)}</b></td><td /></tr></tfoot></table></div>
+          <tfoot><tr><td colSpan={5}><b>Total</b></td><td className="num"><b>{money(t.Labor)}</b></td><td className="num"><b>{money(t.Material)}</b></td><td className="num"><b>{money(t.Other)}</b></td><td className="num"><b>{money(t.Cost)}</b></td><td className="num"><b>{money(t.ContractVal)}</b></td><td className="num"><b>{money(t.ContractVal - t.Cost)}</b></td><td /></tr></tfoot></Grid></div>
       </>
     )
   }
@@ -116,12 +117,12 @@ function Report({ k, d, label }) {
   return (
     <>
       <div className="fm-head"><div><h2>{label}</h2><div className="muted">{sub}</div></div></div>
-      <div className="table-wrap"><table className="grid compact"><thead><tr>{cols.map(([c, l]) => <th key={c} className={MONEY.has(c) || c === 'Quantity' || c === 'PackQty' ? 'num' : ''}>{l}</th>)}</tr></thead>
+      <div className="table-wrap"><Grid className="grid compact"><thead><tr>{cols.map(([c, l]) => <th key={c} className={MONEY.has(c) || c === 'Quantity' || c === 'PackQty' ? 'num' : ''}>{l}</th>)}</tr></thead>
         <tbody>{d.slice(0, 2000).map((r, i) => <tr key={i}>{cols.map(([c]) => <td key={c} className={MONEY.has(c) || c === 'Quantity' || c === 'PackQty' ? `num${c === 'Profit' && r[c] < 0 ? ' neg' : ''}` : c === 'Description' || c === 'Job' || c === 'PackName' ? 'wrap' : ''}>
           {c === 'PlanNum' && r.PmContractID ? <Link to={`/pm/bids/${r.PmContractID}?plan=${r.PmPlanID}`}>{r[c]}</Link> : c === 'PackName' && r.PmPackID ? <Link to={`/pm/packs/${r.PmPackID}`}>{r[c]}</Link>
             : MONEY.has(c) ? (c === 'UnitCost' || c === 'BidPrice' || c === 'JobCostPrice' || c === 'LastCost' ? money4(r[c]) : money(r[c])) : typeof r[c] === 'boolean' ? (yes(r[c]) ? 'Yes' : '') : r[c]}</td>)}</tr>)}</tbody>
         {['plan-standard', 'plan-cost', 'standard-prices', 'option-prices'].includes(k) && <tfoot><tr>{cols.map(([c], i) => <td key={c} className="num">{i === 0 ? <b style={{ float: 'left' }}>Total</b> : ['ExtCost', 'Material', 'Labor', 'Cost', 'Profit', 'ContractVal'].includes(c) ? <b>{money(sum(c))}</b> : ''}</td>)}</tr></tfoot>}
-      </table></div>
+      </Grid></div>
       {d.length > 2000 && <p className="muted small">Showing the first 2,000 of {d.length} rows – use CSV for everything.</p>}
     </>
   )

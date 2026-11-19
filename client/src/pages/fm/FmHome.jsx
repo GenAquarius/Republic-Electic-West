@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { int, money0 } from '../po/shared'
+import Grid from '../../components/Grid'
 
 const money = (v) => (v == null || v === '' ? '—' : Number(v).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }))
 
@@ -122,17 +123,17 @@ function StartPacket({ d }) {
   return (
     <>
       <LotHead h={d.head} title="Start packet – labor" />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Pack type</th><th>Pack</th><th className="num">Pack qty</th><th>Stage</th><th>Work</th><th>Labor code</th><th className="num">Qty</th><th className="num">Value</th></tr></thead>
         <tbody>{d.lines.map((l, i) => <tr key={i}><td>{l.PackType}</td><td className="wrap"><b>{l.PackName}</b></td><td className="num">{int(l.PackQty)}</td><td>{l.Stage}</td><td>{l.WorkType}</td><td>{l.AlternateCode}</td><td className="num">{int(l.Quantity)}</td><td className="num">{money(l.Price)}</td></tr>)}
           {!d.lines.length && <tr><td colSpan={8}><EmptyState title="No pack labor on this lot" /></td></tr>}</tbody>
         <tfoot><tr><td colSpan={7}><b>Total labor</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
       {d.summary.length > 0 && (
         <>
           <h3 className="fm-sub">Optional packs – rough and trim summary</h3>
-          <table className="grid compact"><thead><tr><th>Pack type</th><th>Stage</th><th>Work</th><th className="num">Value</th></tr></thead>
-            <tbody>{d.summary.map((s, i) => <tr key={i}><td>{s.PackType}</td><td>{s.Stage}</td><td>{s.WorkType}</td><td className="num">{money(s.Price)}</td></tr>)}</tbody></table>
+          <Grid className="grid compact"><thead><tr><th>Pack type</th><th>Stage</th><th>Work</th><th className="num">Value</th></tr></thead>
+            <tbody>{d.summary.map((s, i) => <tr key={i}><td>{s.PackType}</td><td>{s.Stage}</td><td>{s.WorkType}</td><td className="num">{money(s.Price)}</td></tr>)}</tbody></Grid>
         </>
       )}
     </>
@@ -154,12 +155,12 @@ function Wip({ d, burden, setBurden, apply }) {
         <StatCard label="Material estimate" tone="amber" value={money0(t.MaterialEst)} foot="From the packs" />
         <StatCard label="Material posted" tone="green" value={money0(t.MaterialPosted)} foot={t.MaterialEst ? `${pctOf(t.MaterialPosted / t.MaterialEst)} of estimate` : ''} />
       </div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Phase</th><th>Lot</th><th className="num">Labor est.</th><th className="num">Labor paid</th><th className="num">Labor %</th><th className="num">Material est.</th><th className="num">Material posted</th><th className="num">Material %</th></tr></thead>
         <tbody>{d.rows.map((r) => <tr key={r.LotID} className={r.LaborPercent > 1 || r.MaterialPercent > 1 ? 'row-warn' : ''}><td>{r.Phase}</td><td><b>{r.LotBlock}</b></td><td className="num">{money(r.LaborEst)}</td><td className="num">{money(r.LaborPaid || 0)}</td><td className="num">{pctOf(r.LaborPercent)}</td><td className="num">{money(r.MaterialEst || 0)}</td><td className="num">{money(r.MaterialPosted || 0)}</td><td className="num">{pctOf(r.MaterialPercent)}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No open lots with labor on this job" /></td></tr>}</tbody>
         <tfoot><tr><td colSpan={2}><b>Total</b></td><td className="num"><b>{money(t.LaborEst)}</b></td><td className="num"><b>{money(t.LaborPaid)}</b></td><td className="num">{t.LaborEst ? pctOf(t.LaborPaid / t.LaborEst) : ''}</td><td className="num"><b>{money(t.MaterialEst)}</b></td><td className="num"><b>{money(t.MaterialPosted)}</b></td><td className="num">{t.MaterialEst ? pctOf(t.MaterialPosted / t.MaterialEst) : ''}</td></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -168,11 +169,11 @@ function LaborPaid({ d }) {
   return (
     <>
       <LotHead h={d.head} title="Labor paid to lot" />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Payroll date</th><th>Employee</th><th>Pack</th><th className="num">Pack qty</th><th>Item</th><th className="num">Qty</th><th>Stage</th><th>Work</th><th className="num">Pay %</th><th className="num">Hours</th><th>Notes</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td>{fmtDate(r.PayrollDate)}</td><td>{r.EmpName}</td><td className="wrap">{r.PackName}</td><td className="num">{int(r.PackQty)}</td><td>{r.Item}</td><td className="num">{int(r.ExtItemQty)}</td><td>{r.ScheduleStage}</td><td>{r.WorkType}</td><td className="num">{r.PayPercent == null ? '' : `${Number(r.PayPercent)}%`}</td><td className="num">{r.PayHours == null ? '' : Number(r.PayHours)}</td><td className="wrap">{r.Notes}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={11}><EmptyState title="No labor paid to this lot yet" /></td></tr>}</tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -181,12 +182,12 @@ function MaterialPosted({ d }) {
   return (
     <>
       <LotHead h={d.head} title="Material posted to lot" />
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Work</th><th>Stage</th><th>Class</th><th>Item</th><th>Description</th><th>Delivery</th><th className="num">Qty</th><th className="num">Value</th></tr></thead>
         <tbody>{d.rows.map((r, i) => <tr key={i}><td>{r.WorkType}</td><td>{r.ScheduleStage}</td><td>{r.InvClass}</td><td><b>{r.InvItem}</b></td><td className="wrap">{r.Description}</td><td>{r.Delivery}</td><td className="num">{int(r.Qty)}</td><td className="num">{money(r.ExtVal)}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={8}><EmptyState title="No material posted to this lot" /></td></tr>}</tbody>
         <tfoot><tr><td colSpan={7}><b>Total</b></td><td className="num"><b>{money(d.total)}</b></td></tr></tfoot>
-      </table></div>
+      </Grid></div>
     </>
   )
 }
@@ -207,8 +208,8 @@ function Sequence({ d }) {
       {d.lots.map((l) => (
         <section key={l.LotID} className="fm-lot">
           <h3>Lot {l.LotBlock} <span className="muted">· Plan {l.PlanNum}{l.PlanName ? ` ${l.PlanName}` : ''} · {[l.Address, l.City].filter(Boolean).join(', ')}</span></h3>
-          <table className="grid compact"><thead><tr><th>Builder code</th><th>Pack</th><th className="num">Qty</th><th>Date</th><th>Verified</th></tr></thead>
-            <tbody>{l.packs.map((k) => <tr key={k.PackID}><td>{k.BuilderCode}</td><td className="wrap"><b>{k.PackName}</b></td><td className="num">{int(k.PackQty)}</td><td>{fmtDate(k.PackDate)}</td><td>{k.Verified}</td></tr>)}</tbody></table>
+          <Grid className="grid compact"><thead><tr><th>Builder code</th><th>Pack</th><th className="num">Qty</th><th>Date</th><th>Verified</th></tr></thead>
+            <tbody>{l.packs.map((k) => <tr key={k.PackID}><td>{k.BuilderCode}</td><td className="wrap"><b>{k.PackName}</b></td><td className="num">{int(k.PackQty)}</td><td>{fmtDate(k.PackDate)}</td><td>{k.Verified}</td></tr>)}</tbody></Grid>
         </section>
       ))}
     </>
@@ -225,11 +226,11 @@ function Items({ d, p, set }) {
         <div className="search-wrap"><input type="search" aria-label="Search items" placeholder="Words in the description, item or code…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
         <select aria-label="Class" value={p.classId || ''} onChange={(e) => set({ classId: e.target.value })}><option value="">All classes</option>{d.classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
       </div>
-      <div className="table-wrap"><table className="grid compact">
+      <div className="table-wrap"><Grid className="grid compact">
         <thead><tr><th>Class</th><th>Item</th><th>Description</th><th>Alternate code</th></tr></thead>
         <tbody>{d.rows.map((r) => <tr key={r.InvItemID}><td>{r.InvClass}</td><td><b>{r.InvItem}</b></td><td className="wrap">{r.Description}</td><td>{r.AlternateCode}</td></tr>)}
           {!d.rows.length && <tr><td colSpan={4}><EmptyState title="No items match" /></td></tr>}</tbody>
-      </table></div>
+      </Grid></div>
     </>
   )
 }

@@ -6,6 +6,7 @@ import { api } from '../../api'
 import { fmtDate } from '../../format'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows } from '../../components/ui'
 import { IcTabs, int, useIcLookups } from './shared'
+import Grid from '../../components/Grid'
 
 export function IcMaterial() {
   const nav = useNavigate()
@@ -37,7 +38,7 @@ export function IcMaterial() {
       </div>
       <div className="table-wrap">
         {!rows ? <div style={{ padding: 16 }}><SkeletonRows rows={6} cols={4} /></div> : (
-          <table className="grid clickable">
+          <Grid className="grid clickable">
             <thead><tr><th>Div</th><th>Job</th><th>Phase</th><th>Lot</th><th>Address</th><th className="num">Lines</th><th className="num">Shipped</th><th>Waiting since</th></tr></thead>
             <tbody>
               {rows.map((r) => (
@@ -48,7 +49,7 @@ export function IcMaterial() {
               ))}
               {!rows.length && <tr><td colSpan={8}><EmptyState icon={PackageCheck} title="No pack material waiting">Material lists appear here when a stage is posted in Scheduling.</EmptyState></td></tr>}
             </tbody>
-          </table>
+          </Grid>
         )}
       </div>
     </div>
@@ -94,7 +95,7 @@ export function IcMaterialLot() {
             <span className="muted small">Ship ALL = scheduled quantity · ZERO = nothing shipped but cleared · NONE = decide later</span>
           </div>
           <div className="table-wrap">
-            <table className="grid compact">
+            <Grid className="grid compact">
               <thead><tr><th>Stage</th><th>Work</th><th>Pack</th><th>Item</th><th>Description</th><th className="num">Scheduled</th><th className="num">Ship</th><th className="num">Short</th></tr></thead>
               <tbody>
                 {lines.map((l) => {
@@ -110,7 +111,7 @@ export function IcMaterialLot() {
                   )
                 })}
               </tbody>
-            </table>
+            </Grid>
           </div>
           {!!d.stages.length && <p className="muted small" style={{ marginTop: 10 }}>Stages on this lot: {d.stages.map((s) => `${s.ScheduleStage} / ${s.WorkType} (${fmtDate(s.DeliveryDate)}${s.DatePosted ? ', posted' : ''})`).join(' · ')}</p>}
         </>

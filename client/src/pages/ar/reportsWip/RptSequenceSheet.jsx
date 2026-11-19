@@ -2,6 +2,7 @@
 import { fmtDate } from '../../../format'
 import { money } from '../shared'
 import { Frame, useReport } from './common'
+import Grid from '../../../components/Grid'
 
 const COLS = [['PackName', 'Pack name'], ['BuilderCode', 'Builder code'], ['PackQty', 'Qty', 'num'], ['ContractEa', 'Value', 'money'], ['RevContractEa', 'Rev value', 'money'], ['ExtVal', 'Ext value', 'money'],
   ['WorkType', 'Work'], ['ScheduleStage', 'Stage'], ['DetailContract', 'Contract', 'money'], ['DetailRevContract', 'Rev', 'money'], ['DetailExtVal', 'Ext', 'money']]
@@ -19,7 +20,7 @@ export default function RptSequenceSheet({ params }) {
         const lots = []
         for (const r of d.rows) { const last = lots[lots.length - 1]; if (last && last.LotID === r.LotID) last.rows.push(r); else lots.push({ LotID: r.LotID, head: r, rows: [r] }) }
         return (
-          <div className="table-wrap"><table className="grid compact">
+          <div className="table-wrap"><Grid className="grid compact">
             <thead><tr>{COLS.map(([k, l, t]) => <th key={k} className={t === 'num' || t === 'money' ? 'num' : ''}>{l}</th>)}</tr></thead>
             {lots.map((lot) => (
               <tbody key={lot.LotID}>
@@ -28,7 +29,7 @@ export default function RptSequenceSheet({ params }) {
                 <tr className="subtotal"><td colSpan={COLS.length - 1}>Rough billing date ____/____/____ &nbsp; Trim billing date ____/____/____ &nbsp; <b>Lot total</b></td><td className="num"><b>{money(tot.get(lot.LotID))}</b></td></tr>
               </tbody>
             ))}
-          </table></div>
+          </Grid></div>
         )
       }}
     </Frame>

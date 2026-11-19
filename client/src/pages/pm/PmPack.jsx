@@ -7,6 +7,7 @@ import { fmtDate } from '../../format'
 import { SearchSelect } from '../../components/Pickers'
 import { Badge, EmptyState, ErrorState, PageHeader, SkeletonRows, StatCard } from '../../components/ui'
 import { PmTabs, money, money4, money0, usePmLookups, yes } from './shared'
+import Grid from '../../components/Grid'
 
 const blankLine = { item: null, Quantity: '1', StageId: '', WorkId: '', Notes: '' }
 
@@ -60,7 +61,7 @@ export default function PmPack() {
           </div>
           <section className="panel">
             <div className="panel-head"><h2>Material ({d.material.length})</h2></div>
-            <div className="table-wrap"><table className="grid compact pm-mat">
+            <div className="table-wrap"><Grid className="grid compact pm-mat">
               <thead><tr><th>Item</th><th>Description</th><th>Code</th><th className="num">Qty</th><th>Stage</th><th>Work</th><th className="num">Unit cost</th><th className="num">Est. price</th><th className="num">Ext cost</th><th>Flags</th><th /></tr></thead>
               <tbody>
                 {d.material.map((m) => edit?.id === m.PmMatID ? (
@@ -100,14 +101,14 @@ export default function PmPack() {
                 </tr>
               </tbody>
               <tfoot><tr><td colSpan={8}><b>Active lines</b></td><td className="num"><b>{money(d.totals.cost)}</b></td><td colSpan={2} /></tr></tfoot>
-            </table></div>
+            </Grid></div>
             {!d.material.length && <EmptyState title="No material yet – add the first line above" />}
           </section>
 
           <div className="dash-grid" style={{ marginTop: 16 }}>
             <section className="panel span-2">
               <div className="panel-head"><h2>Contract value by stage and work</h2></div>
-              <table className="grid compact">
+              <Grid className="grid compact">
                 <thead><tr><th>Stage</th><th>Work</th><th className="num">Value</th><th /></tr></thead>
                 <tbody>
                   {d.values.map((v) => <ValueRow key={v.PmValueID} v={v} onSave={saveVal} onDelete={delVal} />)}
@@ -119,13 +120,13 @@ export default function PmPack() {
                   </tr>
                 </tbody>
                 <tfoot><tr><td colSpan={2}><b>Total</b></td><td className="num"><b>{money(d.totals.values)}</b></td><td /></tr></tfoot>
-              </table>
+              </Grid>
             </section>
             <section className="panel span-2">
               <div className="panel-head"><h2>Material change log</h2></div>
               {!d.log.length ? <p className="muted">No changes logged.</p> : (
-                <table className="grid compact"><thead><tr><th>When</th><th>User</th><th>Action</th><th>Item (before)</th><th className="num">Qty</th><th className="num">Cost</th></tr></thead>
-                  <tbody>{d.log.map((r) => <tr key={r.PmMatChangeID}><td>{fmtDate(r.DateEdited)}</td><td>{r.UserEdited}</td><td><Badge tone={r.Action === 'Delete' ? 'red' : 'blue'}>{r.Action}</Badge></td><td>{r.InvItem}</td><td className="num">{r.Quantity}</td><td className="num">{money4(r.UnitCost)}</td></tr>)}</tbody></table>
+                <Grid className="grid compact"><thead><tr><th>When</th><th>User</th><th>Action</th><th>Item (before)</th><th className="num">Qty</th><th className="num">Cost</th></tr></thead>
+                  <tbody>{d.log.map((r) => <tr key={r.PmMatChangeID}><td>{fmtDate(r.DateEdited)}</td><td>{r.UserEdited}</td><td><Badge tone={r.Action === 'Delete' ? 'red' : 'blue'}>{r.Action}</Badge></td><td>{r.InvItem}</td><td className="num">{r.Quantity}</td><td className="num">{money4(r.UnitCost)}</td></tr>)}</tbody></Grid>
               )}
             </section>
           </div>

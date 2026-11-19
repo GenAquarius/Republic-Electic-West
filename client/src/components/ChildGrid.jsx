@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Grid from './Grid'
 
 /**
  * Inline-editable list of child rows (e.g. account contacts or zones).
@@ -32,7 +33,7 @@ export default function ChildGrid({ title, rows, idKey, fields, onAdd, onSave, o
     <section className="card">
       <h3>{title} <span className="muted small">({rows.length})</span></h3>
       {error && <div className="error">{error}</div>}
-      <table className="grid">
+      <Grid className="grid">
         <thead>
           <tr>{fields.map((f) => <th key={f.key} style={{ width: f.width }}>{f.label}</th>)}<th style={{ width: 150 }} /></tr>
         </thead>
@@ -67,7 +68,7 @@ export default function ChildGrid({ title, rows, idKey, fields, onAdd, onSave, o
             </td>
           </tr>
         </tbody>
-      </table>
+      </Grid>
     </section>
   )
 }
